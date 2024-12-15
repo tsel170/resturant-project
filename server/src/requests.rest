@@ -1,0 +1,29 @@
+POST http://localhost:5000/api/users/register
+Content-Type: application/json
+
+{
+  "name": "Avraham",
+  "email": "avraham3@example.com",
+  "password": "SecurePass123",
+  "phone": "0501234567",
+  "age": 25,
+  "gender": "male",
+  "role": "manager"
+}
+
+###
+
+POST http://localhost:5000/api/users/login
+Content-Type: application/json
+
+{
+    "email": "avraham3@example.com",
+  "password": "SecurePass123"
+
+}
+
+###
+
+GET http://localhost:5000/api/users/users
+
+
