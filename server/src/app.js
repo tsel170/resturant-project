@@ -11,6 +11,7 @@ dotenv.config();
 const app = express();
 
 // Middleware
+//change cors
 // app.use(cors());
 app.use(express.json());
 
