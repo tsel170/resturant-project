@@ -1,26 +1,20 @@
 import express from "express";
 import cors from "cors";
-import connectDB from "./config/db.js";
-import authRoutes from "./routes/authRoutes.js";
-import productRoutes from "./routes/productRoutes.js";
-import cityRoutes from "./routes/cityRoutes.js";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
+import indexRouter from "./routers/indexRouter.js";
+import connectDB from "./configDb/db.js";
+import User from "./models/userModel.js";
+const app = express();
 
 dotenv.config();
 
-const app = express();
+app.use(cors());
 
-// Middleware
-//change cors
-// app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB
 connectDB();
 
-// Routes
-app.use("/auth", authRoutes);
-app.use("/products", productRoutes);
-app.use("/cities", cityRoutes);
+app.use("/api", indexRouter);
 
 export default app;
