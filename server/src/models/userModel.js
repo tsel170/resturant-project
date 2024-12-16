@@ -20,10 +20,9 @@ const userschema = new mongoose.Schema({
     required: true,
   },
 
-  // birthday: {
-  //   type: Date,
-  //   required: true,
-  // },
+  birthday: {
+    type: Date,
+  },
 
   gender: {
     type: String,
@@ -33,7 +32,14 @@ const userschema = new mongoose.Schema({
   role: {
     type: String,
     required: true,
-    enum: ["worker", "manager", "admin"],
+    enum: ["employee", "manager", "admin"],
+  },
+  jobTitle: {
+    type: String,
+    enum: ["waiter", "barista", "chef"],
+    required: function () {
+      return this.role === "employee";
+    },
   },
 });
 
