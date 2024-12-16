@@ -33,11 +33,13 @@ const mealSchema = new mongoose.Schema({
     },
   ],
 
+
   theDishPreparer: {
     type: String,
     required: true,
     enum: ["chef", "waiter", "barista"],
   },
+
 });
 
 const Meal = mongoose.model("Meal", mealSchema);

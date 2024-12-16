@@ -43,6 +43,38 @@ authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NWZkMWE0YWFjMWY4
 }
 
 
+###
+POST http://localhost:5000/api/meals/addMeal
+Content-Type: application/json
+
+{
+  "title": "Chicken Salad",
+  "description": "A healthy salad with grilled chicken.",
+  "price": 15.99,
+  "image": "https://example.com/images/chicken-salad.jpg",
+  "category": "Salads",
+  "Ingredients": [
+    {
+      "ingredient": "Chicken",
+      "quantity": "200g"
+    },
+    {
+      "ingredient": "Lettuce",
+      "quantity": "100g"
+    },
+    {
+      "ingredient": "Tomato",
+      "quantity": "50g"
+    },
+    {
+      "ingredient": "Cucumber",
+      "quantity": "50g"
+    }
+  ]
+}
+
+###
+GET http://localhost:5000/api/meals/getAllMeals
 
 ### 
 
@@ -72,6 +104,7 @@ POST http://localhost:5000/api/meals/addMeal
 ### 
 GET http://localhost:5000/api/meals/getAllMeals
 
+
 ###
 
 DELETE http://localhost:5000/api/meals/deleteMeal/675fedc02af5720663d4eedb
@@ -79,6 +112,7 @@ DELETE http://localhost:5000/api/meals/deleteMeal/675fedc02af5720663d4eedb
 ###
 
 PUT http://localhost:5000/api/meals/changeMeal/675ff3b03787a1cb3383c560
+
 
  Content-Type: application/json
 
@@ -103,5 +137,33 @@ PUT http://localhost:5000/api/meals/changeMeal/675ff3b03787a1cb3383c560
 }
 
 ]
+
+
+Content-Type: application/json
+
+{
+  "title": "Chicken Salad",
+  "description": "A healthy salad with grilled chicken.",
+  "price": 34.99,
+  "image": "https://example.com/images/chicken-salad.jpg",
+  "category": "Salads",
+  "Ingredients": [
+    {
+      "ingredient": "Chicken",
+      "quantity": "400g"
+    },
+    {
+      "ingredient": "Lettuce",
+      "quantity": "100g"
+    },
+    {
+      "ingredient": "Tomato",
+      "quantity": "50g"
+    },
+    {
+      "ingredient": "Cucumber",
+      "quantity": "50g"
+    }
+  ]
 
 }
