@@ -1,4 +1,3 @@
-import express from "express";
 import Product from "../models/productModel.js";
 
 export const addProduct = async (req, res) => {
@@ -16,6 +15,22 @@ export const addProduct = async (req, res) => {
     res.status(400).json({
       success: false,
       message: "Failed to create product",
+      error: err.message,
+    });
+  }
+};
+
+export const getAllProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ creator: req._id });
+    res.status(200).json({
+      success: true,
+      products,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to get products",
       error: err.message,
     });
   }
