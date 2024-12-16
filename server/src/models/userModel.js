@@ -19,10 +19,10 @@ const userschema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  birthday: {
-    type: Date,
-    required: true,
-  },
+  // birthday: {
+  //   type: Date,
+  //   required: true,
+  // },
   gender: {
     type: String,
     required: true,
