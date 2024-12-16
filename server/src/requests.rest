@@ -2,11 +2,14 @@ POST http://localhost:5000/api/users/register
 Content-Type: application/json
 
 {
-  "name": "Avraham",
-  "email": "T@mail",
-  "password": "1234",
-  "phone": "0501234567",
-  "age": 25,
+
+  "name": "John Doe",
+  "email": "john4@example.com",
+  "password": "Password123",
+  "phone": "123456789",
+  "city": "New York",
+  "age": 30,
+
   "gender": "male",
   "role": "manager"
 }
@@ -17,13 +20,28 @@ POST http://localhost:5000/api/users/login
 Content-Type: application/json
 
 {
-    "email": "avraham3@example.com",
-  "password": "SecurePass123"
+    "email": "john4@example.com",
+  "password": "Password123"
 
 }
 
 ###
 
 GET http://localhost:5000/api/users/users
+
+###
+
+POST http://localhost:5000/api/products/addProduct
+Content-Type: application/json
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NWZkMWE0YWFjMWY4Mjk2ZjBkOTlmMSIsImlhdCI6MTczNDMzMjg3MywiZXhwIjoxNzM0NDE5MjczfQ.VSbB-X7EQZnXnVqpEAeBNXA0yYMVECVd5YDPbMRx08M
+
+{
+  "name": "milk2",
+  "image": "https://example.com/images/gaming-laptop.jpg",
+  "price": 2500,
+  "category": "Electronics",
+  "description": "A high-performance laptop for gaming and professional use."
+}
+
 
 
