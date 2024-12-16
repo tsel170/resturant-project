@@ -1,6 +1,6 @@
 import React from "react"
 import Dashboard from "./Dashboard"
-import Employees from "./Employees"
+import Employees from "./emploee/Employees"
 import Footer from "./Footer"
 import Navbar from "./Navbar"
 

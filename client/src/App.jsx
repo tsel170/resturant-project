@@ -1,11 +1,12 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom"
-import { AuthProvider } from "./context/AuthContext"
+import { AuthProvider } from "./context/AuthContext.jsx"
 import "./App.css"
 
-import Home from "./components/Home"
-import Navbar from "./components/Navbar"
-import Login from "./components/Login"
-import EmployeeComponent from "./components/EmployeeComponent"
+import Login from "./components/general/Login.jsx"
+import EmployeeComponent from "./components/emploee/EmployeeComponent.jsx"
+import AdminComponent from "./components/admin/AdminComponent.jsx"
+import ManagerComponent from "./components/manager/ManagerComponent.jsx"
+import E404 from "./components/general/E404.jsx"
 
 function App() {
   return (
@@ -14,7 +15,9 @@ function App() {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/employee" element={<EmployeeComponent />} />
-          <Route path="/manager" element={<EmployeeComponent />} />
+          <Route path="/manager" element={<ManagerComponent />} />
+          <Route path="/admin" element={<AdminComponent />} />
+          <Route path="/*" element={<E404 />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

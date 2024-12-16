@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react"
 import { useNavigate } from "react-router-dom"
-import { AuthContext } from "../context/AuthContext.jsx"
+import { AuthContext } from "../../context/AuthContext.jsx"
 import axios from "axios"
 import Navbar from "./Navbar.jsx"
 import Footer from "./Footer.jsx"
@@ -14,14 +14,17 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const response = await axios.post("http://localhost:5000/auth/login", {
-        email,
-        password,
-      })
+      const response = await axios.post(
+        "http://localhost:5000/api/users/login",
+        {
+          email,
+          password,
+        }
+      )
       login(response.data)
-      console.log(response.data)
+      console.log(response.data.role)
 
-      navigate("/")
+      navigate(`/${response.data.role || "employee"}`)
     } catch (error) {
       console.error("Login failed:", error.response.data.message)
     }
