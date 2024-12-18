@@ -22,30 +22,32 @@ const AddOrder = ({ params }) => {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    const order = {
-      table: AddOrderObject,
-      number: orderNumber,
-      items: dishes.filter((dish) => dish.trim() !== ""), // Filter out empty dishes
-      ready: false, // Default to false
+    if (AddOrderObject != null) {
+      const order = {
+        table: AddOrderObject,
+        number: orderNumber,
+        items: dishes.filter((dish) => dish.trim() !== ""), // Filter out empty dishes
+        ready: false, // Default to false
+      }
+      // console.log(order)
+
+      // Update orders state with the new order
+      setOrders((prevOrders) => [order, ...prevOrders])
+
+      tables.forEach((table) => {
+        if (table.number == order.table) table.order.push(order.number)
+      })
+      console.log(tables)
+
+      setTables((prev) => [...prev])
+      // Reset form and close the AddOrder dialog
+      setOrderNumber("")
+      setTableNumber("")
+      setDishes([""])
+      setAddOrderObject(null)
+
+      console.log("Order submitted:", order)
     }
-    // console.log(order)
-
-    // Update orders state with the new order
-    setOrders((prevOrders) => [order, ...prevOrders])
-
-    tables.forEach((table) => {
-      if (table.number == order.table) table.order.push(order.number)
-    })
-    console.log(tables)
-
-    setTables((prev) => [...prev])
-    // Reset form and close the AddOrder dialog
-    setOrderNumber("")
-    setTableNumber("")
-    setDishes([""])
-    setAddOrderObject(null)
-
-    console.log("Order submitted:", order)
   }
 
   return (
@@ -102,6 +104,12 @@ const AddOrder = ({ params }) => {
             className="w-full rounded-md bg-green-500 px-4 py-2 text-white shadow hover:bg-green-600"
           >
             Submit Order
+          </button>
+          <button
+            className="rounded-lg bg-gray-200 px-4 py-2 font-medium text-gray-700 shadow-sm transition duration-150 ease-in-out hover:bg-gray-300 hover:shadow focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+            onClick={() => setAddOrderObject(null)}
+          >
+            cancel
           </button>
         </div>
       </form>

@@ -11,7 +11,7 @@ const Delivered = ({ params }) => {
         {deliveredOrderes.map((order, i) => (
           <li
             key={i}
-            className={`mt-6 rounded-md border border-gray-300 bg-lime-100 p-4 font-semibold duration-200 hover:border-slate-400 hover:shadow-md`}
+            className={`mt-6 rounded-md border border-gray-300 ${order.paid ? "bg-lime-100" : "bg-red-200"} p-4 font-semibold duration-200 hover:border-slate-400 hover:shadow-md`}
           >
             <p>order number: {order.number}</p>
             <p>for table: {order.table}</p>
