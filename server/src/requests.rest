@@ -2,26 +2,22 @@ POST http://localhost:5000/api/users/register
 Content-Type: application/json
 
 {
-
   "name": "John Doe",
-  "email": "avraham@example.com",
-  "password": "12345678",
-  "phone": "123456789",
-  "city": "New York",
-  "age": 30,
+  "email": "john2.doe@example.com",
+  "password": "Password123",
+  "phone": "123456789",  
   "gender": "male",
-  "role": "manager"
+  "role": "employee",    
+  "jobTitle": "waiter"    
 }
-
 ###
 
 POST http://localhost:5000/api/users/login
 Content-Type: application/json
 
 {
-    "email": "john4@example.com",
+  "email": "john.doe@example.com",
   "password": "Password123"
-
 }
 
 ###

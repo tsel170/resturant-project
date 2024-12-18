@@ -45,6 +45,18 @@ const bonSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  ready: {
+    type: Boolean,
+    default: false,
+  },
+  delivered: {
+    type: Boolean,
+    default: false,
+  },
+  paid: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const Bon = mongoose.model("Bon", bonSchema);
