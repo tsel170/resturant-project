@@ -1,13 +1,13 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import Tables from "./Tables"
 import Orders from "./orders"
 import AddOrder from "./AddOrder"
 import Delivered from "./Delivered.jsx"
+import axios from "axios"
 
 const Waiter = () => {
   const [AddOrderObject, setAddOrderObject] = useState(null)
   const [deliveredOrderes, setDeliveredOrderes] = useState([])
-  console.log()
 
   const [tables, setTables] = useState([
     { number: 1, order: [3] },
@@ -52,17 +52,47 @@ const Waiter = () => {
     },
   ])
 
+  useEffect(() => {
+    const f = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/meals/getAllMeals"
+        )
+
+        console.log(response.data)
+      } catch (error) {
+        console.error("Login failed:", error.response.data.message)
+      }
+    }
+    f()
+  }, [])
+
   const delivered = (i) => {
+    orders[i].delivered = true
+    orders[i].paid = false
     setDeliveredOrderes((prev) => [...prev, orders[i]])
     const newArr = [...orders]
     newArr.splice(i, 1)
     setOrders([...newArr])
-    console.log(orders + i)
+  }
+
+  const pay = (i) => {
+    console.log("pay")
+
+    tables[i].order.forEach((order) => {
+      for (let i = 0; i < deliveredOrderes.length; i++) {
+        console.log(order)
+        if (order == deliveredOrderes[i].number && !deliveredOrderes[i].paid) {
+          deliveredOrderes[i].paid = true
+        }
+      }
+    })
+    setDeliveredOrderes((prev) => [...prev])
   }
 
   return (
     <div className="flex flex-wrap justify-around">
-      <Tables params={{ tables, orders, setAddOrderObject }} />
+      <Tables params={{ tables, orders, setAddOrderObject, pay }} />
       <AddOrder
         params={{
           AddOrderObject,

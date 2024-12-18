@@ -3,7 +3,7 @@ import "./style.css"
 import AddOrder from "./AddOrder"
 
 const Tables = ({ params }) => {
-  const { tables, setAddOrderObject } = params
+  const { tables, setAddOrderObject, pay } = params
 
   const percent = (min, max) => {
     return (min / max) * 100
@@ -31,6 +31,12 @@ const Tables = ({ params }) => {
               className="mt-1 border-spacing-2 rounded-md border border-slate-300 bg-green-300 p-2 duration-200 hover:scale-105 active:scale-95"
             >
               add order
+            </button>
+            <button
+              className="rounded-lg bg-blue-500 px-4 py-2 font-bold text-white shadow-md transition duration-150 ease-in-out hover:bg-blue-600 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+              onClick={() => pay(i)}
+            >
+              pay
             </button>
           </li>
         ))}
