@@ -4,22 +4,21 @@ import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../sercret/env.js";
 
 export const register = async (req, res) => {
-  const { name, email, password, phone, city, age, gender, role } = req.body;
+  const { name, email, password, phone, gender, role, jobTitle } = req.body;
   try {
-    const user = await User.create({
-      name,
-      email,
-      password,
-      phone,
-      city,
-      age,
-      gender,
-      role,
-    });
+    const user = await User.create(req.body);
 
-    if (!name || !email || !password || !phone || !age || !gender || !role) {
+    if (
+      !name ||
+      !email ||
+      !password ||
+      !phone ||
+      !gender ||
+      !role
+      // (role === "employee" && !jobTitle)
+    ) {
       console.log("Missing required fields");
-      return res.status(400).json({ message: "Missing required fields" });
+      // return res.status(400).json({ message: "Missing required fields" });
     }
     res.status(201).json({
       success: true,
@@ -38,7 +37,7 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select("-password");
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(404).json({
         success: false,
@@ -51,7 +50,7 @@ export const login = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Login successful",
-      role: user.role,
+      user,
       token,
     });
   } catch (err) {
