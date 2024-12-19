@@ -1,0 +1,14 @@
+POST http://localhost:5000/api/products/addProduct
+Content-Type: application/json
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NWZkMWE0YWFjMWY4Mjk2ZjBkOTlmMSIsImlhdCI6MTczNDMzMjg3MywiZXhwIjoxNzM0NDE5MjczfQ.VSbB-X7EQZnXnVqpEAeBNXA0yYMVECVd5YDPbMRx08M
+
+{
+  "name": "milk2",
+  "image": "https://example.com/images/gaming-laptop.jpg",
+  "price": 2500,
+  "category": "Electronics",
+  "description": "A high-performance laptop for gaming and professional use."
+}
+
+
+###

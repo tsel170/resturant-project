@@ -1,0 +1,37 @@
+POST http://localhost:5000/api/users/register
+Content-Type: application/json
+
+{
+  "name": "Johnsss Doe",
+  "email": "jo4.doe@example.com",
+  "password": "Password123",
+  "phone": "123456789",  
+  "gender": "male",
+  "role": "admin"      
+}
+###
+
+POST http://localhost:5000/api/users/login
+Content-Type: application/json
+
+{
+  "email": "john4.doe@example.com",
+  "password": "Password123"
+}
+
+###
+
+GET http://localhost:5000/api/users/users
+
+###
+
+PUT http://localhost:5000/api/users/updateUser/6762aa69e43a85aa2e4ae4ac
+Content-Type: application/json
+
+{
+  "name": "John Doe2"
+}
+
+###
+
+DELETE http://localhost:5000/api/users/deleteUser/67631551f46f48433436011d

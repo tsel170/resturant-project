@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 
 const mealSchema = new mongoose.Schema({
+  branch: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Branch",
+    required: true,
+  },
   title: {
     type: String,
     required: true,
@@ -32,14 +37,11 @@ const mealSchema = new mongoose.Schema({
       },
     },
   ],
-
-
   theDishPreparer: {
     type: String,
     required: true,
     enum: ["chef", "waiter", "barista"],
   },
-
 });
 
 const Meal = mongoose.model("Meal", mealSchema);
