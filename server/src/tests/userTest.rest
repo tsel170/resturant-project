@@ -3,11 +3,11 @@ Content-Type: application/json
 
 {
   "name": "Johnsss Doe",
-  "email": "jo4.doe@example.com",
-  "password": "Password123",
+  "email": "t@mail",
+  "password": "1234",
   "phone": "123456789",  
   "gender": "male",
-  "role": "admin"      
+  "role": "manager"      
 }
 ###
 
@@ -15,8 +15,8 @@ POST http://localhost:5000/api/users/login
 Content-Type: application/json
 
 {
-  "email": "john4.doe@example.com",
-  "password": "Password123"
+  "email": "a@mail",
+  "password": "12345678"
 }
 
 ###
