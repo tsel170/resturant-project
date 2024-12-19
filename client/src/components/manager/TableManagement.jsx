@@ -1,13 +1,15 @@
 import React, { useState } from "react"
+import TableList from "./TableList"
+import AddTableForm from "./AddTableForm"
 
 const TableManagement = () => {
   const [tables, setTables] = useState([])
-  const [newTable, setNewTable] = useState("")
+  const [showAddForm, setShowAddForm] = useState(false)
 
-  const addTable = () => {
-    if (newTable) {
-      setTables([...tables, newTable])
-      setNewTable("")
+  const addTable = (tableNumber, seats) => {
+    if (tableNumber && seats) {
+      setTables([...tables, { tableNumber, seats }])
+      setShowAddForm(false)
     }
   }
 
@@ -17,41 +19,26 @@ const TableManagement = () => {
   }
 
   return (
-    <div className="rounded-lg bg-yellow-50 p-6 shadow">
+    <div className="rounded-lg bg-yellow-50 p-6 shadow duration-200 focus-within:bg-yellow-100 focus-within:shadow-md hover:bg-yellow-100 hover:shadow-md">
       <h2 className="mb-4 text-2xl font-bold text-yellow-600">
         Table Management
       </h2>
-      <div className="mb-4 flex">
-        <input
-          type="text"
-          value={newTable}
-          onChange={(e) => setNewTable(e.target.value)}
-          placeholder="Enter table number"
-          className="flex-grow rounded-l-md border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-300"
-        />
+
+      {/* Add Button */}
+      {!showAddForm && (
         <button
-          onClick={addTable}
-          className="rounded-r-md bg-yellow-500 px-4 py-2 font-bold text-white hover:bg-yellow-600"
+          onClick={() => setShowAddForm(true)}
+          className="mb-4 rounded bg-yellow-500 px-4 py-2 font-bold text-white hover:bg-yellow-600"
         >
-          Add
+          Add Table
         </button>
-      </div>
-      <ul className="space-y-2">
-        {tables.map((table, index) => (
-          <li
-            key={index}
-            className="flex items-center justify-between rounded bg-white p-2 shadow"
-          >
-            <span>Table {table}</span>
-            <button
-              onClick={() => deleteTable(index)}
-              className="font-bold text-red-500 hover:text-red-600"
-            >
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
+      )}
+
+      {/* Add Table Form */}
+      {showAddForm && <AddTableForm params={{ addTable, setShowAddForm }} />}
+
+      {/* Table List */}
+      <TableList tables={tables} deleteTable={deleteTable} />
     </div>
   )
 }

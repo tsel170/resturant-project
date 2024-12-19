@@ -1,57 +1,62 @@
 import React, { useState } from "react"
+import MenuList from "./MenuList"
+import AddMenuItemForm from "./AddMenuItemForm"
 
 const MenuManagement = () => {
-  const [dishes, setDishes] = useState([])
-  const [newDish, setNewDish] = useState("")
+  const [menuItems, setMenuItems] = useState([])
+  const [showAddForm, setShowAddForm] = useState(false)
 
-  const addDish = () => {
-    if (newDish) {
-      setDishes([...dishes, newDish])
-      setNewDish("")
+  const addMenuItem = ({
+    title,
+    description,
+    price,
+    image,
+    category,
+    ingredients,
+    theDishPreparer,
+  }) => {
+    if (title && description && price && category && theDishPreparer) {
+      setMenuItems([
+        ...menuItems,
+        {
+          title,
+          description,
+          price,
+          image,
+          category,
+          ingredients,
+          theDishPreparer,
+        },
+      ])
+      setShowAddForm(false)
     }
   }
 
-  const deleteDish = (index) => {
-    const updatedDishes = dishes.filter((_, i) => i !== index)
-    setDishes(updatedDishes)
+  const deleteMenuItem = (index) => {
+    const updatedMenuItems = menuItems.filter((_, i) => i !== index)
+    setMenuItems(updatedMenuItems)
   }
 
   return (
-    <div className="rounded-lg bg-green-50 p-6 shadow">
+    <div className="rounded-lg bg-green-50 p-6 shadow duration-200 focus-within:bg-green-100 focus-within:shadow-md hover:bg-green-100 hover:shadow-md">
       <h2 className="mb-4 text-2xl font-bold text-green-600">
         Menu Management
       </h2>
-      <div className="mb-4 flex">
-        <input
-          type="text"
-          value={newDish}
-          onChange={(e) => setNewDish(e.target.value)}
-          placeholder="Enter dish name"
-          className="flex-grow rounded-l-md border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-300"
-        />
+
+      {!showAddForm && (
         <button
-          onClick={addDish}
-          className="rounded-r-md bg-green-500 px-4 py-2 font-bold text-white hover:bg-green-600"
+          onClick={() => setShowAddForm(true)}
+          className="mb-4 rounded bg-green-500 px-4 py-2 font-bold text-white hover:bg-green-600"
         >
-          Add
+          Add Menu Item
         </button>
-      </div>
-      <ul className="space-y-2">
-        {dishes.map((dish, index) => (
-          <li
-            key={index}
-            className="flex items-center justify-between rounded bg-white p-2 shadow"
-          >
-            <span>{dish}</span>
-            <button
-              onClick={() => deleteDish(index)}
-              className="font-bold text-red-500 hover:text-red-600"
-            >
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
+      )}
+
+      {showAddForm && (
+        <AddMenuItemForm params={{ addMenuItem, setShowAddForm }} />
+      )}
+
+      <MenuList menuItems={menuItems} deleteMenuItem={deleteMenuItem} />
     </div>
   )
 }
