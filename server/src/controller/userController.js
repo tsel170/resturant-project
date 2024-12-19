@@ -37,7 +37,7 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email }).select("-password");
+    const user = await User.findOne({ email });
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(404).json({
         success: false,
@@ -69,6 +69,43 @@ export const getAllUsers = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to get users",
+      error: err.message,
+    });
+  }
+};
+
+export const updateUser = async (req, res) => {
+  const { token } = req.body;
+  try {
+    const user = await User.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    res.status(200).json({
+      success: true,
+      user,
+      token,
+      message: "User updated successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to update user",
+      error: err.message,
+    });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete user",
       error: err.message,
     });
   }

@@ -30,6 +30,16 @@ const userschema = new mongoose.Schema({
     required: true,
     enum: ["employee", "manager", "admin"],
   },
+  branch: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
+      required: function () {
+        return this.role === "manager" || this.role === "employee";
+      },
+    },
+  ],
+
   jobTitle: {
     type: String,
     enum: ["waiter", "barista", "chef"],

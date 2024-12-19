@@ -6,11 +6,6 @@ const authMiddleware = async (req, res, next) => {
     if (!authHeader) {
       return res.status(401).json({ message: "No token provided" });
     }
-
-    // const token = authHeader;
-    // if (!token) {
-    //   return res.status(401).json({ message: "Invalid token format" });
-    // }
     console.log(JWT_SECRET);
 
     const decodeToken = jwt.verify(authHeader, JWT_SECRET);
