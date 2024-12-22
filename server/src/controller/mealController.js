@@ -33,11 +33,42 @@ export const getAllMeals = async (req, res) => {
   }
 };
 
-export const changeMeal = async (req, res) => {
+export const getSingleMeal = async (req, res) => {
   try {
-    const meal = await Meal.findByIdAndUpdate(req.params.id, req.body, {
+    const meal = await Meal.findById(req.params.id);
+    res.status(200).json({
+      success: true,
+      meal,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to get Meal",
+      error: err.message,
+    });
+  }
+};
+
+export const updateMeal = async (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({
+      success: false,
+      message: "Meal id is required",
+    });
+  }
+  try {
+    const meal = await Meal.findByIdAndUpdate(id, req.body, {
       new: true,
     });
+
+    if (!meal) {
+      return res.status(404).json({
+        success: false,
+        message: "Meal not found",
+      });
+    }
+
     res.status(200).json({
       success: true,
       meal,

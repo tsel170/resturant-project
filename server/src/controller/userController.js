@@ -2,24 +2,47 @@ import User from "../models/userModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../sercret/env.js";
+import Branch from "../models/branchModel.js";
 
 export const register = async (req, res) => {
-  const { name, email, password, phone, gender, role, jobTitle } = req.body;
-  try {
-    const user = await User.create(req.body);
+  const { name, email, password, phone, gender, role, jobTitle, branch } =
+    req.body;
 
-    if (
-      !name ||
-      !email ||
-      !password ||
-      !phone ||
-      !gender ||
-      !role
-      // (role === "employee" && !jobTitle)
-    ) {
-      console.log("Missing required fields");
-      // return res.status(400).json({ message: "Missing required fields" });
+  try {
+    if (!name || !email || !password || !phone || !gender || !role) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required fields" });
     }
+
+    const user = await User.create({
+      name,
+      email,
+      password,
+      phone,
+      gender,
+      role,
+      jobTitle,
+      branch,
+    });
+
+    if (branch && (role === "employee" || role === "manager")) {
+      const branchDoc = await Branch.findById(branch);
+      if (!branchDoc) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Branch not found" });
+      }
+
+      branchDoc.employees.push({
+        employee: user._id,
+        role: role,
+        jobTitle: jobTitle || null,
+      });
+
+      await branchDoc.save();
+    }
+
     res.status(201).json({
       success: true,
       user,

@@ -1,0 +1,40 @@
+POST http://localhost:5000/api/menus/addMenu
+Content-Type: application/json
+
+{
+  "branch": "6763ea1d3745860377c67200", 
+  "mealArray": [
+    "67672a1939cb7bdf4c03f9ae"
+  ]
+}
+
+###
+
+GET http://localhost:5000/api/menus/getAllMenus
+
+###
+
+DELETE http://localhost:5000/api/menus/deleteMenu/67672b2ea1e11321f2bf511c
+
+###
+
+PUT http://localhost:5000/api/menus/updateMenu/676730b9028d9e0f4491e8d1
+
+Content-Type: application/json
+
+{
+  "mealArray": [
+    "67672a1939cb7bdf4c03f9ae",
+    "67672a1939cb7bdf4c03f9ae"
+   
+  ]
+}
+
+###
+
+PUT http://localhost:5000/api/menus/addMealToMenu/676730b9028d9e0f4491e8d1
+Content-Type: application/json
+
+{
+  "mealId": "67672a1939cb7bdf4c03f9ae"
+}

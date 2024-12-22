@@ -1,7 +1,6 @@
 POST http://localhost:5000/api/branches/addBranch
 Content-Type: application/json
 
-{
     {
   "branchName":"Tel Aviv Branch",
   "address": "Dizengoff St 100, Tel Aviv",
@@ -14,7 +13,71 @@ Content-Type: application/json
     { "tableNumber": 6, "seats": 4 },
     { "tableNumber": 7, "seats": 8 },
     { "tableNumber": 8, "seats": 10 }
-  ],
+  ]
 }
+
+###
+
+GET http://localhost:5000/api/branches/allBbranches
+
+###
+
+GET http://localhost:5000/api/branches/getBranch/
+
+###
+
+PUT http://localhost:5000/api/branches/updateBranch/6763d722e00782af98d1165e
+Content-Type: application/json
+
+    {
+  "branchName":"Tel Aviv Branch",
+  "address": "Dizengoff St 100, Tel Aviv",
+  "tables": [
+    { "tableNumber": 1, "seats": 8 },
+    { "tableNumber": 2, "seats": 2 },
+    { "tableNumber": 3, "seats": 6 },
+    { "tableNumber": 4, "seats": 6 },
+    { "tableNumber": 5, "seats": 2 },
+    { "tableNumber": 6, "seats": 4 },
+    { "tableNumber": 7, "seats": 8 },
+    { "tableNumber": 8, "seats": 10 },
+    { "tableNumber": 9, "seats": 10 }
+  ]
+}
+
+###
+
+DELETE http://localhost:5000/api/branches/deleteBranch/6763e0115b04a26149d59221
+
+###
+
+PUT http://localhost:5000/api/branches/addTable
+Content-Type: application/json
+
+{
+    "branchId":"6763ea1d3745860377c67200",
+    "tableNumber":12,"seats":8
+
+}
+
+###
+
+PUT http://localhost:5000/api/branches/updateTableSeats
+Content-Type: application/json
+
+{
+    "branchId":"6763ea1d3745860377c67200",
+    "tableNumber":10,"newSeats":6
+
+}
+
+###
+
+DELETE http://localhost:5000/api/branches/deleteTable
+Content-Type: application/json
+
+{
+    "branchId":"6763ea1d3745860377c67200",
+    "tableNumber":10
 
 }
