@@ -10,6 +10,7 @@ Content-Type: application/json
   "role": "employee",   
   "jobTitle": "waiter",
   "branch": "6763ea1d3745860377c67200" 
+
 }
 
 ###
@@ -18,8 +19,8 @@ POST http://localhost:5000/api/users/login
 Content-Type: application/json
 
 {
-  "email": "john4.doe@example.com",
-  "password": "Password123"
+  "email": "a@mail",
+  "password": "12345678"
 }
 
 ###
