@@ -3,6 +3,7 @@ Content-Type: application/json
 
 {
   "name": "John Doe",
+
   "email": "john67.doe@example.com",
   "password": "Password123",
   "phone": "123456789",  
@@ -10,6 +11,7 @@ Content-Type: application/json
   "role": "employee",   
   "jobTitle": "waiter",
   "branch": "6763ea1d3745860377c67200" 
+
 
 }
 

@@ -66,3 +66,16 @@ export const updateBon = async (req, res) => {
     });
   }
 };
+
+export const getSingleBon = async (req, res) => {
+  try {
+    const Bon = await Bon.findById(req.params.id);
+    res.status(200).json(Bon);
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to get Bon",
+      error: err.message,
+    });
+  }
+};

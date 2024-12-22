@@ -8,40 +8,55 @@ export const register = async (req, res) => {
   const { name, email, password, phone, gender, role, jobTitle, branch } =
     req.body;
 
-  try {
-    if (!name || !email || !password || !phone || !gender || !role) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Missing required fields" });
-    }
-
-    const user = await User.create({
-      name,
-      email,
-      password,
-      phone,
-      gender,
-      role,
-      jobTitle,
-      branch,
+  // בודקים אם יש צורך בשדה branch למשתמשים שלא הם מנהלים או אדמינים
+  if (role !== "admin" && !branch) {
+    return res.status(400).json({
+      success: false,
+      message: "Branch is required for non-admin users",
     });
+  }
 
-    if (branch && (role === "employee" || role === "manager")) {
-      const branchDoc = await Branch.findById(branch);
-      if (!branchDoc) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Branch not found" });
-      }
+  // בודקים אם מדובר בעובד, אז צריך להוסיף jobTitle
+  if (role === "employee" && !jobTitle) {
+    return res.status(400).json({
+      success: false,
+      message: "Job title is required for employees",
+    });
+  }
 
-      branchDoc.employees.push({
-        employee: user._id,
-        role: role,
-        jobTitle: jobTitle || null,
+  try {
+    // בודקים אם כתובת המייל כבר קיימת במערכת
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already exists",
       });
-
-      await branchDoc.save();
     }
+
+    // יוצרים את המשתמש
+    const user = await User.create(req.body);
+
+    // אם המשתמש לא אדמין ומוגדר לו סניף, נוסיף את המשתמש לסניף
+    if (role !== "admin" && branch) {
+      const branchToUpdate = await Branch.findById(branch);
+      if (branchToUpdate) {
+        if (role === "manager") {
+          // אם המשתמש הוא מנהל, נוסיף אותו לרשימת המנהלים
+          branchToUpdate.manager.push(user._id);
+        } else if (role === "employee" && jobTitle) {
+          // אם המשתמש הוא עובד, נוסיף אותו לרשימת העובדים עם jobTitle
+          branchToUpdate.employees.push({
+            employee: user._id,
+            role: jobTitle, // כאן נוודא שמועבר ה-jobTitle במקום role
+          });
+        }
+        // שומרים את השינויים בסניף
+        await branchToUpdate.save();
+      }
+    }
+
+    // מחזירים תשובה על יצירת המשתמש בהצלחה
 
     res.status(201).json({
       success: true,

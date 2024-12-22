@@ -10,6 +10,7 @@ const branchSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+
   manager: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -35,9 +36,11 @@ const branchSchema = new mongoose.Schema({
         ref: "User",
         required: true,
       },
-      role: {
+      jobTitle: {
         type: String,
+
         required: true,
+
       },
       jobTitle: {
         type: String,
