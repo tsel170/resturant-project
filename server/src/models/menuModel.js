@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 
 const menuSchema = new mongoose.Schema({
-  //   branch: {
-  //     type: mongoose.Schema.Types.ObjectId,
-  //     ref: "Branch",
-  //   },
+  branch: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Branch",
+  },
   mealArray: {
     type: [
       {

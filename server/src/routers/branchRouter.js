@@ -10,7 +10,7 @@ import {
 const Router = express.Router();
 
 Router.post("/addBranch", addBranch);
-Router.get("/branches", getAllBranches);
+Router.get("/allBranches", getAllBranches);
 Router.get("/branch/:id", getBranchById);
 Router.delete("/deleteBranch/:id", deleteBranch);
 Router.put("/updateBranch/:id", updateBranch);

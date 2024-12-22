@@ -9,11 +9,12 @@ const branchSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  manager: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    // required: true,
-  },
+  manager: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
   tables: [
     {
       tableNumber: {
@@ -33,10 +34,10 @@ const branchSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
-      role: {
+      jobTitle: {
         type: String,
         enum: ["waiter", "chef", "barista"],
-        required: true,
+        required: false,
       },
     },
   ],

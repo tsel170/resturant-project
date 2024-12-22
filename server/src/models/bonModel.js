@@ -11,7 +11,7 @@ const bonSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
-  orders: [
+  meals: [
     {
       meal: {
         type: mongoose.Schema.Types.ObjectId,
@@ -26,6 +26,7 @@ const bonSchema = new mongoose.Schema({
       note: {
         type: String,
         maxlength: 500,
+        require: false,
       },
     },
   ],
