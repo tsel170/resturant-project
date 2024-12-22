@@ -3,12 +3,16 @@ Content-Type: application/json
 
 {
   "name": "John Doe",
-  "email": "john102.manager@example.com",
+
+  "email": "john67.doe@example.com",
   "password": "Password123",
   "phone": "123456789",  
   "gender": "male",
-  "role": "manager",
-  "branch": "6763ea1d3745860377c67200"
+  "role": "employee",   
+  "jobTitle": "waiter",
+  "branch": "6763ea1d3745860377c67200" 
+
+
 }
 
 ###
@@ -17,8 +21,8 @@ POST http://localhost:5000/api/users/login
 Content-Type: application/json
 
 {
-  "email": "john4.doe@example.com",
-  "password": "Password123"
+  "email": "a@mail",
+  "password": "12345678"
 }
 
 ###

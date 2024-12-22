@@ -22,9 +22,9 @@ const Login = () => {
         }
       )
       login(response.data)
-      console.log(response.data.role)
+      console.log(response)
 
-      navigate(`/${response.data.role || "employee"}`)
+      navigate(`/${response.data.user.role || "employee"}`)
     } catch (error) {
       console.error("Login failed:", error.response.data.message)
     }

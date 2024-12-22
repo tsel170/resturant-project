@@ -4,6 +4,8 @@ const menuSchema = new mongoose.Schema({
   branch: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Branch",
+
+
   },
   mealArray: {
     type: [
@@ -11,6 +13,7 @@ const menuSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Meal",
         required: true,
+        uniqe: true,
       },
     ],
   },

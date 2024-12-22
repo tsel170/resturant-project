@@ -1,6 +1,7 @@
 import User from "../models/userModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { JWT_SECRET } from "../sercret/env.js";
 import Branch from "../models/branchModel.js";
 
 export const register = async (req, res) => {
@@ -56,6 +57,7 @@ export const register = async (req, res) => {
     }
 
     // מחזירים תשובה על יצירת המשתמש בהצלחה
+
     res.status(201).json({
       success: true,
       user,

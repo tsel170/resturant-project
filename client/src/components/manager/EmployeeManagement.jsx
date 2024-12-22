@@ -1,13 +1,24 @@
 import React, { useState } from "react"
+import EmployeeList from "./EmployeeList"
+import AddEmployeeForm from "./AddEmployeeForm"
 
 const EmployeeManagement = () => {
   const [employees, setEmployees] = useState([])
-  const [newEmployee, setNewEmployee] = useState("")
+  const [showAddForm, setShowAddForm] = useState(false)
 
-  const addEmployee = () => {
-    if (newEmployee) {
+  const addEmployee = ({ name, email, phone, gender, branch, jobTitle }) => {
+    if (name && email && phone && gender && branch && jobTitle) {
+      const newEmployee = {
+        name,
+        email,
+        phone,
+        gender,
+        /* branch: branch || [],*/
+        jobTitle,
+        role: "employee",
+      }
       setEmployees([...employees, newEmployee])
-      setNewEmployee("")
+      setShowAddForm(false)
     }
   }
 
@@ -17,41 +28,28 @@ const EmployeeManagement = () => {
   }
 
   return (
-    <div className="rounded-lg bg-blue-50 p-6 shadow">
+    <div className="rounded-lg bg-blue-50 p-6 shadow duration-200 focus-within:bg-blue-100 focus-within:shadow-md hover:bg-blue-100 hover:shadow-md">
       <h2 className="mb-4 text-2xl font-bold text-blue-600">
         Employee Management
       </h2>
-      <div className="mb-4 flex">
-        <input
-          type="text"
-          value={newEmployee}
-          onChange={(e) => setNewEmployee(e.target.value)}
-          placeholder="Enter employee name"
-          className="flex-grow rounded-l-md border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
-        />
+
+      {!showAddForm && (
         <button
-          onClick={addEmployee}
-          className="rounded-r-md bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-600"
+          onClick={() => setShowAddForm(true)}
+          className="mb-4 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-600"
         >
-          Add
+          Add Employee
         </button>
-      </div>
-      <ul className="space-y-2">
-        {employees.map((employee, index) => (
-          <li
-            key={index}
-            className="flex items-center justify-between rounded bg-white p-2 shadow"
-          >
-            <span>{employee}</span>
-            <button
-              onClick={() => deleteEmployee(index)}
-              className="font-bold text-red-500 hover:text-red-600"
-            >
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
+      )}
+
+      {showAddForm && (
+        <AddEmployeeForm
+          addEmployee={addEmployee}
+          cancelForm={() => setShowAddForm(false)}
+        />
+      )}
+
+      <EmployeeList employees={employees} deleteEmployee={deleteEmployee} />
     </div>
   )
 }
