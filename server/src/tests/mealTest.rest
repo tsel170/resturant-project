@@ -24,14 +24,50 @@ Content-Type: application/json
       "ingredient": "Cucumber",
       "quantity": "50g"
     }
-  ]
+  ],
+  "theDishPreparer": "chef"
 }
 
 ###
 GET http://localhost:5000/api/meals/getAllMeals
 
 ### 
+GET http://localhost:5000/api/meals/getSingleMeal/67641c2ff17d47e3cb781dc5
 
-DELETE http://localhost:5000/api/meals/deleteMeal/675fedc02af5720663d4eedb
+###
+
+PUT http://localhost:5000/api/meals/updateMeal/67641c2ff17d47e3cb781dc5
+Content-Type: application/json
+
+{
+  "title": "Chicken Salad",
+  "description": "A healthy salad with grilled chicken.",
+  "price": 15.99,
+  "image": "https://example.com/images/chicken-salad.jpg",
+  "category": "Salads",
+  "Ingredients": [
+    {
+      "ingredient": "Chicken",
+      "quantity": "100g"
+    },
+    {
+      "ingredient": "Lettuce",
+      "quantity": "100g"
+    },
+    {
+      "ingredient": "Tomato",
+      "quantity": "100g"
+    },
+    {
+      "ingredient": "Cucumber",
+      "quantity": "100g"
+    }
+  ],
+  "theDishPreparer": "chef"
+}
+
+###
+
+DELETE http://localhost:5000/api/meals/deleteMeal/67641c2ff17d47e3cb781dc5
 
 ###

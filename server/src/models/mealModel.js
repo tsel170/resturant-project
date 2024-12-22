@@ -1,11 +1,6 @@
 import mongoose from "mongoose";
 
 const mealSchema = new mongoose.Schema({
-  branch: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Branch",
-    required: true,
-  },
   title: {
     type: String,
     required: true,
@@ -20,6 +15,7 @@ const mealSchema = new mongoose.Schema({
   },
   image: {
     type: String,
+    required: false,
   },
   category: {
     type: String,
