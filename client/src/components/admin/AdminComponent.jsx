@@ -2,6 +2,8 @@ import React, { useState } from "react"
 import Navbar from "../general/Navbar"
 import Footer from "../general/Footer"
 import AddBranchForm from "./AddBranchForm"
+import AddEntityForm from "./AddEntityForm"
+import BranchList from "./BranchList"
 import EntityList from "./EntityList"
 
 const AdminComponent = () => {
@@ -9,11 +11,17 @@ const AdminComponent = () => {
   const [managers, setManagers] = useState([])
   const [branches, setBranches] = useState([])
   const [showAddForm, setShowAddForm] = useState({ type: null, visible: false })
+  const [branchAssignment, setBranchAssignment] = useState({
+    visible: false,
+    managerIndex: null,
+  })
 
   const addEntity = (type, entity) => {
     if (type === "admin") setAdmins([...admins, entity])
-    if (type === "manager") setManagers([...managers, entity])
-    if (type === "branch") setBranches([...branches, entity])
+    if (type === "manager")
+      setManagers([...managers, { ...entity, branches: [] }])
+    if (type === "branch")
+      setBranches([...branches, { ...entity, managers: [] }])
     setShowAddForm({ type: null, visible: false })
   }
 
@@ -21,6 +29,52 @@ const AdminComponent = () => {
     if (type === "admin") setAdmins(admins.filter((_, i) => i !== index))
     if (type === "manager") setManagers(managers.filter((_, i) => i !== index))
     if (type === "branch") setBranches(branches.filter((_, i) => i !== index))
+  }
+
+  const assignBranch = (managerIndex) => {
+    setBranchAssignment({ visible: true, managerIndex })
+  }
+
+  const removeBranch = (managerIndex, branchIndex) => {
+    const updatedManagers = [...managers]
+    const updatedBranches = [...branches]
+
+    const manager = updatedManagers[managerIndex]
+    const branch = manager.branches[branchIndex]
+
+    manager.branches.splice(branchIndex, 1)
+
+    const branchToUpdate = updatedBranches.find(
+      (b) => b.branchName === branch.branchName
+    )
+    if (branchToUpdate) {
+      branchToUpdate.managers = branchToUpdate.managers.filter(
+        (m) => m.name !== manager.name
+      )
+    }
+
+    setManagers(updatedManagers)
+    setBranches(updatedBranches)
+  }
+
+  const handleBranchSelection = (branchIndex) => {
+    const updatedManagers = [...managers]
+    const updatedBranches = [...branches]
+
+    const manager = updatedManagers[branchAssignment.managerIndex]
+    const branch = updatedBranches[branchIndex]
+
+    // Avoid duplicate assignments
+    if (!manager.branches.some((b) => b.branchName === branch.branchName)) {
+      manager.branches.push(branch)
+    }
+    if (!branch.managers.some((m) => m.name === manager.name)) {
+      branch.managers.push(manager)
+    }
+
+    setManagers(updatedManagers)
+    setBranches(updatedBranches)
+    setBranchAssignment({ visible: false, managerIndex: null })
   }
 
   return (
@@ -64,6 +118,8 @@ const AdminComponent = () => {
               entities={managers}
               type="manager"
               deleteEntity={deleteEntity}
+              assignBranch={assignBranch}
+              removeBranch={removeBranch}
             />
           </div>
 
@@ -78,11 +134,7 @@ const AdminComponent = () => {
             >
               Add Branch
             </button>
-            <EntityList
-              entities={branches}
-              type="branch"
-              deleteEntity={deleteEntity}
-            />
+            <BranchList branches={branches} deleteBranch={deleteEntity} />
           </div>
         </div>
       </div>
@@ -106,6 +158,25 @@ const AdminComponent = () => {
                 }
               />
             )}
+          </div>
+        </div>
+      )}
+
+      {branchAssignment.visible && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+            <h2 className="mb-4 text-xl font-bold">Select Branch</h2>
+            <ul className="space-y-4">
+              {branches.map((branch, index) => (
+                <li
+                  key={index}
+                  className="cursor-pointer rounded bg-gray-100 p-2 shadow hover:bg-gray-200"
+                  onClick={() => handleBranchSelection(index)}
+                >
+                  {branch.branchName}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       )}
