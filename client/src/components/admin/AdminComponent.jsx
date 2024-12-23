@@ -24,11 +24,42 @@ const AdminComponent = () => {
     if (type === "branch")
       setBranches([...branches, { ...entity, managers: [] }])
     setShowAddForm({ type: null, visible: false })
+    fetchUsers()
+    fetchBrances()
+    setAdmins((prev) => [...prev])
+    setManagers((prev) => [...prev])
+    setBranches((prev) => [...prev])
   }
 
-  const deleteEntity = (type, index) => {
-    if (type === "admin") setAdmins(admins.filter((_, i) => i !== index))
-    if (type === "manager") setManagers(managers.filter((_, i) => i !== index))
+  const deleteEntity = async (type, index) => {
+    if (type === "admin") {
+      try {
+        const response = await axios.delete(
+          import.meta.env.VITE_SERVER +
+            `/api/users/deleteUser/${admins[index]._id}`
+        )
+        fetchUsers()
+        setAdmins((prev) => [...prev])
+        console.log("Resource deleted:", response.data)
+      } catch (error) {
+        console.error("Error deleting resource:", error)
+        alert("somthing went wrong")
+      }
+    }
+
+    if (type === "manager") {
+      try {
+        const response = await axios.delete(
+          import.meta.env.VITE_SERVER +
+            `/api/users/deleteUser/${managers[index]._id}`
+        )
+        fetchUsers()
+        setManagers((prev) => [...prev])
+        console.log("Resource deleted:", response.data)
+      } catch (error) {
+        console.error("Error deleting resource:", error)
+      }
+    }
     if (type === "branch") setBranches(branches.filter((_, i) => i !== index))
   }
 
@@ -82,37 +113,33 @@ const AdminComponent = () => {
     setAdmins([...admins, newAdmin])
   }
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get(
-          import.meta.env.VITE_SERVER + "/api/users/users"
-        )
-        setAdmins(response.data.users.filter((user) => user.role === "admin"))
-        setManagers(
-          response.data.users.filter((user) => user.role === "manager")
-        )
-      } catch (error) {
-        console.error("Error fetching data:", error)
-      }
-    }
-    const fetchBrances = async () => {
-      try {
-        const response = await axios.get(
-          import.meta.env.VITE_SERVER + "/api/branches/allBranches"
-        )
-        setBranches([...response.data])
-      } catch (error) {
-        console.error("Error fetching data:", error)
-      }
-    }
+  async function fetchUsers() {
+    try {
+      const response = await axios.get(
+        import.meta.env.VITE_SERVER + "/api/users/users"
+      )
 
+      setAdmins(response.data.users.filter((user) => user.role === "admin"))
+      setManagers(response.data.users.filter((user) => user.role === "manager"))
+    } catch (error) {
+      console.error("Error fetching data:", error)
+    }
+  }
+  async function fetchBrances() {
+    try {
+      const response = await axios.get(
+        import.meta.env.VITE_SERVER + "/api/branches/allBranches"
+      )
+      setBranches([...response.data])
+    } catch (error) {
+      console.error("Error fetching data:", error)
+    }
+  }
+
+  useEffect(() => {
     fetchUsers()
     fetchBrances()
   }, [])
-  useEffect(() => {
-    setAdmins([...admins])
-  }, [admins])
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-100">
