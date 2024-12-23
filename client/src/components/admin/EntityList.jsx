@@ -35,8 +35,8 @@ const EntityList = ({
               <p className="text-sm text-gray-600">
                 Branches:
                 <ul className="mt-2 space-y-1">
-                  {entity.branches && entity.branches.length > 0 ? (
-                    entity.branches.map((branch, branchIndex) => (
+                  {entity.branch && entity.branch.length > 0 ? (
+                    entity.branch.map((branch, branchIndex) => (
                       <li
                         key={branchIndex}
                         className="flex items-center justify-between rounded bg-gray-100 px-3 py-1 text-sm text-gray-700 shadow"
