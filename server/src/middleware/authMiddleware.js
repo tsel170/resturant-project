@@ -6,10 +6,8 @@ const authMiddleware = async (req, res, next) => {
     if (!authHeader) {
       return res.status(401).json({ message: "No token provided" });
     }
-    console.log(JWT_SECRET);
 
     const decodeToken = jwt.verify(authHeader, JWT_SECRET);
-    console.log(authHeader);
     req._id = decodeToken._id;
 
     next();
