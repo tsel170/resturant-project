@@ -85,10 +85,23 @@ export const login = async (req, res) => {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "30d",
     });
+
+    console.log({ token }, user._id);
+    const userData = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      gender: user.gender,
+      role: user.role,
+      branch: user.branch,
+      role: user.jobTitle,
+    };
+
     res.status(200).json({
       success: true,
       message: "Login successful",
-      user,
+      userData,
       token,
     });
   } catch (err) {
@@ -113,11 +126,37 @@ export const getAllUsers = async (req, res) => {
 };
 
 export const updateUser = async (req, res) => {
-  const { token } = req.body;
+  const { token, branch } = req.body;
   try {
     const user = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
+
+    if (branch) {
+      const branchToUpdate = await Branch.findById(branch);
+      if (branchToUpdate) {
+        if (
+          user.role === "manager" &&
+          !branchToUpdate.manager.includes(user._id)
+        ) {
+          branchToUpdate.manager.push(user._id);
+        }
+
+        if (user.role === "employee" && user.jobTitle) {
+          const existingEmployee = branchToUpdate.employees.find(
+            (emp) => emp.employee.toString() === user._id.toString()
+          );
+          if (!existingEmployee) {
+            branchToUpdate.employees.push({
+              employee: user._id,
+              role: user.jobTitle,
+            });
+          }
+        }
+        await branchToUpdate.save();
+      }
+    }
+
     res.status(200).json({
       success: true,
       user,
@@ -135,7 +174,30 @@ export const updateUser = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
   try {
+    const user = await User.findById(req.params.id);
+
+    if (user.branch) {
+      const branchToUpdate = await Branch.findById(user.branch);
+
+      if (branchToUpdate) {
+        if (user.role === "manager") {
+          branchToUpdate.manager = branchToUpdate.manager.filter(
+            (manager) => manager.toString() !== user._id.toString()
+          );
+        }
+
+        if (user.role === "employee") {
+          branchToUpdate.employees = branchToUpdate.employees.filter(
+            (employee) => employee.employee.toString() !== user._id.toString()
+          );
+        }
+
+        await branchToUpdate.save();
+      }
+    }
+
     await User.findByIdAndDelete(req.params.id);
+
     res.status(200).json({
       success: true,
       message: "User deleted successfully",
