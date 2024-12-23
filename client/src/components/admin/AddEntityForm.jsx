@@ -1,41 +1,52 @@
 import React, { useState } from "react"
+import axios from "axios"
 
-const AddEntityForm = ({ addEntity, cancelForm, type }) => {
+const AddEntityForm = ({ type, cancelForm, onSuccess }) => {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [phone, setPhone] = useState("")
   const [gender, setGender] = useState("")
-  const [role, setRole] = useState("")
-  const [branch, setBranch] = useState("")
+  const [error, setError] = useState("")
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    const newEntity = {
-      name,
-      email,
-      password,
-      phone,
-      gender,
-      role: type,
-      branch: role === "manager" ? branch : null,
+
+    const newEntity = { name, email, password, phone, gender, role: type }
+
+    try {
+      // Make POST request to server
+      const response = await axios.post(
+        `${import.meta.env.VITE_SERVER}/api/users/register`,
+        newEntity
+      )
+      console.log("Admin added:", response.data)
+
+      // Call onSuccess callback to refresh the list or handle UI updates
+      onSuccess(response.data)
+
+      // Clear the form and error state
+      setName("")
+      setEmail("")
+      setPassword("")
+      setPhone("")
+      setGender("")
+      setError("")
+      cancelForm()
+    } catch (err) {
+      console.error("Error adding admin:", err)
+      setError("Failed to add admin. Please try again.")
     }
-
-    console.log(newEntity)
-
-    addEntity(newEntity)
-    setName("")
-    setEmail("")
-    setPassword("")
-    setPhone("")
-    setGender("")
-    setRole("")
-    setBranch("")
   }
 
   return (
     <form onSubmit={handleSubmit} className="rounded-lg bg-white p-6 shadow-md">
-      <h2 className="mb-4 text-2xl font-semibold text-gray-800">Add Entity</h2>
+      <h2 className="mb-4 text-2xl font-semibold text-gray-800">
+        Add {type.charAt(0).toUpperCase() + type.slice(1)}
+      </h2>
+
+      {error && <p className="mb-4 text-red-500">{error}</p>}
+
       <div className="mb-4">
         <label htmlFor="name" className="block font-bold text-gray-700">
           Name
@@ -50,6 +61,7 @@ const AddEntityForm = ({ addEntity, cancelForm, type }) => {
           className="w-full rounded border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
         />
       </div>
+
       <div className="mb-4">
         <label htmlFor="email" className="block font-bold text-gray-700">
           Email
@@ -64,6 +76,7 @@ const AddEntityForm = ({ addEntity, cancelForm, type }) => {
           className="w-full rounded border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
         />
       </div>
+
       <div className="mb-4">
         <label htmlFor="password" className="block font-bold text-gray-700">
           Password
@@ -78,6 +91,7 @@ const AddEntityForm = ({ addEntity, cancelForm, type }) => {
           className="w-full rounded border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
         />
       </div>
+
       <div className="mb-4">
         <label htmlFor="phone" className="block font-bold text-gray-700">
           Phone
@@ -92,6 +106,7 @@ const AddEntityForm = ({ addEntity, cancelForm, type }) => {
           className="w-full rounded border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
         />
       </div>
+
       <div className="mb-4">
         <label htmlFor="gender" className="block font-bold text-gray-700">
           Gender
@@ -109,22 +124,6 @@ const AddEntityForm = ({ addEntity, cancelForm, type }) => {
         </select>
       </div>
 
-      {role === "manager" && (
-        <div className="mb-4">
-          <label htmlFor="branch" className="block font-bold text-gray-700">
-            Branch
-          </label>
-          <input
-            type="text"
-            id="branch"
-            value={branch}
-            onChange={(e) => setBranch(e.target.value)}
-            placeholder="Enter branch ID"
-            required
-            className="w-full rounded border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
-          />
-        </div>
-      )}
       <div className="flex justify-end">
         <button
           type="submit"

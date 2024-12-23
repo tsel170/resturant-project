@@ -1,6 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 import { AuthProvider } from "./context/AuthContext.jsx"
-import dotenv from "dotenv"
 import "./App.css"
 
 import Login from "./components/general/Login.jsx"
