@@ -2,17 +2,15 @@ POST http://localhost:5000/api/users/register
 Content-Type: application/json
 
 {
-  "name": "test user",
+  "name": "test5",
 
-  "email": "test@example.com",
+  "email": "test5@example.com",
+
   "password": "Password123",
   "phone": "123456789",  
   "gender": "male",
-  "role": "employee",   
-  "jobTitle": "waiter",
+  "role": "manager",   
   "branch": "6763ea1d3745860377c67200" 
-
-
 }
 
 ###
@@ -31,7 +29,7 @@ GET http://localhost:5000/api/users/users
 
 ###
 
-PUT http://localhost:5000/api/users/updateUser/6762aa69e43a85aa2e4ae4ac
+PUT http://localhost:5000/api/users/updateUser/67692d930b1a41029ccf5cea
 Content-Type: application/json
 
 {
@@ -40,4 +38,4 @@ Content-Type: application/json
 
 ###
 
-DELETE http://localhost:5000/api/users/deleteUser/67631551f46f48433436011d
+DELETE http://localhost:5000/api/users/deleteUser/67691b6a8648ba7de0a87753
