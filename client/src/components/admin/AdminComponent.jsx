@@ -1,4 +1,5 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
+import axios from "axios"
 import Navbar from "../general/Navbar"
 import Footer from "../general/Footer"
 import AddBranchForm from "./AddBranchForm"
@@ -77,6 +78,42 @@ const AdminComponent = () => {
     setBranchAssignment({ visible: false, managerIndex: null })
   }
 
+  const handleAddAdmin = (newAdmin) => {
+    setAdmins([...admins, newAdmin])
+  }
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get(
+          import.meta.env.VITE_SERVER + "/api/users/users"
+        )
+        setAdmins(response.data.users.filter((user) => user.role === "admin"))
+        setManagers(
+          response.data.users.filter((user) => user.role === "manager")
+        )
+      } catch (error) {
+        console.error("Error fetching data:", error)
+      }
+    }
+    const fetchBrances = async () => {
+      try {
+        const response = await axios.get(
+          import.meta.env.VITE_SERVER + "/api/branches/allBranches"
+        )
+        setBranches([...response.data])
+      } catch (error) {
+        console.error("Error fetching data:", error)
+      }
+    }
+
+    fetchUsers()
+    fetchBrances()
+  }, [])
+  useEffect(() => {
+    setAdmins([...admins])
+  }, [admins])
+
   return (
     <div className="flex min-h-screen flex-col bg-gray-100">
       <Navbar role={"admin"} />
@@ -152,6 +189,7 @@ const AdminComponent = () => {
             ) : (
               <AddEntityForm
                 type={showAddForm.type}
+                onSuccess={handleAddAdmin}
                 addEntity={(entity) => addEntity(showAddForm.type, entity)}
                 cancelForm={() =>
                   setShowAddForm({ type: null, visible: false })
