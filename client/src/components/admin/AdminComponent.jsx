@@ -1,7 +1,10 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
+import axios from "axios"
 import Navbar from "../general/Navbar"
 import Footer from "../general/Footer"
 import AddBranchForm from "./AddBranchForm"
+import AddEntityForm from "./AddEntityForm"
+import BranchList from "./BranchList"
 import EntityList from "./EntityList"
 
 const AdminComponent = () => {
@@ -9,19 +12,134 @@ const AdminComponent = () => {
   const [managers, setManagers] = useState([])
   const [branches, setBranches] = useState([])
   const [showAddForm, setShowAddForm] = useState({ type: null, visible: false })
+  const [branchAssignment, setBranchAssignment] = useState({
+    visible: false,
+    managerIndex: null,
+  })
 
   const addEntity = (type, entity) => {
     if (type === "admin") setAdmins([...admins, entity])
-    if (type === "manager") setManagers([...managers, entity])
-    if (type === "branch") setBranches([...branches, entity])
+    if (type === "manager")
+      setManagers([...managers, { ...entity, branches: [] }])
+    if (type === "branch")
+      setBranches([...branches, { ...entity, managers: [] }])
     setShowAddForm({ type: null, visible: false })
+    fetchUsers()
+    fetchBrances()
+    setAdmins((prev) => [...prev])
+    setManagers((prev) => [...prev])
+    setBranches((prev) => [...prev])
   }
 
-  const deleteEntity = (type, index) => {
-    if (type === "admin") setAdmins(admins.filter((_, i) => i !== index))
-    if (type === "manager") setManagers(managers.filter((_, i) => i !== index))
+  const deleteEntity = async (type, index) => {
+    if (type === "admin") {
+      try {
+        const response = await axios.delete(
+          import.meta.env.VITE_SERVER +
+            `/api/users/deleteUser/${admins[index]._id}`
+        )
+        fetchUsers()
+        setAdmins((prev) => [...prev])
+        console.log("Resource deleted:", response.data)
+      } catch (error) {
+        console.error("Error deleting resource:", error)
+        alert("somthing went wrong")
+      }
+    }
+
+    if (type === "manager") {
+      try {
+        const response = await axios.delete(
+          import.meta.env.VITE_SERVER +
+            `/api/users/deleteUser/${managers[index]._id}`
+        )
+        fetchUsers()
+        setManagers((prev) => [...prev])
+        console.log("Resource deleted:", response.data)
+      } catch (error) {
+        console.error("Error deleting resource:", error)
+      }
+    }
     if (type === "branch") setBranches(branches.filter((_, i) => i !== index))
   }
+
+  const assignBranch = (managerIndex) => {
+    setBranchAssignment({ visible: true, managerIndex })
+  }
+
+  const removeBranch = (managerIndex, branchIndex) => {
+    const updatedManagers = [...managers]
+    const updatedBranches = [...branches]
+
+    const manager = updatedManagers[managerIndex]
+    const branch = manager.branches[branchIndex]
+
+    manager.branches.splice(branchIndex, 1)
+
+    const branchToUpdate = updatedBranches.find(
+      (b) => b.branchName === branch.branchName
+    )
+    if (branchToUpdate) {
+      branchToUpdate.managers = branchToUpdate.managers.filter(
+        (m) => m.name !== manager.name
+      )
+    }
+
+    setManagers(updatedManagers)
+    setBranches(updatedBranches)
+  }
+
+  const handleBranchSelection = (branchIndex) => {
+    const updatedManagers = [...managers]
+    const updatedBranches = [...branches]
+
+    const manager = updatedManagers[branchAssignment.managerIndex]
+    const branch = updatedBranches[branchIndex]
+
+    // Avoid duplicate assignments
+    if (!manager.branches.some((b) => b.branchName === branch.branchName)) {
+      manager.branches.push(branch)
+    }
+    if (!branch.managers.some((m) => m.name === manager.name)) {
+      branch.managers.push(manager)
+    }
+
+    setManagers(updatedManagers)
+    setBranches(updatedBranches)
+    setBranchAssignment({ visible: false, managerIndex: null })
+  }
+
+  const handleAddAdmin = (newAdmin) => {
+    setAdmins([...admins, newAdmin])
+  }
+
+  async function fetchUsers() {
+    try {
+      const response = await axios.get(
+        import.meta.env.VITE_SERVER + "/api/users/users"
+      )
+
+      setAdmins(response.data.users.filter((user) => user.role === "admin"))
+      setManagers(response.data.users.filter((user) => user.role === "manager"))
+    } catch (error) {
+      console.error("Error fetching data:", error)
+    }
+  }
+  async function fetchBrances() {
+    try {
+      const response = await axios.get(
+        import.meta.env.VITE_SERVER + "/api/branches/allBranches"
+      )
+      setBranches([...response.data])
+    } catch (error) {
+      console.error("Error fetching data:", error)
+    }
+  }
+
+  useEffect(() => {
+    fetchUsers()
+    fetchBrances()
+  }, [])
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-100">
@@ -64,6 +182,8 @@ const AdminComponent = () => {
               entities={managers}
               type="manager"
               deleteEntity={deleteEntity}
+              assignBranch={assignBranch}
+              removeBranch={removeBranch}
             />
           </div>
 
@@ -78,11 +198,7 @@ const AdminComponent = () => {
             >
               Add Branch
             </button>
-            <EntityList
-              entities={branches}
-              type="branch"
-              deleteEntity={deleteEntity}
-            />
+            <BranchList branches={branches} deleteBranch={deleteEntity} />
           </div>
         </div>
       </div>
@@ -100,12 +216,32 @@ const AdminComponent = () => {
             ) : (
               <AddEntityForm
                 type={showAddForm.type}
+                onSuccess={handleAddAdmin}
                 addEntity={(entity) => addEntity(showAddForm.type, entity)}
                 cancelForm={() =>
                   setShowAddForm({ type: null, visible: false })
                 }
               />
             )}
+          </div>
+        </div>
+      )}
+
+      {branchAssignment.visible && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+            <h2 className="mb-4 text-xl font-bold">Select Branch</h2>
+            <ul className="space-y-4">
+              {branches.map((branch, index) => (
+                <li
+                  key={index}
+                  className="cursor-pointer rounded bg-gray-100 p-2 shadow hover:bg-gray-200"
+                  onClick={() => handleBranchSelection(index)}
+                >
+                  {branch.branchName}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       )}
