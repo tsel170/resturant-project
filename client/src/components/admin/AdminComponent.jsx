@@ -131,6 +131,7 @@ const AdminComponent = () => {
         import.meta.env.VITE_SERVER + "/api/branches/allBranches"
       )
       setBranches([...response.data])
+      console.log(response.data)
     } catch (error) {
       console.error("Error fetching data:", error)
     }
@@ -181,6 +182,7 @@ const AdminComponent = () => {
             <EntityList
               entities={managers}
               type="manager"
+              branches={branches}
               deleteEntity={deleteEntity}
               assignBranch={assignBranch}
               removeBranch={removeBranch}
@@ -208,7 +210,7 @@ const AdminComponent = () => {
           <div className="w-full max-w-md">
             {showAddForm.type === "branch" ? (
               <AddBranchForm
-                addBranch={(branch) => addEntity("branch", branch)}
+                fetchBrances={() => fetchBrances()}
                 cancelForm={() =>
                   setShowAddForm({ type: null, visible: false })
                 }

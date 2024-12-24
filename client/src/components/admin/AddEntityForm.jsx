@@ -20,7 +20,6 @@ const AddEntityForm = ({ type, cancelForm, onSuccess }) => {
         `${import.meta.env.VITE_SERVER}/api/users/register`,
         newEntity
       )
-      console.log("Admin added:", response.data)
 
       // Call onSuccess callback to refresh the list or handle UI updates
       onSuccess(response.data)
