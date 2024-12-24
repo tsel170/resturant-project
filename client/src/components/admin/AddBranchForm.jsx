@@ -1,30 +1,28 @@
+import axios from "axios"
 import React, { useState } from "react"
 
-const AddBranchForm = ({ addBranch, cancelForm }) => {
+const AddBranchForm = ({ fetchBrances, cancelForm }) => {
   const [branchName, setBranchName] = useState("")
   const [address, setAddress] = useState("")
-  const [tables, setTables] = useState([])
-  const [tableNumber, setTableNumber] = useState("")
-  const [seats, setSeats] = useState("")
 
-  const addTable = () => {
-    if (tableNumber && seats) {
-      setTables([
-        ...tables,
-        { tableNumber: Number(tableNumber), seats: Number(seats) },
-      ])
-      setTableNumber("")
-      setSeats("")
-    }
-  }
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    const newBranch = { branchName, address, tables }
-    addBranch(newBranch)
-    setBranchName("")
-    setAddress("")
-    setTables([])
+    const newBranch = { branchName, address }
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_SERVER}/api/branches/addBranch`,
+        newBranch
+      )
+      fetchBrances()
+      setBranchName("")
+      setAddress("")
+      cancelForm()
+    } catch (error) {
+      alert("somthing went wrong")
+      console.error(error)
+      setError("Failed to add Branche. Please try again.")
+    }
   }
 
   return (
