@@ -2,17 +2,17 @@ POST http://localhost:5000/api/branches/addBranch
 Content-Type: application/json
 
     {
-  "branchName":"Tel Aviv Branch",
+  "branchName":"holon Branch",
   "address": "Dizengoff St 100, Tel Aviv",
   "tables": [
-    { "tableNumber": 1, "seats": 4 },
-    { "tableNumber": 2, "seats": 4 },
-    { "tableNumber": 3, "seats": 6 },
-    { "tableNumber": 4, "seats": 6 },
-    { "tableNumber": 5, "seats": 2 },
-    { "tableNumber": 6, "seats": 4 },
-    { "tableNumber": 7, "seats": 8 },
-    { "tableNumber": 8, "seats": 10 }
+    { "tableNumber": 1, "seats": 1 },
+    { "tableNumber": 2, "seats": 2 },
+    { "tableNumber": 3, "seats": 3 },
+    { "tableNumber": 4, "seats": 4 },
+    { "tableNumber": 5, "seats": 5 },
+    { "tableNumber": 6, "seats": 6 },
+    { "tableNumber": 7, "seats": 7 },
+    { "tableNumber": 8, "seats": 8 }
   ]
 }
 
@@ -26,7 +26,7 @@ GET http://localhost:5000/api/branches/getBranch/
 
 ###
 
-PUT http://localhost:5000/api/branches/updateBranch/6763d722e00782af98d1165e
+PUT http://localhost:5000/api/branches/updateBranch/6763ea1d3745860377c67200
 Content-Type: application/json
 
     {
@@ -71,7 +71,6 @@ Content-Type: application/json
 
 }
 
-}
 
 ###
 
