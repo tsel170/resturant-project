@@ -8,7 +8,6 @@ export const register = async (req, res) => {
   const { name, email, password, phone, gender, role, jobTitle, branch } =
     req.body;
 
-  // בודקים אם יש צורך בשדה branch למשתמשים שלא הם מנהלים או אדמינים
   if (role !== "admin" && !branch) {
     return res.status(400).json({
       success: false,
@@ -16,7 +15,6 @@ export const register = async (req, res) => {
     });
   }
 
-  // בודקים אם מדובר בעובד, אז צריך להוסיף jobTitle
   if (role === "employee" && !jobTitle) {
     return res.status(400).json({
       success: false,
@@ -25,7 +23,6 @@ export const register = async (req, res) => {
   }
 
   try {
-    // בודקים אם כתובת המייל כבר קיימת במערכת
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
@@ -34,30 +31,22 @@ export const register = async (req, res) => {
       });
     }
 
-    // יוצרים את המשתמש
     const user = await User.create(req.body);
 
-    // אם המשתמש לא אדמין ומוגדר לו סניף, נוסיף את המשתמש לסניף
     if (role !== "admin" && branch) {
       const branchToUpdate = await Branch.findById(branch);
       if (branchToUpdate) {
         if (role === "manager") {
-          // אם המשתמש הוא מנהל, נוסיף אותו לרשימת המנהלים
           branchToUpdate.manager.push(user._id);
         } else if (role === "employee" && jobTitle) {
-          // אם המשתמש הוא עובד, נוסיף אותו לרשימת העובדים עם jobTitle
           branchToUpdate.employees.push({
             employee: user._id,
-            role: jobTitle, // כאן נוודא שמועבר ה-jobTitle במקום role
+            role: jobTitle,
           });
         }
-        // שומרים את השינויים בסניף
         await branchToUpdate.save();
       }
     }
-
-    // מחזירים תשובה על יצירת המשתמש בהצלחה
-
     res.status(201).json({
       success: true,
       user,
