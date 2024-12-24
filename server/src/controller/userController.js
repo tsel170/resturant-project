@@ -45,9 +45,6 @@ export const register = async (req, res) => {
         await branchToUpdate.save();
       }
     }
-
-    // מחזירים תשובה על יצירת המשתמש בהצלחה
-
     res.status(201).json({
       success: true,
       user,

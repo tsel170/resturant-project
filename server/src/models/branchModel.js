@@ -10,7 +10,6 @@ const branchSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-
   manager: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -18,18 +17,26 @@ const branchSchema = new mongoose.Schema({
       required: false,
     },
   ],
-
   tables: [
     {
       tableNumber: {
         type: Number,
         required: true,
+
+        unique: false,
+
       },
       seats: {
         type: Number,
         required: true,
       },
-      required: false,
+
+      status: {
+        type: String,
+        enum: ["occupied", "available"],
+        default: "available",
+      },
+
     },
   ],
   employees: [
@@ -41,18 +48,11 @@ const branchSchema = new mongoose.Schema({
       },
       jobTitle: {
         type: String,
-
-        required: true,
-      },
-      jobTitle: {
-        type: String,
         enum: ["waiter", "chef", "barista"],
         required: function () {
           return this.role === "employee"
         },
       },
-
-      required: false,
     },
   ],
   menu: {
@@ -71,7 +71,6 @@ const branchSchema = new mongoose.Schema({
         type: Number,
         required: true,
       },
-      required: false,
     },
   ],
 })

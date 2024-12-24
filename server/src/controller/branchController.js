@@ -19,13 +19,13 @@ export const getBranchById = async (req, res) => {
 }
 
 export const addBranch = async (req, res) => {
-  const { name, address } = req.body
+
   try {
-    const branch = await Branch.create(req.body)
-    res.status(201).json(branch)
+    console.log(await Branch.find());
+    const branch = await Branch.create(req.body);
+    res.status(201).json(branch);
   } catch (error) {
-    console.log(error.message)
-    res.status(500).json({ message: error.message })
+    res.status(500).json({ success: false, message: error.message });
   }
 }
 
