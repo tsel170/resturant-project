@@ -2,7 +2,7 @@ import React from "react"
 
 const Tables = () => {
   return (
-    <div className="rounded-lg bg-white p-4 shadow hover:bg-gray-100">
+    <div className="rounded-lg bg-white p-4 shadow duration-200 hover:bg-gray-100">
       <h2 className="mb-4 text-xl font-bold text-gray-700">Tables</h2>
       <div className="grid grid-cols-3 gap-4">
         {Array(9)

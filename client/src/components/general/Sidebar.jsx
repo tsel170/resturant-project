@@ -1,9 +1,14 @@
-import React from "react"
+import React, { useContext } from "react"
 import { Link } from "react-router-dom"
+import { AuthContext } from "../../context/AuthContext"
 
 const Sidebar = () => {
+  const { isSidebarVisible } = useContext(AuthContext)
+
   return (
-    <aside className="h-auto w-48 bg-gray-300 p-4">
+    <aside
+      className={`h-auto w-48 bg-gray-300 p-4 ${isSidebarVisible ? "" : "hidden"}`}
+    >
       <ul className="space-y-2">
         <li className="font-medium">
           <Link
