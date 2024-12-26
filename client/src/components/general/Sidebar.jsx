@@ -7,30 +7,41 @@ const Sidebar = () => {
 
   return (
     <aside
-      className={`h-auto w-48 bg-gray-300 p-4 ${isSidebarVisible ? "" : "hidden"}`}
+      className={`bottom-[64px] left-0 top-[64px] w-64 bg-gradient-to-b from-gray-800 to-gray-900 p-6 text-gray-100 shadow-xl transition-all duration-300 ease-in-out ${
+        isSidebarVisible ? "translate-x-0" : "-translate-x-full"
+      }`}
     >
-      <ul className="space-y-2">
-        <li className="font-medium">
+      <ul className="space-y-4">
+        <li>
           <Link
             to="/enter-shift"
-            className="block cursor-pointer hover:text-blue-500"
+            className="group flex items-center rounded-lg p-2 text-sm font-medium transition-all duration-200 hover:bg-gray-700"
           >
+            <span className="mr-3 text-gray-400 group-hover:text-blue-400">
+              📝
+            </span>
             Enter Shift
           </Link>
         </li>
-        <li className="font-medium">
+        <li>
           <Link
             to="/personal-space"
-            className="block cursor-pointer hover:text-blue-500"
+            className="group flex items-center rounded-lg p-2 text-sm font-medium transition-all duration-200 hover:bg-gray-700"
           >
+            <span className="mr-3 text-gray-400 group-hover:text-blue-400">
+              👤
+            </span>
             Personal Space
           </Link>
         </li>
-        <li className="font-medium">
+        <li>
           <Link
             to="/dashboard"
-            className="block cursor-pointer hover:text-blue-500"
+            className="group flex items-center rounded-lg p-2 text-sm font-medium transition-all duration-200 hover:bg-gray-700"
           >
+            <span className="mr-3 text-gray-400 group-hover:text-blue-400">
+              📊
+            </span>
             Dashboard
           </Link>
         </li>
