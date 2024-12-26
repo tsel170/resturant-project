@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
 import axios from "axios"
-import Navbar from "../general/Navbar"
+import Navbar from "../general/Header"
 import Footer from "../general/Footer"
 import AddBranchForm from "./AddBranchForm"
 import AddEntityForm from "./AddEntityForm"

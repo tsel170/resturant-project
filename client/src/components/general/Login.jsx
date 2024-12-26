@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react"
 import { useNavigate } from "react-router-dom"
 import { AuthContext } from "../../context/AuthContext.jsx"
 import axios from "axios"
-import Navbar from "./Navbar.jsx"
+import Navbar from "./Header.jsx"
 import Footer from "./Footer.jsx"
 
 const Login = () => {
