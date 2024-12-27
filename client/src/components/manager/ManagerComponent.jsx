@@ -1,5 +1,5 @@
 import React from "react"
-import Navbar from "../general/Navbar"
+import Navbar from "../general/Header"
 import Footer from "../general/Footer"
 import EmployeeManagement from "./EmployeeManagement"
 import MenuManagement from "./MenuManagement"
