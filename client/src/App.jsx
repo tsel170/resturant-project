@@ -7,6 +7,7 @@ import EmployeeComponent from "./components/emploee/EmployeeComponent.jsx"
 import AdminComponent from "./components/admin/AdminComponent.jsx"
 import ManagerComponent from "./components/manager/ManagerComponent.jsx"
 import E404 from "./components/general/E404.jsx"
+import ShowMenu from "./components/manager/ShowMenu.jsx"
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/employee" element={<EmployeeComponent />} />
           <Route path="/manager" element={<ManagerComponent />} />
           <Route path="/admin" element={<AdminComponent />} />
+          <Route path="/showMenu" element={<ShowMenu />} />
           <Route path="/*" element={<E404 />} />
         </Routes>
       </BrowserRouter>

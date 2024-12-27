@@ -95,7 +95,7 @@ const AddMenuItemForm = ({ params }) => {
           Image URL
         </label>
         <input
-          type="text"
+          type="file"
           id="image"
           value={image}
           onChange={(e) => setImage(e.target.value)}

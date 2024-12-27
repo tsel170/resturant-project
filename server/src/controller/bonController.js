@@ -1,19 +1,58 @@
 import Bon from "../models/bonModel.js";
+import Meal from "../models/mealModel.js";
+import User from "../models/userModel.js";
+import Branch from "../models/branchModel.js";
 
 export const addBon = async (req, res) => {
+  const { meals, user, tableNumber, branch } = req.body;
+
+  if (!meals || !user || !tableNumber || !branch) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
+
   try {
-    const Bon = await Bon.create(req.body);
+    for (const mealEntry of meals) {
+      const meal = await Meal.findById(mealEntry.meal);
+      if (!meal) {
+        return res
+          .status(400)
+          .json({ message: `Invalid meal id: ${mealEntry.meal}` });
+      }
+    }
+    const userExists = await User.findById(user);
+    if (!userExists) {
+      return res.status(400).json({ message: "Invalid user id" });
+    }
+
+    const newBon = await Bon.create(req.body); // החלפתי את שם המשתנה ל-newBon
     res.status(201).json({
       success: true,
-      Bon,
+      Bon: newBon,
       message: "Bon created successfully",
     });
-  } catch (err) {
-    res.status(400).json({
-      success: false,
-      message: "Failed to create Bon",
-      error: err.message,
-    });
+
+    const branchBon = await Branch.findByIdAndUpdate(
+      branch,
+      { $push: { bons: newBon._id } },
+      { new: true }
+    );
+    if (!branchBon) {
+      return res.status(400).json({ message: "Invalid branch id" });
+    }
+
+    const userBon = await User.findByIdAndUpdate(
+      user,
+      { $push: { bons: newBon._id } },
+      { new: true }
+    );
+    if (!userBon) {
+      return res.status(400).json({ message: "Invalid user id" });
+    }
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "An error occurred", error: error.message });
   }
 };
 

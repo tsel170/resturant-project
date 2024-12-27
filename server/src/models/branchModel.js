@@ -28,10 +28,9 @@ const branchSchema = new mongoose.Schema({
         type: Number,
         required: true,
       },
-      status: {
-        type: String,
-        enum: ["occupied", "available"],
-        default: "available",
+      occuipied: {
+        type: Boolean,
+        default: false,
       },
     },
   ],
@@ -56,16 +55,23 @@ const branchSchema = new mongoose.Schema({
     ref: "Menu",
     required: false,
   },
-  products: [
+  shifts: [
     {
-      product: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Shift",
+      required: false,
+    },
+  ],
+  orders: [
+    {
+      bon: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-        required: true,
+        ref: "Bon",
+        required: false,
       },
-      quantity: {
-        type: Number,
-        required: true,
+      date: {
+        type: Date,
+        default: Date.now,
       },
     },
   ],

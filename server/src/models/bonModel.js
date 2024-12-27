@@ -1,10 +1,15 @@
 import mongoose from "mongoose";
 
 const bonSchema = new mongoose.Schema({
-  bonNumber: {
-    type: String,
+  BonDate: {
+    type: Date,
     required: true,
-    unique: true,
+    default: Date.now,
+  },
+  branch: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Branch",
+    required: true,
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -26,31 +31,16 @@ const bonSchema = new mongoose.Schema({
       note: {
         type: String,
         maxlength: 500,
-        require: false,
+        required: false,
       },
     },
   ],
-  orderType: {
-    type: String,
-    enum: ["dine-in", "takeaway"],
-    required: true,
-  },
   tableNumber: {
     type: Number,
-    required: function () {
-      return this.orderType === "dine-in";
-    },
+    required: true,
     min: 1,
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
   ready: {
-    type: Boolean,
-    default: false,
-  },
-  delivered: {
     type: Boolean,
     default: false,
   },
