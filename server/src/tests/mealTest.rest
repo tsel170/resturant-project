@@ -6,7 +6,7 @@ Content-Type: application/json
   "description": "A healthy salad with grilled chicken.",
   "price": 15.99,
   "image": "https://example.com/images/chicken-salad.jpg",
-  "category": "Salads",
+  "category": "breakfast",
   "Ingredients": [
     {
       "ingredient": "Chicken",

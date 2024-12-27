@@ -14,6 +14,7 @@ import Dashboard from "./pages/Dashboard.jsx"
 import PersonalSpace from "./pages/PersonalSpace.jsx"
 import EnterShift from "./pages/EnterShift.jsx"
 
+
 function App() {
   return (
     <AuthProvider>
@@ -29,6 +30,7 @@ function App() {
           <Route path="/tables" element={<TablesManagement />} />
           <Route path="/manager" element={<ManagerComponent />} />
           <Route path="/admin" element={<AdminComponent />} />
+          <Route path="/showMenu" element={<ShowMenu />} />
           <Route path="/*" element={<E404 />} />
         </Routes>
       </BrowserRouter>

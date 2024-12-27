@@ -12,7 +12,7 @@ Router.use("/users", usersRouter);
 
 Router.use("/products", productRouter);
 
-Router.use("/orders", bonRouter);
+Router.use("/bons", bonRouter);
 
 Router.use("/meals", mealRouter);
 
