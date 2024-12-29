@@ -51,6 +51,10 @@ export const AuthProvider = ({ children }) => {
     fetchData()
   }, [])
 
+  useEffect(() => {
+    //add axios here
+  }, [])
+
   const updateTable = (tableId, updates) => {
     setTables((prevTables) =>
       prevTables.map((table) =>

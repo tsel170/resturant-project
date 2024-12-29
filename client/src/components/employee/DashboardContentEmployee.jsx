@@ -5,7 +5,7 @@ import Tables from "./Tables"
 import Orders from "./Orders"
 import { AuthContext } from "../../context/AuthContext"
 
-const DashboardContent = () => {
+const DashboardContentEmployee = () => {
   const navigate = useNavigate()
 
   const { orders } = useContext(AuthContext)
@@ -28,4 +28,4 @@ const DashboardContent = () => {
   )
 }
 
-export default DashboardContent
+export default DashboardContentEmployee

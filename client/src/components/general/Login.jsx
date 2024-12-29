@@ -21,10 +21,11 @@ const Login = () => {
           password,
         }
       )
-      login(response.data)
       console.log(response)
-
-      navigate(`/${response.data.user.role || "employee"}`)
+      login(response.data)
+      navigate(
+        `/${response.data.userData.role === "manager" ? "dashboard" : "enter-shift"}`
+      )
     } catch (error) {
       console.error("Login failed:", error.response.data.message)
     }

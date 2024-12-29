@@ -5,7 +5,7 @@ import { useContext } from "react"
 
 const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber }) => {
   const [newOrder, setNewOrder] = useState({
-    items: [{ name: "", quantity: 1, notes: "" }],
+    meals: [{ name: "", quantity: 1, notes: "" }],
     tableNumber: tableNumber,
     ready: false,
     paid: false,
@@ -31,7 +31,7 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber }) => {
     onSubmit(orderWithTimestamp)
 
     setNewOrder({
-      items: [{ name: "", quantity: 1, notes: "" }],
+      meals: [{ name: "", quantity: 1, notes: "" }],
       tableNumber,
       ready: false,
       paid: false,
@@ -41,14 +41,14 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber }) => {
   const addItem = () => {
     setNewOrder((prev) => ({
       ...prev,
-      items: [...prev.items, { name: "", quantity: 1, notes: "" }],
+      meals: [...prev.meals, { name: "", quantity: 1, notes: "" }],
     }))
   }
 
   const updateItem = (index, field, value) => {
     setNewOrder((prev) => ({
       ...prev,
-      items: prev.items.map((item, i) =>
+      meals: prev.meals.map((item, i) =>
         i === index ? { ...item, [field]: value } : item
       ),
     }))
@@ -57,7 +57,7 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber }) => {
   const removeItem = (index) => {
     setNewOrder((prev) => ({
       ...prev,
-      items: prev.items.filter((_, i) => i !== index),
+      meals: prev.meals.filter((_, i) => i !== index),
     }))
   }
 
@@ -95,7 +95,7 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber }) => {
             `}</style>
 
             <AnimatePresence mode="popLayout">
-              {newOrder.items.map((item, index) => (
+              {newOrder.meals.map((item, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: -10 }}
@@ -136,7 +136,7 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber }) => {
                         updateItem(index, "notes", e.target.value)
                       }
                     />
-                    {newOrder.items.length > 1 && (
+                    {newOrder.meals.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeItem(index)}

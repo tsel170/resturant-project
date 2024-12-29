@@ -1,5 +1,6 @@
 import { useState } from "react"
 import OrderModal from "./OrderModal"
+import axios from "axios"
 
 const TableCard = ({
   tableNumber,
@@ -29,6 +30,18 @@ const TableCard = ({
   }
 
   const handleSubmitOrder = (newOrder) => {
+    axios
+      .post(import.meta.env.VITE_SERVER + "/api/Bons/addBon", newOrder)
+      .then((response) => {
+        updateTable(tableNumber, {
+          orders: [...orders, newOrder],
+        })
+        setShowOrderModal(false)
+      })
+      .catch((error) => {
+        console.error("Error submitting order:", error)
+        alert("Error submitting order")
+      })
     updateTable(tableNumber, {
       orders: [...orders, newOrder],
     })
