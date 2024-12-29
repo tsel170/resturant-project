@@ -1,26 +1,25 @@
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Navbar from "../components/general/Header"
 import Sidebar from "../components/general/Sidebar"
 import Footer from "../components/general/Footer"
+import { AuthContext } from "../context/AuthContext"
 
 const OrdersManagement = () => {
   const navigate = useNavigate()
 
-  const [inProcessOrders, setInProcessOrders] = useState([
-    { id: 1, items: ["Burger", "Fries"] },
-    { id: 2, items: ["Pizza", "Coke"] },
-    { id: 3, items: ["Salad", "Soup"] },
-    { id: 4, items: ["Pasta", "Wine"] },
-  ])
-
-  const [deliveredOrders, setDeliveredOrders] = useState([])
-
+  const { orders, setOrders } = useContext(AuthContext)
+  // console.log(orders)
   const handleDelivered = (orderId) => {
-    const orderToDeliver = inProcessOrders.find((order) => order.id === orderId)
-    setDeliveredOrders([...deliveredOrders, orderToDeliver])
-    setInProcessOrders(inProcessOrders.filter((order) => order.id !== orderId))
+    setOrders(
+      orders.map((order) =>
+        order.id === orderId ? { ...order, delivered: true } : order
+      )
+    )
   }
+
+  const inProcessOrders = orders.filter((order) => !order.delivered)
+  const deliveredOrders = orders.filter((order) => order.delivered)
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">

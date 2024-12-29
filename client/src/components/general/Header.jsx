@@ -2,13 +2,13 @@ import React, { useContext } from "react"
 import { AuthContext } from "../../context/AuthContext"
 
 const Header = ({ role }) => {
-  const { toggleSidebar } = useContext(AuthContext)
+  const { toggleSidebar, isSidebarVisible } = useContext(AuthContext)
 
   return (
     <header className="flex items-center bg-green-600 py-2 text-white shadow-md">
       <button
         onClick={() => toggleSidebar()}
-        className="mr-4 text-white hover:text-gray-200 focus:outline-none active:text-gray-300"
+        className={`${isSidebarVisible ? "" : "rotate-90"} mr-4 duration-200 hover:text-gray-200 focus:outline-none active:text-gray-300`}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

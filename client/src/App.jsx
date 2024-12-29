@@ -13,7 +13,7 @@ import TablesManagement from "./pages/TablesManagement.jsx"
 import Dashboard from "./pages/Dashboard.jsx"
 import PersonalSpace from "./pages/PersonalSpace.jsx"
 import EnterShift from "./pages/EnterShift.jsx"
-
+import ShowMenu from "./components/manager/ShowMenu.jsx"
 
 function App() {
   return (
