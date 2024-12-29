@@ -1,4 +1,5 @@
-import React from "react"
+import React, { useContext } from "react"
+import { AuthContext } from "../../context/AuthContext"
 
 const Tables = () => {
   // Status colors
@@ -8,12 +9,7 @@ const Tables = () => {
       : "bg-green-50 border-green-200 hover:bg-green-100"
 
   // Example data - you can replace this with your actual table status data
-  const tables = Array(9)
-    .fill(0)
-    .map((_, index) => ({
-      id: index + 1,
-      isOccupied: Math.random() < 0.5, // Random status for demonstration
-    }))
+  const { tables } = useContext(AuthContext)
 
   return (
     <div className="rounded-xl bg-white p-6 shadow-lg">
@@ -24,17 +20,24 @@ const Tables = () => {
         {tables.map((table) => (
           <div
             key={table.id}
-            className={`rounded-xl border-2 ${getTableStyle(table.isOccupied)} cursor-pointer p-4 text-center shadow-sm transition-all duration-200 hover:shadow-md`}
+            className={`rounded-xl border-2 ${getTableStyle(
+              table.isOccupied
+            )} cursor-pointer p-4 text-center shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md`}
           >
-            <div className="mb-2">
-              <span className="text-3xl">🪑</span>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-700">
+            <h3 className="mb-2 text-lg font-semibold text-gray-700">
               Table {table.id}
             </h3>
+            <div className="mb-2 flex justify-center text-3xl">
+              {"🪑".repeat(table.seats / 2)}
+            </div>
+            <p className="mb-2 text-sm font-medium text-gray-600">
+              {table.seats} seats
+            </p>
             <p
-              className={`mt-2 text-sm font-medium ${
-                table.isOccupied ? "text-red-600" : "text-green-600"
+              className={`rounded-full px-3 py-1 text-sm font-medium ${
+                table.isOccupied
+                  ? "bg-red-100 text-red-700"
+                  : "bg-green-100 text-green-700"
               }`}
             >
               {table.isOccupied ? "Occupied" : "Available"}

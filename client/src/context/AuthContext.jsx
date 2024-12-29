@@ -23,7 +23,13 @@ export const AuthProvider = ({ children }) => {
   }
 
   const [orders, setOrders] = useState([])
-  const [tables, setTables] = useState([])
+  const [tables, setTables] = useState([
+    { number: 1, seats: 4, orders: [], isOccupied: false },
+    { number: 2, seats: 2, orders: [], isOccupied: false },
+    { number: 3, seats: 6, orders: [], isOccupied: false },
+    { number: 4, seats: 4, orders: [], isOccupied: false },
+    // Add more tables as needed
+  ])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,6 +39,9 @@ export const AuthProvider = ({ children }) => {
         )
         // Handle the response data here
         orders.push(...response.data.Bons)
+        orders.forEach((order) => {
+          order.delivered = false
+        }) //////////////////////////////////////////////////////////////////////////////////// need to change this to the actual data
         setOrders((prev) => [...prev])
       } catch (error) {
         console.error("Error fetching data:", error)
@@ -42,22 +51,16 @@ export const AuthProvider = ({ children }) => {
     fetchData()
   }, [])
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          import.meta.env.VITE_SERVER + "/api/bons/bons"
-        )
-        // Handle the response data here
-        tables.push(...response.data.Bons)
-        setTables((prev) => [...prev])
-      } catch (error) {
-        console.error("Error fetching data:", error)
-      }
-    }
+  const updateTable = (tableId, updates) => {
+    setTables((prevTables) =>
+      prevTables.map((table) =>
+        table.number === tableId ? { ...table, ...updates } : table
+      )
+    )
 
-    fetchData()
-  }, [])
+    // If you're connecting to a backend, add API call here
+    // await axios.patch(`/api/tables/${tableId}`, updates);
+  }
 
   return (
     <AuthContext.Provider
@@ -69,6 +72,9 @@ export const AuthProvider = ({ children }) => {
         toggleSidebar,
         orders,
         setOrders,
+        tables,
+        setTables,
+        updateTable,
       }}
     >
       {children}
