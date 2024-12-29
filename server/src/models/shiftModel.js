@@ -1,6 +1,12 @@
 import mongoose from "mongoose";
 
 const shiftSchema = new mongoose.Schema({
+  branch: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Branch",
+    required: true,
+    default: "676d0974ccb270069df3e06f",
+  },
   Date: {
     type: Date,
     required: true,
@@ -17,6 +23,10 @@ const shiftSchema = new mongoose.Schema({
       required: false,
     },
   ],
+  tip: {
+    type: Number,
+    default: 0,
+  },
 });
 
 const Shift = mongoose.model("Shift", shiftSchema);

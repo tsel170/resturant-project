@@ -11,6 +11,7 @@ export const addBon = async (req, res) => {
   }
 
   try {
+    let totalAmount = 0;
     for (const mealEntry of meals) {
       const meal = await Meal.findById(mealEntry.meal);
       if (!meal) {
@@ -18,36 +19,36 @@ export const addBon = async (req, res) => {
           .status(400)
           .json({ message: `Invalid meal id: ${mealEntry.meal}` });
       }
-    }
-    const userExists = await User.findById(user);
-    if (!userExists) {
-      return res.status(400).json({ message: "Invalid user id" });
+      totalAmount += meal.price * mealEntry.quantity;
     }
 
-    const newBon = await Bon.create(req.body); // החלפתי את שם המשתנה ל-newBon
-    res.status(201).json({
-      success: true,
-      Bon: newBon,
-      message: "Bon created successfully",
+    const newBon = await Bon.create({
+      ...req.body,
+      totalAmount,
+      date: new Date(),
     });
 
-    const branchBon = await Branch.findByIdAndUpdate(
-      branch,
-      { $push: { bons: newBon._id } },
-      { new: true }
-    );
-    if (!branchBon) {
-      return res.status(400).json({ message: "Invalid branch id" });
-    }
+    await Promise.all([
+      Branch.findByIdAndUpdate(
+        branch,
+        { $push: { bons: newBon._id } },
+        { new: true }
+      ),
+      User.findByIdAndUpdate(
+        user,
+        {
+          $push: { bons: newBon._id },
+          $inc: { totalSpent: totalAmount },
+        },
+        { new: true }
+      ),
+    ]);
 
-    const userBon = await User.findByIdAndUpdate(
-      user,
-      { $push: { bons: newBon._id } },
-      { new: true }
-    );
-    if (!userBon) {
-      return res.status(400).json({ message: "Invalid user id" });
-    }
+    res.status(201).json({
+      success: true,
+      bon: newBon,
+      message: "Bon created successfully",
+    });
   } catch (error) {
     console.error(error);
     res
@@ -72,17 +73,14 @@ export const getAllBons = async (req, res) => {
   }
 };
 
-export const deleteBon = async (req, res) => {
+export const getSingleBon = async (req, res) => {
   try {
-    const Bon = await Bon.findByIdAndDelete(req.params.id);
-    if (!Bon) {
-      return res.status(404).json({ message: "Bon not found" });
-    }
-    res.status(200).json({ message: "Bon deleted successfully" });
+    const Bon = await Bon.findById(req.params.id);
+    res.status(200).json(Bon);
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: "Failed to delete Bon",
+      message: "Failed to get Bon",
       error: err.message,
     });
   }
@@ -90,13 +88,20 @@ export const deleteBon = async (req, res) => {
 
 export const updateBon = async (req, res) => {
   try {
-    const Bon = await Bon.findByIdAndUpdate(req.params.id, req.body, {
+    const updatedBon = await Bon.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
+      runValidators: true,
     });
-    if (!Bon) {
+
+    if (!updatedBon) {
       return res.status(404).json({ message: "Bon not found" });
     }
-    res.status(200).json({ message: "Bon updated successfully" });
+
+    res.status(200).json({
+      success: true,
+      message: "Bon updated successfully",
+      bon: updatedBon,
+    });
   } catch (err) {
     res.status(500).json({
       success: false,
@@ -106,14 +111,25 @@ export const updateBon = async (req, res) => {
   }
 };
 
-export const getSingleBon = async (req, res) => {
+export const deleteBon = async (req, res) => {
   try {
-    const Bon = await Bon.findById(req.params.id);
-    res.status(200).json(Bon);
+    const deletedBon = await Bon.findByIdAndDelete(req.params.id);
+
+    if (!deletedBon) {
+      return res.status(404).json({
+        success: false,
+        message: "Bon not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Bon deleted successfully",
+    });
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: "Failed to get Bon",
+      message: "Failed to delete Bon",
       error: err.message,
     });
   }
