@@ -18,3 +18,32 @@ Content-Type: application/json
   ],
   "tableNumber": 5
 }
+
+###
+GET http://localhost:5000/api/bons/allBons
+
+###
+PUT http://localhost:5000/api/bons/updateBon/676e8b9bfa05ce7def1f2066
+Content-Type: application/json
+
+{
+  "branch": "676e884378317a74ac0817b2",
+  "user": "676d0974ccb270069df3e06f",
+  "meals": [
+    {
+      "meal": "67672a1939cb7bdf4c03f9ae",
+      "quantity": 2,
+      "note": "Extra spicy"
+    },
+    {
+      "meal": "676aa582b08100a707be237e",
+      "quantity": 1,
+      "note": "No onions"
+    }
+  ],
+  "tableNumber": 4
+}
+
+###
+DELETE http://localhost:5000/api/bons/deleteBon/6771069a535c2367fbfdccd1
+

@@ -48,6 +48,8 @@ const bonSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  totalAmount: { type: Number, required: true },
+  date: { type: Date, default: Date.now },
 });
 
 const Bon = mongoose.model("Bon", bonSchema);
