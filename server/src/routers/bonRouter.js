@@ -9,7 +9,7 @@ import {
 const Router = express.Router();
 
 Router.post("/addBon", addBon);
-Router.get("/bons", getAllBons);
+Router.get("/allBons", getAllBons);
 Router.put("/updateBon/:id", updateBon);
 Router.delete("/deleteBon/:id", deleteBon);
 

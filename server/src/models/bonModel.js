@@ -3,8 +3,15 @@ import mongoose from "mongoose";
 const bonSchema = new mongoose.Schema({
   bonNumber: {
     type: String,
-    required: true,
     unique: true,
+    default: function () {
+      const now = new Date();
+      return `${now.getHours()}${now.getMinutes()}${now.getSeconds()}`.replace(
+        /:/g,
+        ""
+      );
+    },
+    trim: true,
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -16,6 +23,10 @@ const bonSchema = new mongoose.Schema({
       meal: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Meal",
+        required: true,
+      },
+      mealTitle: {
+        type: String,
         required: true,
       },
       quantity: {
@@ -30,11 +41,6 @@ const bonSchema = new mongoose.Schema({
       },
     },
   ],
-  orderType: {
-    type: String,
-    enum: ["dine-in", "takeaway"],
-    required: true,
-  },
   tableNumber: {
     type: Number,
     required: function () {

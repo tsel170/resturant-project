@@ -1,11 +1,38 @@
 import Bon from "../models/bonModel.js";
+import User from "../models/userModel.js";
+import Branch from "../models/branchModel.js";
+import Meal from "../models/mealModel.js";
 
 export const addBon = async (req, res) => {
   try {
-    const Bon = await Bon.create(req.body);
+    const { branch, user, meals, tableNumber, mealTitle } = req.body;
+    const newBon = await Bon.create(req.body);
+
+    const newMeals = await Meal.find({
+      _id: { $in: meals.map((meal) => meal.meal) },
+    });
+
+    const newMealsWithTitle = newMeals.map((meal) => ({
+      ...meal,
+      mealTitle: mealTitle,
+    }));
+
+    if (!newMeals) {
+      return res.status(404).json({ message: "Meals not found" });
+    }
+
+    await Branch.findByIdAndUpdate(branch, {
+      $push: { bons: newBon._id },
+    });
+
+    await User.findByIdAndUpdate(user, {
+      $push: { bons: newBon._id },
+    });
+
     res.status(201).json({
       success: true,
-      Bon,
+      bonNumber: newBon.bonNumber,
+      bon: newBon,
       message: "Bon created successfully",
     });
   } catch (err) {
