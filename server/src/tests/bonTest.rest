@@ -2,6 +2,7 @@ POST http://localhost:5000/api/bons/addBon
 Content-Type: application/json
 
 {
+
   "user": "676d0974ccb270069df3e06f",
   "branch": "676e884378317a74ac0817b2",
   "meals": [
@@ -10,12 +11,14 @@ Content-Type: application/json
       "quantity": 2,
       "note": "Extra spicy",
       "mealTitle": "Pizza"
+
     },
     {
       "meal": "676aa582b08100a707be237e",
       "quantity": 1,
       "note": "No onions",
       "mealTitle": "Burger"
+
     }
   ],
   "tableNumber": 5

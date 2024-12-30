@@ -6,7 +6,14 @@ const EntityList = ({
   deleteEntity,
   assignBranch,
   removeBranch,
+  branches,
 }) => {
+  const getBranchNmae = (id) => {
+    for (let i = 0; i < branches.length; i++) {
+      if (branches[i]._id == id) return branches[i].branchName
+    }
+  }
+
   return (
     <ul className="space-y-4">
       {entities.map((entity, index) => (
@@ -41,7 +48,7 @@ const EntityList = ({
                         key={branchIndex}
                         className="flex items-center justify-between rounded bg-gray-100 px-3 py-1 text-sm text-gray-700 shadow"
                       >
-                        {branch.branchName}
+                        {getBranchNmae(branch)}
                         <button
                           onClick={() => removeBranch(index, branchIndex)}
                           className="ml-4 rounded bg-red-500 px-2 py-1 text-xs font-bold text-white hover:bg-red-600"

@@ -3,8 +3,16 @@ import User from "../models/userModel.js";
 import Branch from "../models/branchModel.js";
 import Meal from "../models/mealModel.js";
 
+
 export const addBon = async (req, res) => {
+  const { meals, user, tableNumber, branch } = req.body;
+
+  if (!meals || !user || !tableNumber || !branch) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
+
   try {
+
     const { branch, user, meals, tableNumber, mealTitle } = req.body;
     const newBon = await Bon.create(req.body);
 
@@ -32,15 +40,15 @@ export const addBon = async (req, res) => {
     res.status(201).json({
       success: true,
       bonNumber: newBon.bonNumber,
+
       bon: newBon,
       message: "Bon created successfully",
     });
-  } catch (err) {
-    res.status(400).json({
-      success: false,
-      message: "Failed to create Bon",
-      error: err.message,
-    });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "An error occurred", error: error.message });
   }
 };
 
@@ -60,17 +68,14 @@ export const getAllBons = async (req, res) => {
   }
 };
 
-export const deleteBon = async (req, res) => {
+export const getSingleBon = async (req, res) => {
   try {
-    const Bon = await Bon.findByIdAndDelete(req.params.id);
-    if (!Bon) {
-      return res.status(404).json({ message: "Bon not found" });
-    }
-    res.status(200).json({ message: "Bon deleted successfully" });
+    const Bon = await Bon.findById(req.params.id);
+    res.status(200).json(Bon);
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: "Failed to delete Bon",
+      message: "Failed to get Bon",
       error: err.message,
     });
   }
@@ -78,13 +83,20 @@ export const deleteBon = async (req, res) => {
 
 export const updateBon = async (req, res) => {
   try {
-    const Bon = await Bon.findByIdAndUpdate(req.params.id, req.body, {
+    const updatedBon = await Bon.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
+      runValidators: true,
     });
-    if (!Bon) {
+
+    if (!updatedBon) {
       return res.status(404).json({ message: "Bon not found" });
     }
-    res.status(200).json({ message: "Bon updated successfully" });
+
+    res.status(200).json({
+      success: true,
+      message: "Bon updated successfully",
+      bon: updatedBon,
+    });
   } catch (err) {
     res.status(500).json({
       success: false,
@@ -94,14 +106,25 @@ export const updateBon = async (req, res) => {
   }
 };
 
-export const getSingleBon = async (req, res) => {
+export const deleteBon = async (req, res) => {
   try {
-    const Bon = await Bon.findById(req.params.id);
-    res.status(200).json(Bon);
+    const deletedBon = await Bon.findByIdAndDelete(req.params.id);
+
+    if (!deletedBon) {
+      return res.status(404).json({
+        success: false,
+        message: "Bon not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Bon deleted successfully",
+    });
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: "Failed to get Bon",
+      message: "Failed to delete Bon",
       error: err.message,
     });
   }

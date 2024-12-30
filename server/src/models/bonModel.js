@@ -12,6 +12,11 @@ const bonSchema = new mongoose.Schema({
       );
     },
     trim: true,
+  branch: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Branch",
+    required: true,
+
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -37,32 +42,29 @@ const bonSchema = new mongoose.Schema({
       note: {
         type: String,
         maxlength: 500,
-        require: false,
+        required: false,
       },
     },
   ],
   tableNumber: {
     type: Number,
-    required: function () {
-      return this.orderType === "dine-in";
-    },
+    required: true,
     min: 1,
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
   ready: {
-    type: Boolean,
-    default: false,
-  },
-  delivered: {
     type: Boolean,
     default: false,
   },
   paid: {
     type: Boolean,
     default: false,
+  },
+  totalAmount: { type: Number, required: true },
+  date: { type: Date, default: Date.now },
+  bonNumber: {
+    type: Number,
+    required: true,
+    unique: true,
   },
 });
 

@@ -20,6 +20,16 @@ const mealSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
+    enum: [
+      "breakfast",
+      "lunch",
+      "dinner",
+      "desert",
+      "starter",
+      "main",
+      "drink",
+      "other",
+    ],
   },
   Ingredients: [
     {
@@ -31,6 +41,7 @@ const mealSchema = new mongoose.Schema({
         type: String,
         required: true,
       },
+      required: false,
     },
   ],
   theDishPreparer: {

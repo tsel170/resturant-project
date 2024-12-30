@@ -5,15 +5,13 @@ import { JWT_SECRET } from "../sercret/env.js";
 import Branch from "../models/branchModel.js";
 
 export const register = async (req, res) => {
-  const { name, email, password, phone, gender, role, jobTitle, branch } =
-    req.body;
-  if (role !== "admin" && !branch) {
+  const { name, email, password, phone, gender, role, jobTitle } = req.body;
+  if (!name || !email || !password || !phone || !gender || !role) {
     return res.status(400).json({
       success: false,
-      message: "Branch is required for non-admin users",
+      message: "All fields are required",
     });
   }
-
   if (role === "employee" && !jobTitle) {
     return res.status(400).json({
       success: false,
@@ -30,21 +28,6 @@ export const register = async (req, res) => {
       });
     }
     const user = await User.create(req.body);
-
-    if (role !== "admin" && branch) {
-      const branchToUpdate = await Branch.findById(branch);
-      if (branchToUpdate) {
-        if (role === "manager") {
-          branchToUpdate.manager.push(user._id);
-        } else if (role === "employee" && jobTitle) {
-          branchToUpdate.employees.push({
-            employee: user._id,
-            role: jobTitle,
-          });
-        }
-        await branchToUpdate.save();
-      }
-    }
     res.status(201).json({
       success: true,
       user,
