@@ -1,14 +1,14 @@
-import Bon from "../models/bonModel.js";
-import User from "../models/userModel.js";
-import Branch from "../models/branchModel.js";
-import Meal from "../models/mealModel.js";
+import Bon from "../models/bonModel.js"
+import Meal from "../models/mealModel.js"
+import User from "../models/userModel.js"
+import Branch from "../models/branchModel.js"
 
 
 export const addBon = async (req, res) => {
-  const { meals, user, tableNumber, branch } = req.body;
+  const { meals, user, tableNumber, branch } = req.body
 
   if (!meals || !user || !tableNumber || !branch) {
-    return res.status(400).json({ message: "Missing required fields" });
+    return res.status(400).json({ message: "Missing required fields" })
   }
 
   try {
@@ -23,8 +23,7 @@ export const addBon = async (req, res) => {
     const newMealsWithTitle = newMeals.map((meal) => ({
       ...meal,
       mealTitle: mealTitle,
-    }));
-
+  
     if (!newMeals) {
       return res.status(404).json({ message: "Meals not found" });
     }
@@ -45,28 +44,26 @@ export const addBon = async (req, res) => {
       message: "Bon created successfully",
     });
   } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ message: "An error occurred", error: error.message });
+    console.error(error)
+    res.status(500).json({ message: "An error occurred", error: error.message })
   }
-};
+}
 
 export const getAllBons = async (req, res) => {
   try {
-    const Bons = await Bon.find();
+    const Bons = await Bon.find()
     res.status(200).json({
       success: true,
       Bons,
-    });
+    })
   } catch (err) {
     res.status(500).json({
       success: false,
       message: "Failed to get Bons",
       error: err.message,
-    });
+    })
   }
-};
+}
 
 export const getSingleBon = async (req, res) => {
   try {
@@ -77,34 +74,28 @@ export const getSingleBon = async (req, res) => {
       success: false,
       message: "Failed to get Bon",
       error: err.message,
-    });
+    })
   }
-};
+}
 
 export const updateBon = async (req, res) => {
   try {
     const updatedBon = await Bon.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
-      runValidators: true,
-    });
-
-    if (!updatedBon) {
-      return res.status(404).json({ message: "Bon not found" });
+    })
+    if (!Bon) {
+      return res.status(404).json({ message: "Bon not found" })
     }
+    res.status(200).json({ message: "Bon updated successfully" })
 
-    res.status(200).json({
-      success: true,
-      message: "Bon updated successfully",
-      bon: updatedBon,
-    });
   } catch (err) {
     res.status(500).json({
       success: false,
       message: "Failed to update Bon",
       error: err.message,
-    });
+    })
   }
-};
+}
 
 export const deleteBon = async (req, res) => {
   try {
@@ -126,6 +117,6 @@ export const deleteBon = async (req, res) => {
       success: false,
       message: "Failed to delete Bon",
       error: err.message,
-    });
+    })
   }
-};
+}

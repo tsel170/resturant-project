@@ -8,7 +8,7 @@ import Footer from "./Footer.jsx"
 const Login = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const { login } = useContext(AuthContext)
+  const { login, setUser } = useContext(AuthContext)
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
@@ -22,9 +22,10 @@ const Login = () => {
         }
       )
       login(response.data)
-      console.log(response)
-
-      navigate(`/${response.data.user.role || "employee"}`)
+      setUser(response.data.userData)
+      navigate(
+        `/${response.data.userData.role === "manager" ? "dashboard" : "enter-shift"}`
+      )
     } catch (error) {
       console.error("Login failed:", error.response.data.message)
     }

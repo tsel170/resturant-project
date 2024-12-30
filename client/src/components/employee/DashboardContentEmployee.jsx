@@ -5,11 +5,9 @@ import Tables from "./Tables"
 import Orders from "./Orders"
 import { AuthContext } from "../../context/AuthContext"
 
-const DashboardContent = () => {
+const DashboardContentEmployee = () => {
   const navigate = useNavigate()
-
   const { orders } = useContext(AuthContext)
-
   return (
     <div className="space-y-6">
       <div
@@ -19,14 +17,11 @@ const DashboardContent = () => {
         {orders.length > 0 && <Orders params={{ orders }} />}
       </div>
 
-      <div
-        className="cursor-pointer rounded-lg bg-white shadow"
-        onClick={() => navigate("/tables")}
-      >
+      <div className="rounded-lg bg-white shadow">
         <Tables />
       </div>
     </div>
   )
 }
 
-export default DashboardContent
+export default DashboardContentEmployee
