@@ -37,20 +37,31 @@ const userschema = new mongoose.Schema({
     },
     shifts: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Shift",
-        required: false,
+        shift: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Shift",
+          required: false,
+        },
+        tip: {
+          type: Number,
+          required: false,
+        },
       },
     ],
-
-    Bons: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Bon",
-        required: false,
-      },
-    ],
+    branch: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
+      default: "676d0974ccb270069df3e06f",
+    },
   },
+  bons: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Bon",
+      required: false,
+    },
+  ],
+  totalSpent: { type: Number, default: 0 },
 });
 
 userschema.pre("save", async function (next) {
