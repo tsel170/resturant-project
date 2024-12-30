@@ -1,7 +1,8 @@
 import Bon from "../models/bonModel.js";
-import Meal from "../models/mealModel.js";
 import User from "../models/userModel.js";
 import Branch from "../models/branchModel.js";
+import Meal from "../models/mealModel.js";
+
 
 export const addBon = async (req, res) => {
   const { meals, user, tableNumber, branch } = req.body;
@@ -11,45 +12,35 @@ export const addBon = async (req, res) => {
   }
 
   try {
-    const lastBon = await Bon.findOne().sort({ bonNumber: -1 });
-    const nextBonNumber = (lastBon?.bonNumber || 0) + 1;
 
-    let totalAmount = 0;
-    for (const mealEntry of meals) {
-      const meal = await Meal.findById(mealEntry.meal);
-      if (!meal) {
-        return res
-          .status(400)
-          .json({ message: `Invalid meal id: ${mealEntry.meal}` });
-      }
-      totalAmount += meal.price * mealEntry.quantity;
-    }
+    const { branch, user, meals, tableNumber, mealTitle } = req.body;
+    const newBon = await Bon.create(req.body);
 
-    const newBon = await Bon.create({
-      ...req.body,
-      bonNumber: nextBonNumber,
-      totalAmount,
-      date: new Date(),
+    const newMeals = await Meal.find({
+      _id: { $in: meals.map((meal) => meal.meal) },
     });
 
-    await Promise.all([
-      Branch.findByIdAndUpdate(
-        branch,
-        { $push: { bons: newBon._id } },
-        { new: true }
-      ),
-      User.findByIdAndUpdate(
-        user,
-        {
-          $push: { bons: newBon._id },
-          $inc: { totalSpent: totalAmount },
-        },
-        { new: true }
-      ),
-    ]);
+    const newMealsWithTitle = newMeals.map((meal) => ({
+      ...meal,
+      mealTitle: mealTitle,
+    }));
+
+    if (!newMeals) {
+      return res.status(404).json({ message: "Meals not found" });
+    }
+
+    await Branch.findByIdAndUpdate(branch, {
+      $push: { bons: newBon._id },
+    });
+
+    await User.findByIdAndUpdate(user, {
+      $push: { bons: newBon._id },
+    });
 
     res.status(201).json({
       success: true,
+      bonNumber: newBon.bonNumber,
+
       bon: newBon,
       message: "Bon created successfully",
     });

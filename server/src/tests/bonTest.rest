@@ -2,18 +2,23 @@ POST http://localhost:5000/api/bons/addBon
 Content-Type: application/json
 
 {
-  "branch": "676e884378317a74ac0817b2",
+
   "user": "676d0974ccb270069df3e06f",
+  "branch": "676e884378317a74ac0817b2",
   "meals": [
     {
       "meal": "67672a1939cb7bdf4c03f9ae",
       "quantity": 2,
-      "note": "Extra spicy"
+      "note": "Extra spicy",
+      "mealTitle": "Pizza"
+
     },
     {
       "meal": "676aa582b08100a707be237e",
       "quantity": 1,
-      "note": "No onions"
+      "note": "No onions",
+      "mealTitle": "Burger"
+
     }
   ],
   "tableNumber": 5
