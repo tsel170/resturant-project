@@ -50,6 +50,11 @@ const bonSchema = new mongoose.Schema({
   },
   totalAmount: { type: Number, required: true },
   date: { type: Date, default: Date.now },
+  bonNumber: {
+    type: Number,
+    required: true,
+    unique: true,
+  },
 });
 
 const Bon = mongoose.model("Bon", bonSchema);

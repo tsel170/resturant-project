@@ -11,6 +11,9 @@ export const addBon = async (req, res) => {
   }
 
   try {
+    const lastBon = await Bon.findOne().sort({ bonNumber: -1 });
+    const nextBonNumber = (lastBon?.bonNumber || 0) + 1;
+
     let totalAmount = 0;
     for (const mealEntry of meals) {
       const meal = await Meal.findById(mealEntry.meal);
@@ -24,6 +27,7 @@ export const addBon = async (req, res) => {
 
     const newBon = await Bon.create({
       ...req.body,
+      bonNumber: nextBonNumber,
       totalAmount,
       date: new Date(),
     });
