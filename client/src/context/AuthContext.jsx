@@ -39,9 +39,6 @@ export const AuthProvider = ({ children }) => {
         )
         // Handle the response data here
         orders.push(...response.data.Bons)
-        orders.forEach((order) => {
-          order.delivered = false
-        }) //////////////////////////////////////////////////////////////////////////////////// need to change this to the actual data
         setOrders((prev) => [...prev])
       } catch (error) {
         console.error("Error fetching data:", error)

@@ -14,7 +14,6 @@ import Dashboard from "./pages/Dashboard.jsx"
 import PersonalSpace from "./pages/PersonalSpace.jsx"
 import EnterShift from "./pages/EnterShift.jsx"
 import ShowMenu from "./components/manager/ShowMenu.jsx"
-//lol
 function App() {
   return (
     <AuthProvider>
