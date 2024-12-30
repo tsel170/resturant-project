@@ -56,7 +56,7 @@ const OrdersManagement = () => {
                     </h3>
                     <ul className="ml-4 list-disc text-gray-700">
                       {order.meals.map((item, index) => (
-                        <li key={index}>{item.meal}</li>
+                        <li key={index}>{item.mealTitle}</li>
                       ))}
                     </ul>
                     <button

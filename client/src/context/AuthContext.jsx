@@ -39,6 +39,7 @@ export const AuthProvider = ({ children }) => {
         )
         // Handle the response data here
         orders.push(...response.data.Bons)
+
         setOrders((prev) => [...prev])
       } catch (error) {
         console.error("Error fetching data:", error)
@@ -67,6 +68,7 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         user,
+        setUser,
         login,
         logout,
         isSidebarVisible,
