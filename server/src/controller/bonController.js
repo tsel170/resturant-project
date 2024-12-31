@@ -1,30 +1,30 @@
-import Bon from "../models/bonModel.js"
-import Meal from "../models/mealModel.js"
-import User from "../models/userModel.js"
-import Branch from "../models/branchModel.js"
+import Bon from "../models/bonModel.js";
+import Meal from "../models/mealModel.js";
+import User from "../models/userModel.js";
+import Branch from "../models/branchModel.js";
 
 export const addBon = async (req, res) => {
-  const { meals, user, tableNumber, branch } = req.body
+  const { meals, user, tableNumber, branch, mealTitle } = req.body;
 
   if (!meals || !user || !tableNumber || !branch) {
-    return res.status(400).json({ message: "Missing required fields" })
+    return res.status(400).json({ message: "Missing required fields" });
   }
 
   try {
-    const { branch, user, meals, tableNumber, mealTitle } = req.body;
     const newBon = await Bon.create(req.body);
 
     const newMeals = await Meal.find({
       _id: { $in: meals.map((meal) => meal.meal) },
     });
 
-    const newMealsWithTitle = newMeals.map((meal) => ({
-      ...meal,
-      mealTitle: mealTitle,
-  
     if (!newMeals) {
       return res.status(404).json({ message: "Meals not found" });
     }
+
+    const newMealsWithTitle = newMeals.map((meal) => ({
+      ...meal,
+      mealTitle: mealTitle,
+    }));
 
     await Branch.findByIdAndUpdate(branch, {
       $push: { bons: newBon._id },
@@ -42,26 +42,28 @@ export const addBon = async (req, res) => {
       message: "Bon created successfully",
     });
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: "An error occurred", error: error.message })
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "An error occurred", error: error.message });
   }
-}
+};
 
 export const getAllBons = async (req, res) => {
   try {
-    const Bons = await Bon.find()
+    const Bons = await Bon.find();
     res.status(200).json({
       success: true,
       Bons,
-    })
+    });
   } catch (err) {
     res.status(500).json({
       success: false,
       message: "Failed to get Bons",
       error: err.message,
-    })
+    });
   }
-}
+};
 
 export const getSingleBon = async (req, res) => {
   try {
@@ -72,29 +74,28 @@ export const getSingleBon = async (req, res) => {
       success: false,
       message: "Failed to get Bon",
       error: err.message,
-    })
+    });
   }
-}
+};
 
 export const updateBon = async (req, res) => {
   const { branch, user } = req.body;
   try {
     const updatedBon = await Bon.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
-    })
+    });
     if (!Bon) {
-      return res.status(404).json({ message: "Bon not found" })
+      return res.status(404).json({ message: "Bon not found" });
     }
-    res.status(200).json({ message: "Bon updated successfully" })
-
+    res.status(200).json({ message: "Bon updated successfully" });
   } catch (err) {
     res.status(500).json({
       success: false,
       message: "Failed to update Bon",
       error: err.message,
-    })
+    });
   }
-}
+};
 
 export const deleteBon = async (req, res) => {
   try {
@@ -116,7 +117,7 @@ export const deleteBon = async (req, res) => {
       success: false,
       message: "Failed to delete Bon",
       error: err.message,
-    })
+    });
   }
 };
 
@@ -225,4 +226,3 @@ export const updatePaidBon = async (req, res) => {
       .json({ message: "Failed to update bon", error: error.message });
   }
 };
-
