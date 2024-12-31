@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose"
 
 const bonSchema = new mongoose.Schema({
   bonNumber: {
@@ -54,6 +54,7 @@ const bonSchema = new mongoose.Schema({
   delivered: {
     type: Boolean,
     default: false,
+
   },
   ready: {
     type: Boolean,
@@ -63,9 +64,11 @@ const bonSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+
   date: { type: Date, default: Date.now },
 });
 
-const Bon = mongoose.model("Bon", bonSchema);
 
-export default Bon;
+const Bon = mongoose.model("Bon", bonSchema)
+
+export default Bon

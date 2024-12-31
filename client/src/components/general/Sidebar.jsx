@@ -1,9 +1,10 @@
 import React, { useContext } from "react"
-import { Link } from "react-router-dom"
 import { AuthContext } from "../../context/AuthContext"
+import SidebarEmployee from "./SidebarEmployee"
+import SidebarManager from "./SidebarManager"
 
 const Sidebar = () => {
-  const { isSidebarVisible } = useContext(AuthContext)
+  const { isSidebarVisible, user } = useContext(AuthContext)
 
   return (
     <aside
@@ -11,41 +12,7 @@ const Sidebar = () => {
         isSidebarVisible ? "translate-x-0" : "-translate-x-full"
       }`}
     >
-      <ul className="space-y-4">
-        <li>
-          <Link
-            to="/enter-shift"
-            className="group flex items-center rounded-lg p-2 text-sm font-medium transition-all duration-200 hover:bg-gray-700"
-          >
-            <span className="mr-3 text-gray-400 group-hover:text-blue-400">
-              📝
-            </span>
-            Enter Shift
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="/personal-space"
-            className="group flex items-center rounded-lg p-2 text-sm font-medium transition-all duration-200 hover:bg-gray-700"
-          >
-            <span className="mr-3 text-gray-400 group-hover:text-blue-400">
-              👤
-            </span>
-            Personal Space
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="/dashboard"
-            className="group flex items-center rounded-lg p-2 text-sm font-medium transition-all duration-200 hover:bg-gray-700"
-          >
-            <span className="mr-3 text-gray-400 group-hover:text-blue-400">
-              📊
-            </span>
-            Dashboard
-          </Link>
-        </li>
-      </ul>
+      {user.role === "manager" ? <SidebarManager /> : <SidebarEmployee />}
     </aside>
   )
 }

@@ -9,7 +9,7 @@ const OrdersManagement = () => {
   const navigate = useNavigate()
 
   const { orders, setOrders } = useContext(AuthContext)
-  // console.log(orders)
+  console.log(orders)
   const handleDelivered = (orderId) => {
     setOrders(
       orders.map((order) =>
@@ -52,11 +52,11 @@ const OrdersManagement = () => {
                     className="transform rounded-lg border border-gray-200 bg-white p-4 shadow-md transition-transform hover:scale-105 hover:shadow-lg"
                   >
                     <h3 className="font-bold text-gray-800">
-                      Order #{order.id}
+                      Order #{order.bonNumber}
                     </h3>
                     <ul className="ml-4 list-disc text-gray-700">
-                      {order.items.map((item, index) => (
-                        <li key={index}>{item}</li>
+                      {order.meals.map((item, index) => (
+                        <li key={index}>{item.mealTitle}</li>
                       ))}
                     </ul>
                     <button
@@ -85,7 +85,7 @@ const OrdersManagement = () => {
                       Order #{order.id}
                     </h3>
                     <ul className="ml-4 list-disc text-gray-700">
-                      {order.items.map((item, index) => (
+                      {order.meals.map((item, index) => (
                         <li key={index}>{item}</li>
                       ))}
                     </ul>
