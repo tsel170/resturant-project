@@ -1,4 +1,4 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
 const branchSchema = new mongoose.Schema({
   branchName: {
@@ -24,7 +24,6 @@ const branchSchema = new mongoose.Schema({
         required: true,
 
         unique: false,
-
       },
       seats: {
         type: Number,
@@ -33,9 +32,7 @@ const branchSchema = new mongoose.Schema({
       occuipied: {
         type: Boolean,
         default: false,
-
       },
-
     },
   ],
   employees: [
@@ -49,7 +46,7 @@ const branchSchema = new mongoose.Schema({
         type: String,
         enum: ["waiter", "chef", "barista"],
         required: function () {
-          return this.role === "employee"
+          return this.role === "employee";
         },
       },
     },
@@ -61,9 +58,19 @@ const branchSchema = new mongoose.Schema({
   },
   shifts: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Shift",
-      required: false,
+      shift: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Shift",
+        required: false,
+      },
+      date: {
+        type: Date,
+        default: Date.now,
+      },
+      timeShift: {
+        type: String,
+        required: false,
+      },
     },
   ],
   orders: [
@@ -79,8 +86,8 @@ const branchSchema = new mongoose.Schema({
       },
     },
   ],
-})
+});
 
-const Branch = mongoose.model("Branch", branchSchema)
+const Branch = mongoose.model("Branch", branchSchema);
 
-export default Branch
+export default Branch;

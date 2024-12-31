@@ -7,7 +7,7 @@ const shiftSchema = new mongoose.Schema({
     required: true,
     default: "676d0974ccb270069df3e06f",
   },
-  Date: {
+  date: {
     type: Date,
     required: true,
   },

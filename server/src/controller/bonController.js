@@ -3,7 +3,6 @@ import Meal from "../models/mealModel.js"
 import User from "../models/userModel.js"
 import Branch from "../models/branchModel.js"
 
-
 export const addBon = async (req, res) => {
   const { meals, user, tableNumber, branch } = req.body
 
@@ -12,7 +11,6 @@ export const addBon = async (req, res) => {
   }
 
   try {
-
     const { branch, user, meals, tableNumber, mealTitle } = req.body;
     const newBon = await Bon.create(req.body);
 
@@ -79,6 +77,7 @@ export const getSingleBon = async (req, res) => {
 }
 
 export const updateBon = async (req, res) => {
+  const { branch, user } = req.body;
   try {
     const updatedBon = await Bon.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -119,4 +118,111 @@ export const deleteBon = async (req, res) => {
       error: err.message,
     })
   }
-}
+};
+
+export const updateDeliveredBon = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const bon = await Bon.findById(id);
+    if (!bon) {
+      return res.status(404).json({ message: "Bon not found" });
+    }
+
+    bon.delivered = true;
+    await bon.save();
+
+    await User.findOneAndUpdate(
+      { "bons.bon": id },
+      {
+        $set: {
+          "bons.$.delivered": true,
+        },
+      }
+    );
+
+    await Branch.findOneAndUpdate(
+      { "bons.bon": id },
+      {
+        $set: {
+          "bons.$.delivered": true,
+        },
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Bon delivery status updated successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to update bon delivery status",
+      error: error.message,
+    });
+  }
+};
+
+export const updateReadyBon = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const bon = await Bon.findById(id);
+    bon.ready = true;
+    await bon.save();
+
+    await User.findOneAndUpdate(
+      { "bons.bon": id },
+      {
+        $set: {
+          "bons.$.ready": true,
+        },
+      }
+    );
+
+    await Branch.findOneAndUpdate(
+      { "bons.bon": id },
+      {
+        $set: {
+          "bons.$.ready": true,
+        },
+      }
+    );
+    res.status(200).json({ message: "Bon updated successfully" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to update bon", error: error.message });
+  }
+};
+
+export const updatePaidBon = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const bon = await Bon.findById(id);
+    bon.paid = true;
+    await bon.save();
+
+    await User.findOneAndUpdate(
+      { "bons.bon": id },
+      {
+        $set: {
+          "bons.$.paid": true,
+        },
+      }
+    );
+
+    await Branch.findOneAndUpdate(
+      { "bons.bon": id },
+      {
+        $set: {
+          "bons.$.paid": true,
+        },
+      }
+    );
+    res.status(200).json({ message: "Bon updated successfully" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to update bon", error: error.message });
+  }
+};
+

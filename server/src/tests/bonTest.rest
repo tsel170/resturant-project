@@ -48,7 +48,18 @@ Content-Type: application/json
   ],
   "tableNumber": 4
 }
+###
+GET http://localhost:5000/api/bons/allBons
 
 ###
 DELETE http://localhost:5000/api/bons/deleteBon/6771069a535c2367fbfdccd1
+
+###
+PUT http://localhost:5000/api/bons/updateDeliveredBon/6773ba2b8f8d42d3775831e3
+
+###
+PUT http://localhost:5000/api/bons/updateReadyBon/6773ba2b8f8d42d3775831e3
+
+###
+PUT http://localhost:5000/api/bons/updatePaidBon/6773ba2b8f8d42d3775831e3
 
