@@ -12,11 +12,11 @@ const bonSchema = new mongoose.Schema({
       );
     },
     trim: true,
+  },
   branch: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Branch",
     required: true,
-
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -51,6 +51,10 @@ const bonSchema = new mongoose.Schema({
     required: true,
     min: 1,
   },
+  delivered: {
+    type: Boolean,
+    default: false,
+  },
   ready: {
     type: Boolean,
     default: false,
@@ -59,13 +63,7 @@ const bonSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  totalAmount: { type: Number, required: true },
   date: { type: Date, default: Date.now },
-  bonNumber: {
-    type: Number,
-    required: true,
-    unique: true,
-  },
 });
 
 const Bon = mongoose.model("Bon", bonSchema);
