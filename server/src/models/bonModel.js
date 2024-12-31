@@ -12,6 +12,7 @@ const bonSchema = new mongoose.Schema({
       )
     },
     trim: true,
+
     branch: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Branch",
@@ -43,6 +44,7 @@ const bonSchema = new mongoose.Schema({
           maxlength: 500,
           required: false,
         },
+
       },
     ],
     tableNumber: {
@@ -63,15 +65,30 @@ const bonSchema = new mongoose.Schema({
       default: false,
     },
 
-    totalAmount: { type: Number, required: true },
-    date: { type: Date, default: Date.now },
-    bonNumber: {
-      type: Number,
-      required: true,
-      unique: true,
-    },
+  ],
+  tableNumber: {
+    type: Number,
+    required: true,
+    min: 1,
   },
-})
+  delivered: {
+    type: Boolean,
+    default: false,
+
+  },
+  ready: {
+    type: Boolean,
+    default: false,
+  },
+  paid: {
+    type: Boolean,
+    default: false,
+  },
+
+  date: { type: Date, default: Date.now },
+});
+
+
 
 const Bon = mongoose.model("Bon", bonSchema)
 

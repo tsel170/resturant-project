@@ -35,34 +35,36 @@ const userschema = new mongoose.Schema({
     required: function () {
       return this.role === "employee"
     },
-    shifts: [
-      {
-        shift: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Shift",
-          required: false,
-        },
-        tip: {
-          type: Number,
-          required: false,
-        },
-      },
-    ],
-    branch: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Branch",
-      default: "676d0974ccb270069df3e06f",
+  },
+  shifts: [
+    {
+      shift: { type: mongoose.Schema.Types.ObjectId, ref: "Shift" },
+      date: Date,
+      timeShift: String,
     },
+  ],
+  branch: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Branch",
+    default: "676d0974ccb270069df3e06f",
   },
   bons: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Bon",
-      required: false,
+      bon: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Bon",
+        required: false,
+      },
+      delivered: {
+        type: Boolean,
+        default: false,
+      },
+      totalSpent: { type: Number, default: 0 },
     },
   ],
-  totalSpent: { type: Number, default: 0 },
-})
+
+});
+
 
 userschema.pre("save", async function (next) {
   if (!this.isModified("password")) return next()

@@ -1,9 +1,27 @@
-POST http://localhost:3000/api/shift/addShift
+POST http://localhost:5000/api/shifts/addShift
 Content-Type: application/json
 
 {
-  "Date": "2024-01-01",
+  "date": "2024-01-01",
   "timeShift": "am",
   "users": ["676d0974ccb270069df3e06f"],
   "branchId": "676d0974ccb270069df3e06f"
 }
+
+###
+
+GET http://localhost:5000/api/shifts/allShifts
+
+###
+
+PUT http://localhost:5000/api/shifts/editShift/6772e9d735b4f270638f1127
+Content-Type: application/json
+
+{
+  "date": "2024-01-01",
+  "timeShift": "pm"
+}
+
+###
+
+DELETE http://localhost:5000/api/shifts/deleteShift/6772e9d735b4f270638f1127

@@ -1,15 +1,14 @@
-import Shift from "../models/shiftModel";
-import User from "../models/userModel";
-import Branch from "../models/branchModel";
-
+import Shift from "../models/shiftModel.js";
+import User from "../models/userModel.js";
+import Branch from "../models/branchModel.js";
 export const addShift = async (req, res) => {
-  const { Date, timeShift, users, branchId } = req.body;
-  if (!Date || !timeShift || !branchId) {
+  const { date, timeShift, users, branchId } = req.body;
+  if (!date || !timeShift || !branchId) {
     return res
       .status(400)
       .json({ error: "Date, timeShift and branchId are required" });
   }
-  if (Date < new Date()) {
+  if (date < new Date()) {
     return res.status(400).json({ error: "We are not supporting time travel" });
   }
 
@@ -28,11 +27,19 @@ export const addShift = async (req, res) => {
     if (users && users.length > 0) {
       await User.updateMany(
         { _id: { $in: users } },
-        { $push: { shifts: shift._id } }
+        {
+          $push: {
+            shifts: { shift: shift._id, date: date, timeShift: timeShift },
+          },
+        }
       );
     }
 
-    await Branch.findByIdAndUpdate(branchId, { $push: { shifts: shift._id } });
+    await Branch.findByIdAndUpdate(branchId, {
+      $push: {
+        shifts: { shift: shift._id, date: date, timeShift: timeShift },
+      },
+    });
 
     res.status(201).json(shift);
   } catch (error) {
@@ -49,10 +56,30 @@ export const getShifts = async (req, res) => {
   }
 };
 
-const editShift = async (req, res) => {
+export const updateShift = async (req, res) => {
+  const { id, branchId, userId } = req.params;
+  const { date, timeShift } = req.body;
   try {
-    const { id } = req.params;
-    const shift = await Shift.findByIdAndUpdate(id, req.body, { new: true });
+    const shift = await Shift.findByIdAndUpdate(
+      id,
+      { date, timeShift },
+      { new: true }
+    );
+
+    if (userId.length > 0) {
+      await User.findByIdAndUpdate(userId, {
+        $set: { shifts: { shift: id, date: date, timeShift: timeShift } },
+      });
+    }
+
+    if (branchId) {
+      await Branch.findByIdAndUpdate(branchId, {
+        $set: {
+          shifts: { shift: id, date: date, timeShift: timeShift },
+        },
+      });
+    }
+
     if (!shift) {
       return res.status(404).json({ error: "Shift not found" });
     }
@@ -63,13 +90,19 @@ const editShift = async (req, res) => {
 };
 
 export const deleteShift = async (req, res) => {
-  const { id } = req.params;
+  const { id, branchId, userId } = req.params;
   try {
     const shift = await Shift.findByIdAndDelete(id);
     if (!shift) {
       return res.status(404).json({ error: "Shift not found" });
     }
-    res.status(200).json(shift);
+    await Branch.findByIdAndUpdate(branchId, {
+      $pull: { shifts: { shift: id } },
+    });
+    await User.findByIdAndUpdate(userId, {
+      $pull: { shifts: { shift: id } },
+    });
+    res.status(200).json({ message: "Shift deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
