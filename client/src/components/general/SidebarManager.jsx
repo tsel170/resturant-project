@@ -6,46 +6,35 @@ const SidebarManager = () => {
     <ul className="space-y-4">
       <li>
         <Link
-          to="/manage-shifts"
+          to="/dashboard"
           className="group flex items-center rounded-lg p-2 text-sm font-medium transition-all duration-200 hover:bg-gray-700"
         >
           <span className="mr-3 text-gray-400 group-hover:text-blue-400">
-            📅
+            ⏱️
           </span>
-          Manage Shifts
+          Current Shift
         </Link>
       </li>
       <li>
         <Link
-          to="/manage-employees"
-          className="group flex items-center rounded-lg p-2 text-sm font-medium transition-all duration-200 hover:bg-gray-700"
-        >
-          <span className="mr-3 text-gray-400 group-hover:text-blue-400">
-            👥
-          </span>
-          Manage Employees
-        </Link>
-      </li>
-      <li>
-        <Link
-          to="/reports"
-          className="group flex items-center rounded-lg p-2 text-sm font-medium transition-all duration-200 hover:bg-gray-700"
-        >
-          <span className="mr-3 text-gray-400 group-hover:text-blue-400">
-            📊
-          </span>
-          Reports
-        </Link>
-      </li>
-      <li>
-        <Link
-          to="/settings"
+          to="/management"
           className="group flex items-center rounded-lg p-2 text-sm font-medium transition-all duration-200 hover:bg-gray-700"
         >
           <span className="mr-3 text-gray-400 group-hover:text-blue-400">
             ⚙️
           </span>
-          Settings
+          Management
+        </Link>
+      </li>
+      <li>
+        <Link
+          to="/statistics"
+          className="group flex items-center rounded-lg p-2 text-sm font-medium transition-all duration-200 hover:bg-gray-700"
+        >
+          <span className="mr-3 text-gray-400 group-hover:text-blue-400">
+            📊
+          </span>
+          Statistics
         </Link>
       </li>
     </ul>

@@ -5,46 +5,66 @@ const bonSchema = new mongoose.Schema({
     type: String,
     unique: true,
     default: function () {
-      const now = new Date();
+      const now = new Date()
       return `${now.getHours()}${now.getMinutes()}${now.getSeconds()}`.replace(
         /:/g,
         ""
-      );
+      )
     },
     trim: true,
-  },
-  branch: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Branch",
-    required: true,
-  },
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
-  meals: [
-    {
-      meal: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Meal",
-        required: true,
-      },
-      mealTitle: {
-        type: String,
-        required: true,
-      },
-      quantity: {
-        type: Number,
-        required: true,
-        min: 1,
-      },
-      note: {
-        type: String,
-        maxlength: 500,
-        required: false,
-      },
+
+    branch: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
+      required: true,
     },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    meals: [
+      {
+        meal: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Meal",
+          required: true,
+        },
+        mealTitle: {
+          type: String,
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+          min: 1,
+        },
+        note: {
+          type: String,
+          maxlength: 500,
+          required: false,
+        },
+
+      },
+    ],
+    tableNumber: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+    number: {
+      type: Number,
+      required: true,
+    },
+    ready: {
+      type: Boolean,
+      default: false,
+    },
+    paid: {
+      type: Boolean,
+      default: false,
+    },
+
   ],
   tableNumber: {
     type: Number,
@@ -67,6 +87,7 @@ const bonSchema = new mongoose.Schema({
 
   date: { type: Date, default: Date.now },
 });
+
 
 
 const Bon = mongoose.model("Bon", bonSchema)

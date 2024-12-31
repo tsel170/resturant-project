@@ -12,7 +12,7 @@ const Sidebar = () => {
         isSidebarVisible ? "translate-x-0" : "-translate-x-full"
       }`}
     >
-      {user.role === "manager" ? <SidebarManager /> : <SidebarEmployee />}
+      {user?.role === "manager" ? <SidebarManager /> : <SidebarEmployee />}
     </aside>
   )
 }

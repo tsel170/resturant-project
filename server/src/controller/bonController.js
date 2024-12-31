@@ -1,7 +1,9 @@
+
 import Bon from "../models/bonModel.js";
 import Meal from "../models/mealModel.js";
 import User from "../models/userModel.js";
 import Branch from "../models/branchModel.js";
+
 
 export const addBon = async (req, res) => {
   const { meals, user, tableNumber, branch, mealTitle } = req.body;
@@ -11,14 +13,24 @@ export const addBon = async (req, res) => {
   }
 
   try {
-    const newBon = await Bon.create(req.body);
+
+    const { branch, user, meals, tableNumber, mealTitle } = req.body
+    const newBon = await Bon.create(req.body)
+
 
     const newMeals = await Meal.find({
       _id: { $in: meals.map((meal) => meal.meal) },
-    });
+    })
+
+
+    const newMealsWithTitle = newMeals.map((meal) => ({
+      ...meal,
+      mealTitle: mealTitle,
+    }))
+
 
     if (!newMeals) {
-      return res.status(404).json({ message: "Meals not found" });
+      return res.status(404).json({ message: "Meals not found" })
     }
 
     const newMealsWithTitle = newMeals.map((meal) => ({
@@ -28,11 +40,11 @@ export const addBon = async (req, res) => {
 
     await Branch.findByIdAndUpdate(branch, {
       $push: { bons: newBon._id },
-    });
+    })
 
     await User.findByIdAndUpdate(user, {
       $push: { bons: newBon._id },
-    });
+    })
 
     res.status(201).json({
       success: true,
@@ -40,7 +52,7 @@ export const addBon = async (req, res) => {
 
       bon: newBon,
       message: "Bon created successfully",
-    });
+    })
   } catch (error) {
     console.error(error);
     res
@@ -67,8 +79,8 @@ export const getAllBons = async (req, res) => {
 
 export const getSingleBon = async (req, res) => {
   try {
-    const Bon = await Bon.findById(req.params.id);
-    res.status(200).json(Bon);
+    const Bon = await Bon.findById(req.params.id)
+    res.status(200).json(Bon)
   } catch (err) {
     res.status(500).json({
       success: false,
@@ -87,7 +99,9 @@ export const updateBon = async (req, res) => {
     if (!Bon) {
       return res.status(404).json({ message: "Bon not found" });
     }
-    res.status(200).json({ message: "Bon updated successfully" });
+
+    res.status(200).json({ message: "Bon updated successfully" })
+
   } catch (err) {
     res.status(500).json({
       success: false,
@@ -99,19 +113,19 @@ export const updateBon = async (req, res) => {
 
 export const deleteBon = async (req, res) => {
   try {
-    const deletedBon = await Bon.findByIdAndDelete(req.params.id);
+    const deletedBon = await Bon.findByIdAndDelete(req.params.id)
 
     if (!deletedBon) {
       return res.status(404).json({
         success: false,
         message: "Bon not found",
-      });
+      })
     }
 
     res.status(200).json({
       success: true,
       message: "Bon deleted successfully",
-    });
+    })
   } catch (err) {
     res.status(500).json({
       success: false,
