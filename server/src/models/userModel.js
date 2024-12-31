@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import bcrypt from "bcrypt";
+import mongoose from "mongoose"
+import bcrypt from "bcrypt"
 const userschema = new mongoose.Schema({
   name: {
     type: String,
@@ -31,9 +31,9 @@ const userschema = new mongoose.Schema({
   },
   jobTitle: {
     type: String,
-    enum: ["waiter", "barista", "chef"],
+    enum: ["waiter", "barista", "chef", ""],
     required: function () {
-      return this.role === "employee";
+      return this.role === "employee"
     },
     shifts: [
       {
@@ -62,12 +62,12 @@ const userschema = new mongoose.Schema({
     },
   ],
   totalSpent: { type: Number, default: 0 },
-});
+})
 
 userschema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
-});
+  if (!this.isModified("password")) return next()
+  this.password = await bcrypt.hash(this.password, 10)
+  next()
+})
 
-export default mongoose.model("User", userschema);
+export default mongoose.model("User", userschema)

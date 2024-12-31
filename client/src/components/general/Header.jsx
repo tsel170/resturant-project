@@ -2,7 +2,8 @@ import React, { useContext } from "react"
 import { AuthContext } from "../../context/AuthContext"
 
 const Header = ({ role }) => {
-  const { toggleSidebar, isSidebarVisible } = useContext(AuthContext)
+  const { toggleSidebar, isSidebarVisible, logout, user } =
+    useContext(AuthContext)
 
   return (
     <header className="flex items-center bg-green-600 py-2 text-white shadow-md">
@@ -25,13 +26,21 @@ const Header = ({ role }) => {
           />
         </svg>
       </button>
-      <div className="container mx-auto flex items-center">
-        {/* Hamburger Icon */}
-
+      <div className="container mx-auto flex items-center justify-between">
         {/* Title */}
         <h1 className="text-xl font-bold">
           Great Pita && Tavlinim{role ? `: ${role}` : "."}
         </h1>
+
+        {/* Logout Button */}
+        {user && (
+          <button
+            onClick={logout}
+            className="rounded px-4 py-2 hover:bg-green-700 focus:outline-none active:bg-green-800"
+          >
+            Logout
+          </button>
+        )}
       </div>
     </header>
   )
