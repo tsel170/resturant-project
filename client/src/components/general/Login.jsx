@@ -33,37 +33,65 @@ const Login = () => {
 
   return (
     <>
-      <div className="flex min-h-screen flex-col bg-gray-100">
+      <div className="flex min-h-screen flex-col bg-gradient-to-br from-gray-50 to-gray-100">
         <Navbar />
         <form
           onSubmit={handleSubmit}
-          className="mx-auto my-8 flex flex-grow content-center items-center"
+          className="mx-auto my-12 w-full max-w-md flex-grow px-6"
         >
-          <div className="flex flex-col gap-3 rounded-lg p-6 text-center duration-200 focus-within:bg-gray-200 focus-within:shadow hover:bg-gray-200 hover:shadow">
-            <h2>Enter your email and password</h2>
+          <div className="flex flex-col gap-6 rounded-xl bg-white p-8 shadow-lg">
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-gray-800">
+                Welcome Back
+              </h2>
+              <p className="mt-2 text-sm text-gray-600">
+                Please sign in to continue
+              </p>
+            </div>
 
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="peer"
-            />
+            <div className="space-y-4">
+              <div className="flex flex-col gap-1">
+                <label
+                  htmlFor="email"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Email Address
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="rounded-lg border border-gray-300 px-4 py-2 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                />
+              </div>
 
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="peer"
-            />
+              <div className="flex flex-col gap-1">
+                <label
+                  htmlFor="password"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="rounded-lg border border-gray-300 px-4 py-2 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                />
+              </div>
+            </div>
+
             <button
               type="submit"
-              className="rounded-md p-1 px-2 duration-200 peer-valid:bg-cyan-400 peer-valid:hover:scale-105 peer-valid:hover:bg-cyan-500 peer-valid:active:scale-95 peer-invalid:cursor-default peer-invalid:bg-red-300 peer-invalid:hover:scale-100 peer-invalid:hover:bg-red-300 peer-invalid:disabled:bg-red-300"
+              className="active:scale-97 mt-2 rounded-lg bg-cyan-500 py-2.5 font-medium text-white transition-all hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
             >
-              Login
+              Sign In
             </button>
           </div>
         </form>
