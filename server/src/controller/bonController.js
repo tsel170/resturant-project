@@ -33,11 +33,6 @@ export const addBon = async (req, res) => {
       return res.status(404).json({ message: "Meals not found" })
     }
 
-    const newMealsWithTitle = newMeals.map((meal) => ({
-      ...meal,
-      mealTitle: mealTitle,
-    }));
-
     await Branch.findByIdAndUpdate(branch, {
       $push: { bons: newBon._id },
     })
