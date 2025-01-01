@@ -20,6 +20,8 @@ const MenuManagement = () => {
   const [error, setError] = useState(null)
   const [isLoadingMeals, setIsLoadingMeals] = useState(true)
   const [deleteModalMeal, setDeleteModalMeal] = useState(null)
+  const [showEditForm, setShowEditForm] = useState(false)
+  const [editingMeal, setEditingMeal] = useState(null)
 
   const uniqueCategories = [...new Set(meals.map((meal) => meal.category))]
 
@@ -112,10 +114,9 @@ const MenuManagement = () => {
   }
 
   const handleNewCategorySubmit = (value) => {
-    if (newCategory.trim()) {
-      setNewMeal({ ...newMeal, category: newCategory.trim().toLowerCase() })
-      // setIsNewCategory(false)
+    if (value.trim()) {
       setNewCategory(value)
+      setNewMeal({ ...newMeal, category: value.trim().toLowerCase() })
     }
   }
 
@@ -162,6 +163,67 @@ const MenuManagement = () => {
     })
     setIsNewCategory(false)
     setNewCategory("")
+  }
+
+  const handleEditClick = (meal) => {
+    setEditingMeal({
+      ...meal,
+      price: String(meal.price), // Convert price to string for input field
+    })
+    setShowEditForm(true)
+  }
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault()
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      await axios.put(
+        `http://localhost:5000/api/meals/updateMeal/${editingMeal._id}`,
+        editingMeal
+      )
+      const response = await axios.get(
+        "http://localhost:5000/api/meals/getAllMeals"
+      )
+      setMeals(response.data.Meals)
+      setShowEditForm(false)
+      setEditingMeal(null)
+    } catch (error) {
+      setError(
+        error.response?.data?.message ||
+          "An error occurred while updating the meal."
+      )
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleEditIngredientChange = (index, field, value) => {
+    const updatedIngredients = editingMeal.Ingredients.map((ing, i) => {
+      if (i === index) {
+        return { ...ing, [field]: value }
+      }
+      return ing
+    })
+    setEditingMeal({ ...editingMeal, Ingredients: updatedIngredients })
+  }
+
+  const handleAddEditIngredient = () => {
+    setEditingMeal({
+      ...editingMeal,
+      Ingredients: [
+        ...editingMeal.Ingredients,
+        { ingredient: "", quantity: "" },
+      ],
+    })
+  }
+
+  const handleRemoveEditIngredient = (index) => {
+    const updatedIngredients = editingMeal.Ingredients.filter(
+      (_, i) => i !== index
+    )
+    setEditingMeal({ ...editingMeal, Ingredients: updatedIngredients })
   }
 
   return (
@@ -305,7 +367,7 @@ const MenuManagement = () => {
                   <div className="mt-1 flex gap-2">
                     <input
                       type="text"
-                      defaultValue={newCategory}
+                      value={newCategory}
                       onChange={(e) => handleNewCategorySubmit(e.target.value)}
                       className="w-full rounded-md border border-gray-300 p-2"
                       placeholder="Enter new category"
@@ -315,6 +377,7 @@ const MenuManagement = () => {
                       onClick={() => {
                         setIsNewCategory(false)
                         setNewCategory("")
+                        setNewMeal({ ...newMeal, category: "" })
                       }}
                       className="rounded bg-gray-500 px-3 py-1 text-white hover:bg-gray-600"
                     >
@@ -459,7 +522,7 @@ const MenuManagement = () => {
 
                 <div className="relative">
                   <h3 className="text-xl font-bold text-gray-800 transition-colors duration-300 group-hover:text-indigo-600">
-                    {meal.name}
+                    {meal.title}
                   </h3>
                   <p className="mt-2 text-gray-600">{meal.description}</p>
                   <p className="mt-3 text-2xl font-semibold text-indigo-600">
@@ -481,6 +544,12 @@ const MenuManagement = () => {
                       {selectedMeal === meal._id
                         ? "Hide Ingredients"
                         : "Show Ingredients"}
+                    </button>
+                    <button
+                      onClick={() => handleEditClick(meal)}
+                      className="rounded-lg bg-yellow-500 px-4 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:bg-yellow-600"
+                    >
+                      Edit
                     </button>
                     <button
                       onClick={() => setDeleteModalMeal(meal._id)}
@@ -593,6 +662,222 @@ const MenuManagement = () => {
               )}
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Edit Meal Modal */}
+      <div
+        className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-300 ${
+          showEditForm ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      >
+        <div
+          className={`relative w-full max-w-2xl transform rounded-lg bg-white p-6 shadow-xl transition-all duration-300 ${
+            showEditForm ? "scale-100 opacity-100" : "scale-95 opacity-0"
+          }`}
+        >
+          <button
+            onClick={() => {
+              setShowEditForm(false)
+              setEditingMeal(null)
+            }}
+            className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+          >
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+
+          <h2 className="mb-4 text-xl font-bold text-gray-900">Edit Meal</h2>
+
+          {error && (
+            <div className="mb-4 rounded-md bg-red-50 p-4">
+              <p className="text-sm text-red-800">{error}</p>
+            </div>
+          )}
+
+          {editingMeal && (
+            <form onSubmit={handleEditSubmit} className="space-y-6">
+              <div className="grid gap-6 md:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editingMeal.title}
+                    onChange={(e) =>
+                      setEditingMeal({ ...editingMeal, title: e.target.value })
+                    }
+                    className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Price (₪)
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={editingMeal.price}
+                    onChange={(e) =>
+                      setEditingMeal({ ...editingMeal, price: e.target.value })
+                    }
+                    className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Category
+                  </label>
+                  <select
+                    value={editingMeal.category}
+                    onChange={(e) =>
+                      setEditingMeal({
+                        ...editingMeal,
+                        category: e.target.value,
+                      })
+                    }
+                    className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                  >
+                    {allCategories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Description
+                </label>
+                <textarea
+                  required
+                  value={editingMeal.description}
+                  onChange={(e) =>
+                    setEditingMeal({
+                      ...editingMeal,
+                      description: e.target.value,
+                    })
+                  }
+                  className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                  rows="3"
+                />
+              </div>
+
+              <div className="mt-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-medium">Ingredients</h3>
+                  <button
+                    type="button"
+                    onClick={handleAddEditIngredient}
+                    className="rounded bg-green-500 px-3 py-1 text-sm text-white hover:bg-green-600"
+                  >
+                    Add Ingredient
+                  </button>
+                </div>
+
+                {editingMeal.Ingredients.map((ing, index) => (
+                  <div key={index} className="mt-3 flex items-center gap-4">
+                    <input
+                      type="text"
+                      placeholder="Ingredient"
+                      value={ing.ingredient}
+                      onChange={(e) =>
+                        handleEditIngredientChange(
+                          index,
+                          "ingredient",
+                          e.target.value
+                        )
+                      }
+                      className="w-full rounded-md border border-gray-300 p-2"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Quantity"
+                      value={ing.quantity}
+                      onChange={(e) =>
+                        handleEditIngredientChange(
+                          index,
+                          "quantity",
+                          e.target.value
+                        )
+                      }
+                      className="w-full rounded-md border border-gray-300 p-2"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveEditIngredient(index)}
+                      className="rounded bg-red-500 px-3 py-2 text-white hover:bg-red-600"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditForm(false)
+                    setEditingMeal(null)
+                  }}
+                  className="mt-6 w-full rounded-lg bg-gray-100 py-2 text-gray-700 transition-all hover:bg-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="mt-6 w-full rounded-lg bg-indigo-600 py-2 text-white transition-all hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center justify-center">
+                      <svg
+                        className="mr-2 h-5 w-5 animate-spin text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Updating Meal...
+                    </div>
+                  ) : (
+                    "Update Meal"
+                  )}
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
     </DefaultPage>
