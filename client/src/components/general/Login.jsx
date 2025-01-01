@@ -4,6 +4,7 @@ import { AuthContext } from "../../context/AuthContext.jsx"
 import axios from "axios"
 import Navbar from "./Header.jsx"
 import Footer from "./Footer.jsx"
+import backgroundImage from "../../assets/A_cozy_restaurant_interior_design_with_warm_ambien_converted.png"
 
 const Login = () => {
   const [email, setEmail] = useState("")
@@ -33,69 +34,79 @@ const Login = () => {
 
   return (
     <>
-      <div className="flex min-h-screen flex-col bg-gradient-to-br from-gray-50 to-gray-100">
-        <Navbar />
-        <form
-          onSubmit={handleSubmit}
-          className="mx-auto my-12 w-full max-w-md flex-grow px-6"
-        >
-          <div className="flex flex-col gap-6 rounded-xl bg-white p-8 shadow-lg">
-            <div className="text-center">
-              <h2 className="text-2xl font-semibold text-gray-800">
-                Welcome Back
-              </h2>
-              <p className="mt-2 text-sm text-gray-600">
-                Please sign in to continue
-              </p>
-            </div>
+      <div
+        className="relative flex min-h-screen flex-col"
+        style={{
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="absolute inset-0 bg-white/30 backdrop-blur-sm"></div>
 
-            <div className="space-y-4">
-              <div className="flex flex-col gap-1">
-                <label
-                  htmlFor="email"
-                  className="text-sm font-medium text-gray-700"
+        <div className="relative flex min-h-screen flex-col">
+          <Navbar />
+          <div className="flex flex-grow items-center justify-center">
+            <form onSubmit={handleSubmit} className="w-full max-w-md px-6">
+              <div className="flex flex-col gap-6 rounded-xl bg-white/90 p-8 shadow-lg backdrop-blur-sm">
+                <div className="text-center">
+                  <h2 className="text-2xl font-semibold text-gray-800">
+                    Welcome Back
+                  </h2>
+                  <p className="mt-2 text-sm text-gray-600">
+                    Please sign in to continue
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex flex-col gap-1">
+                    <label
+                      htmlFor="email"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      Email Address
+                    </label>
+                    <input
+                      id="email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="rounded-lg border border-gray-300 px-4 py-2 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label
+                      htmlFor="password"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      Password
+                    </label>
+                    <input
+                      id="password"
+                      type="password"
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="rounded-lg border border-gray-300 px-4 py-2 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="active:scale-97 mt-2 rounded-lg bg-cyan-500 py-2.5 font-medium text-white transition-all hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                 >
-                  Email Address
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="rounded-lg border border-gray-300 px-4 py-2 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
-                />
+                  Sign In
+                </button>
               </div>
-
-              <div className="flex flex-col gap-1">
-                <label
-                  htmlFor="password"
-                  className="text-sm font-medium text-gray-700"
-                >
-                  Password
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="rounded-lg border border-gray-300 px-4 py-2 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="active:scale-97 mt-2 rounded-lg bg-cyan-500 py-2.5 font-medium text-white transition-all hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
-            >
-              Sign In
-            </button>
+            </form>
           </div>
-        </form>
-        <Footer />
+          <Footer />
+        </div>
       </div>
     </>
   )
