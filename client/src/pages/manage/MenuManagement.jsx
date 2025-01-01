@@ -22,6 +22,10 @@ const MenuManagement = () => {
   const [deleteModalMeal, setDeleteModalMeal] = useState(null)
   const [showEditForm, setShowEditForm] = useState(false)
   const [editingMeal, setEditingMeal] = useState(null)
+  const [filterCategory, setFilterCategory] = useState("")
+  const [sortBy, setSortBy] = useState("")
+  const [sortOrder, setSortOrder] = useState("asc")
+  const [searchTitle, setSearchTitle] = useState("")
 
   const uniqueCategories = [...new Set(meals.map((meal) => meal.category))]
 
@@ -226,369 +230,230 @@ const MenuManagement = () => {
     setEditingMeal({ ...editingMeal, Ingredients: updatedIngredients })
   }
 
+  const getFilteredAndSortedMeals = () => {
+    let filteredMeals = [...meals]
+
+    // Apply title search
+    if (searchTitle) {
+      filteredMeals = filteredMeals.filter((meal) =>
+        meal.title.toLowerCase().includes(searchTitle.toLowerCase())
+      )
+    }
+
+    // Apply category filter
+    if (filterCategory) {
+      filteredMeals = filteredMeals.filter(
+        (meal) => meal.category === filterCategory
+      )
+    }
+
+    // Apply sorting
+    if (sortBy) {
+      filteredMeals.sort((a, b) => {
+        if (sortBy === "price") {
+          return sortOrder === "asc" ? a.price - b.price : b.price - a.price
+        } else if (sortBy === "title") {
+          return sortOrder === "asc"
+            ? a.title.localeCompare(b.title)
+            : b.title.localeCompare(a.title)
+        }
+        return 0
+      })
+    }
+
+    return filteredMeals
+  }
+
   return (
     <DefaultPage title="Menu Management" role="manager">
-      <div className="mb-6 flex justify-end">
-        <button
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="transform rounded-md bg-gradient-to-r from-indigo-500 to-blue-600 px-3 py-1.5 text-xs font-medium text-white shadow-md transition-all duration-200 hover:scale-105 hover:from-indigo-600 hover:to-blue-700 hover:shadow-lg active:scale-95"
-        >
-          {showAddForm ? (
-            <span className="flex items-center gap-1">
-              <svg
-                className="h-3 w-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-              Cancel
-            </span>
-          ) : (
-            <span className="flex items-center gap-1">
-              <svg
-                className="h-3 w-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              Add Meal
-            </span>
-          )}
-        </button>
-      </div>
+      <div className="flex flex-col">
+        <div className="mb-6 grid grid-cols-5 gap-4 rounded-lg bg-white p-4 shadow-md">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Search by Title
+            </label>
+            <input
+              type="text"
+              value={searchTitle}
+              onChange={(e) => setSearchTitle(e.target.value)}
+              placeholder="Search meals..."
+              className="mt-1 w-full rounded-md border border-gray-300 p-2 text-sm"
+            />
+          </div>
 
-      {/* Modal Overlay */}
-      <div
-        className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-300 ${
-          showAddForm ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
-      >
-        {/* Modal Content */}
-        <div
-          className={`relative w-full max-w-2xl transform rounded-lg bg-white p-6 shadow-xl transition-all duration-300 ${
-            showAddForm ? "scale-100 opacity-100" : "scale-95 opacity-0"
-          }`}
-        >
-          <button
-            onClick={() => setShowAddForm(false)}
-            className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
-          >
-            <svg
-              className="h-6 w-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Filter by Category
+            </label>
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className="mt-1 w-full rounded-md border border-gray-300 p-2 text-sm"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
+              <option value="">All Categories</option>
+              {allCategories.map((category) => (
+                <option key={category} value={category}>
+                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <h2 className="mb-4 text-xl font-bold text-gray-900">Add New Meal</h2>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Sort By
+            </label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="mt-1 w-full rounded-md border border-gray-300 p-2 text-sm"
+            >
+              <option value="">None</option>
+              <option value="price">Price</option>
+              <option value="title">Title</option>
+            </select>
+          </div>
 
-          {error && (
-            <div className="mb-4 rounded-md bg-red-50 p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Sort Order
+            </label>
+            <select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+              className="mt-1 w-full rounded-md border border-gray-300 p-2 text-sm"
+              disabled={!sortBy}
+            >
+              <option value="asc">Ascending</option>
+              <option value="desc">Descending</option>
+            </select>
+          </div>
+
+          <div className="flex items-end justify-end">
+            <button
+              onClick={() => setShowAddForm(!showAddForm)}
+              className="transform rounded-md bg-gradient-to-r from-indigo-500 to-blue-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-all duration-200 hover:scale-105 hover:from-indigo-600 hover:to-blue-700 hover:shadow-lg active:scale-95"
+            >
+              {showAddForm ? (
+                <span className="flex items-center gap-1">
                   <svg
-                    className="h-5 w-5 text-red-400"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
                     <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                      clipRule="evenodd"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
                     />
                   </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-red-800">{error}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Title
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newMeal.title}
-                  onChange={(e) =>
-                    setNewMeal({ ...newMeal, title: e.target.value })
-                  }
-                  className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Price (₪)
-                </label>
-                <input
-                  type="number"
-                  required
-                  value={newMeal.price}
-                  onChange={(e) =>
-                    setNewMeal({ ...newMeal, price: e.target.value })
-                  }
-                  className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Category
-                </label>
-                {isNewCategory ? (
-                  <div className="mt-1 flex gap-2">
-                    <input
-                      type="text"
-                      value={newCategory}
-                      onChange={(e) => handleNewCategorySubmit(e.target.value)}
-                      className="w-full rounded-md border border-gray-300 p-2"
-                      placeholder="Enter new category"
+                  Cancel
+                </span>
+              ) : (
+                <span className="flex items-center gap-1">
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 4v16m8-8H4"
                     />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsNewCategory(false)
-                        setNewCategory("")
-                        setNewMeal({ ...newMeal, category: "" })
-                      }}
-                      className="rounded bg-gray-500 px-3 py-1 text-white hover:bg-gray-600"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                ) : (
-                  <select
-                    value={newMeal.category}
-                    onChange={handleCategoryChange}
-                    className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                  </svg>
+                  Add Meal
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {isLoadingMeals
+              ? [...Array(6)].map((_, index) => <MealSkeleton key={index} />)
+              : getFilteredAndSortedMeals().map((meal) => (
+                  <div
+                    key={meal._id}
+                    className="group relative transform rounded-xl border border-gray-100 bg-white p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                   >
-                    <option value="">Select a category</option>
-                    {allCategories.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                      </option>
-                    ))}
-                    <option value="new">+ Add New Category</option>
-                  </select>
-                )}
-              </div>
-            </div>
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Description
-              </label>
-              <textarea
-                required
-                value={newMeal.description}
-                onChange={(e) =>
-                  setNewMeal({ ...newMeal, description: e.target.value })
-                }
-                className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                rows="3"
-              />
-            </div>
+                    <div className="relative">
+                      <h3 className="text-xl font-bold text-gray-800 transition-colors duration-300 group-hover:text-indigo-600">
+                        {meal.title}
+                      </h3>
+                      <p className="mt-2 text-gray-600">{meal.description}</p>
+                      <p className="mt-3 text-2xl font-semibold text-indigo-600">
+                        ₪{meal.price}
+                      </p>
+                      <p className="mt-2 inline-block rounded-full bg-indigo-50 px-3 py-1 text-sm text-indigo-600">
+                        {meal.category}
+                      </p>
 
-            <div className="mt-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium">Ingredients</h3>
-                <button
-                  type="button"
-                  onClick={handleAddIngredient}
-                  className="rounded bg-green-500 px-3 py-1 text-sm text-white hover:bg-green-600"
-                >
-                  Add Ingredient
-                </button>
-              </div>
+                      <div className="mt-4 flex justify-between gap-2">
+                        <button
+                          onClick={() =>
+                            setSelectedMeal(
+                              selectedMeal === meal._id ? null : meal._id
+                            )
+                          }
+                          className="w-full transform rounded-lg bg-gradient-to-r from-indigo-500 to-blue-600 px-4 py-2.5 text-center text-sm font-medium text-white transition-all duration-300 hover:from-indigo-600 hover:to-blue-700 hover:shadow-md"
+                        >
+                          {selectedMeal === meal._id
+                            ? "Hide Ingredients"
+                            : "Show Ingredients"}
+                        </button>
+                        <button
+                          onClick={() => handleEditClick(meal)}
+                          className="rounded-lg bg-yellow-500 px-4 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:bg-yellow-600"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => setDeleteModalMeal(meal._id)}
+                          className="rounded-lg bg-red-500 px-4 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:bg-red-600"
+                        >
+                          Delete
+                        </button>
+                      </div>
 
-              {newMeal.Ingredients.map((ing, index) => (
-                <div key={index} className="mt-3 flex items-center gap-4">
-                  <input
-                    type="text"
-                    placeholder="Ingredient"
-                    value={ing.ingredient}
-                    onChange={(e) =>
-                      handleIngredientChange(
-                        index,
-                        "ingredient",
-                        e.target.value
-                      )
-                    }
-                    className="w-full rounded-md border border-gray-300 p-2"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Quantity"
-                    value={ing.quantity}
-                    onChange={(e) =>
-                      handleIngredientChange(index, "quantity", e.target.value)
-                    }
-                    className="w-full rounded-md border border-gray-300 p-2"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveIngredient(index)}
-                    className="rounded bg-red-500 px-3 py-2 text-white hover:bg-red-600"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={handleReset}
-                className="mt-6 w-full rounded-lg bg-red-100 py-2 text-red-700 transition-all hover:bg-red-200 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Reset Form
-              </button>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="mt-6 w-full rounded-lg bg-indigo-600 py-2 text-white transition-all hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isLoading ? (
-                  <div className="flex items-center justify-center">
-                    <svg
-                      className="mr-2 h-5 w-5 animate-spin text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Adding Meal...
+                      <div
+                        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                          selectedMeal === meal._id
+                            ? "max-h-[500px] opacity-100"
+                            : "max-h-0 opacity-0"
+                        }`}
+                      >
+                        <div className="mt-4">
+                          <h4 className="mb-3 font-medium text-gray-700">
+                            Ingredients:
+                          </h4>
+                          <ul className="space-y-2">
+                            {meal.Ingredients.map((ing) => (
+                              <li
+                                key={ing._id}
+                                className="flex items-center rounded-lg bg-gray-50 px-3 py-2 text-gray-600 transition-colors duration-200 hover:bg-gray-100"
+                              >
+                                <span className="mr-2 h-2 w-2 rounded-full bg-indigo-400" />
+                                {ing.ingredient} - {ing.quantity}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                ) : (
-                  "Add Meal"
-                )}
-              </button>
-            </div>
-          </form>
+                ))}
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {isLoadingMeals
-          ? [...Array(6)].map((_, index) => <MealSkeleton key={index} />)
-          : meals.map((meal) => (
-              <div
-                key={meal._id}
-                className="group relative transform rounded-xl border border-gray-100 bg-white p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-
-                <div className="relative">
-                  <h3 className="text-xl font-bold text-gray-800 transition-colors duration-300 group-hover:text-indigo-600">
-                    {meal.title}
-                  </h3>
-                  <p className="mt-2 text-gray-600">{meal.description}</p>
-                  <p className="mt-3 text-2xl font-semibold text-indigo-600">
-                    ₪{meal.price}
-                  </p>
-                  <p className="mt-2 inline-block rounded-full bg-indigo-50 px-3 py-1 text-sm text-indigo-600">
-                    {meal.category}
-                  </p>
-
-                  <div className="mt-4 flex justify-between gap-2">
-                    <button
-                      onClick={() =>
-                        setSelectedMeal(
-                          selectedMeal === meal._id ? null : meal._id
-                        )
-                      }
-                      className="w-full transform rounded-lg bg-gradient-to-r from-indigo-500 to-blue-600 px-4 py-2.5 text-center text-sm font-medium text-white transition-all duration-300 hover:from-indigo-600 hover:to-blue-700 hover:shadow-md"
-                    >
-                      {selectedMeal === meal._id
-                        ? "Hide Ingredients"
-                        : "Show Ingredients"}
-                    </button>
-                    <button
-                      onClick={() => handleEditClick(meal)}
-                      className="rounded-lg bg-yellow-500 px-4 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:bg-yellow-600"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => setDeleteModalMeal(meal._id)}
-                      className="rounded-lg bg-red-500 px-4 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  </div>
-
-                  <div
-                    className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                      selectedMeal === meal._id
-                        ? "max-h-[500px] opacity-100"
-                        : "max-h-0 opacity-0"
-                    }`}
-                  >
-                    <div className="mt-4">
-                      <h4 className="mb-3 font-medium text-gray-700">
-                        Ingredients:
-                      </h4>
-                      <ul className="space-y-2">
-                        {meal.Ingredients.map((ing) => (
-                          <li
-                            key={ing._id}
-                            className="flex items-center rounded-lg bg-gray-50 px-3 py-2 text-gray-600 transition-colors duration-200 hover:bg-gray-100"
-                          >
-                            <span className="mr-2 h-2 w-2 rounded-full bg-indigo-400" />
-                            {ing.ingredient} - {ing.quantity}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-      </div>
-
-      {/* Delete Confirmation Modal */}
       <div
         className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-300 ${
           deleteModalMeal ? "opacity-100" : "pointer-events-none opacity-0"
@@ -665,7 +530,6 @@ const MenuManagement = () => {
         </div>
       </div>
 
-      {/* Edit Meal Modal */}
       <div
         className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-300 ${
           showEditForm ? "opacity-100" : "pointer-events-none opacity-0"
