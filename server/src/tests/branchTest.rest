@@ -55,8 +55,8 @@ PUT http://localhost:5000/api/branches/addTable
 Content-Type: application/json
 
 {
-    "branchId":"6763ea1d3745860377c67200",
-    "tableNumber":12,"seats":8
+    "branchId":"676e884378317a74ac0817b2",
+    "tableNumber":9,"seats":8
 
 }
 
@@ -81,8 +81,8 @@ DELETE http://localhost:5000/api/branches/deleteTable
 Content-Type: application/json
 
 {
-    "branchId":"6763ea1d3745860377c67200",
-    "tableNumber":10
+    "branchId":"676e884378317a74ac0817b2",
+    "tableNumber":1
 
 }
 

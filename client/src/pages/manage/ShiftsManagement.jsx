@@ -2,52 +2,18 @@ import React, { useState } from "react"
 import Header from "../../components/general/Header"
 import Sidebar from "../../components/general/Sidebar"
 import Footer from "../../components/general/Footer"
-import axios from "axios"
-import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google"
 import FullCalendar from "@fullcalendar/react"
 import dayGridPlugin from "@fullcalendar/daygrid"
-
-const clientId = import.meta.env.VITE_CLIENT_ID
-
+// Add this at the top of your component file
 const ShiftsManagement = () => {
-  const [events, setEvents] = useState([])
-  const [accessToken, setAccessToken] = useState(null)
-
-  const handleGoogleSuccess = async (credentialResponse) => {
-    setAccessToken(credentialResponse.access_token)
-    await loadEvents()
-  }
-
-  const loadEvents = async () => {
-    if (!accessToken) return
-
-    try {
-      const response = await axios.get(
-        "https://www.googleapis.com/calendar/v3/calendars/primary/events",
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-          params: {
-            timeMin: new Date().toISOString(),
-            maxResults: 10,
-            singleEvents: true,
-            orderBy: "startTime",
-          },
-        }
-      )
-
-      const calendarEvents = response.data.items.map((event) => ({
-        title: event.summary,
-        start: event.start.dateTime || event.start.date,
-        end: event.end.dateTime || event.end.date,
-      }))
-
-      setEvents(calendarEvents)
-    } catch (error) {
-      console.error("Error loading calendar events:", error)
-    }
-  }
+  const [events, setEvents] = useState([
+    // You can add some sample events here, or load them from your own API
+    {
+      title: "Sample Shift",
+      start: "2024-03-20",
+      end: "2024-03-21",
+    },
+  ])
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-blue-50 to-gray-100">
@@ -59,20 +25,25 @@ const ShiftsManagement = () => {
             Calendar View
           </h2>
 
-          <GoogleOAuthProvider clientId={clientId}>
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => console.log("Login Failed")}
-              scope="https://www.googleapis.com/auth/calendar.readonly"
-            />
-          </GoogleOAuthProvider>
-
-          <div className="mt-6">
+          <div className="mt-6 rounded-lg bg-white p-6 shadow-lg [&_.fc-button-active:hover]:bg-blue-800 [&_.fc-button-active]:bg-blue-800 [&_.fc-button:hover]:bg-blue-700 [&_.fc-button]:border-0 [&_.fc-button]:bg-blue-600 [&_.fc-button]:px-4 [&_.fc-button]:py-2 [&_.fc-button]:font-medium [&_.fc-col-header]:p-2 [&_.fc-day-today]:bg-blue-50 [&_.fc-daygrid-day]:p-2 [&_.fc-event]:rounded-md [&_.fc-event]:bg-blue-500 [&_.fc-event]:p-1 [&_.fc-header-toolbar]:mb-6 [&_.fc-scrollgrid-section-header]:bg-gray-50 [&_.fc-toolbar-title]:text-2xl [&_.fc-toolbar-title]:font-bold [&_.fc-toolbar-title]:text-blue-900 [&_.fc-toolbar]:flex [&_.fc-toolbar]:flex-wrap [&_.fc-toolbar]:gap-4 [&_.fc-view]:rounded-lg">
             <FullCalendar
               plugins={[dayGridPlugin]}
               initialView="dayGridMonth"
               events={events}
-              height="500px"
+              height="650px"
+              headerToolbar={{
+                left: "prev,next today",
+                center: "title",
+                right: "dayGridMonth,dayGridWeek",
+              }}
+              buttonText={{
+                today: "Today",
+                month: "Month",
+                week: "Week",
+              }}
+              dayMaxEvents={true}
+              eventDisplay="block"
+              contentHeight="auto"
             />
           </div>
         </div>

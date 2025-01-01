@@ -142,7 +142,7 @@ export const updateTableSeats = async (req, res) => {
 
 export const deleteTable = async (req, res) => {
   const { branchId, tableNumber } = req.body
-
+  
   try {
     if (!branchId || !tableNumber) {
       return res.status(400).json({

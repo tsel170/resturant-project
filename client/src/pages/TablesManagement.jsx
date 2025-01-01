@@ -1,14 +1,15 @@
-import React, { useContext } from "react"
+import React, { useContext, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { AuthContext } from "../context/AuthContext"
 import Header from "../components/general/Header"
 import Sidebar from "../components/general/Sidebar"
 import Footer from "../components/general/Footer"
 import TableCard from "../components/employee/TableCard"
+import axios from "axios"
 
 const TablesManagement = () => {
   const navigate = useNavigate()
-  const { tables, updateTable } = useContext(AuthContext)
+  const { tables, updateTable, setTables } = useContext(AuthContext)
 
   const handleAssignTable = (table) => {
     updateTable(table.number, { isOccupied: !table.isOccupied })
