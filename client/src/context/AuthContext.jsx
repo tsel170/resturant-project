@@ -5,12 +5,13 @@ export const AuthContext = createContext()
 
 export const AuthProvider = ({ children }) => {
   let [user, setUser] = useState(null)
+  const [employees, setEmployees] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
   const navigate = useNavigate()
   // Add initial user check from cookies
   useEffect(() => {
     const token = localStorage.getItem("token")
     const savedUser = localStorage.getItem("user")
-
     if (token && savedUser) {
       user = JSON.parse(savedUser)
       setUser(user.userData)
@@ -20,6 +21,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = (userData) => {
     setUser(userData)
+    // console.log(userData)
+
     localStorage.setItem("token", userData.token)
     localStorage.setItem("user", JSON.stringify(userData)) // Save user data
   }
@@ -63,6 +66,23 @@ export const AuthProvider = ({ children }) => {
 
     fetchData()
   }, [])
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      setIsLoading(true)
+      try {
+        const response = await axios.get(
+          import.meta.env.VITE_SERVER + "/api/users/users"
+        )
+        setEmployees(response.data.users)
+      } catch (error) {
+        console.error("Error fetching employees:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchEmployees()
+  }, [])
 
   const updateTable = (tableId, updates) => {
     setTables((prevTables) =>
@@ -90,6 +110,9 @@ export const AuthProvider = ({ children }) => {
         setTables,
         updateTable,
         navigate,
+        employees,
+        setEmployees,
+        isLoading,
       }}
     >
       {children}

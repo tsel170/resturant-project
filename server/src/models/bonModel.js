@@ -44,7 +44,6 @@ const bonSchema = new mongoose.Schema({
           maxlength: 500,
           required: false,
         },
-
       },
     ],
     tableNumber: {
@@ -64,31 +63,14 @@ const bonSchema = new mongoose.Schema({
       type: Boolean,
       default: false,
     },
+    delivered: {
+      type: Boolean,
+      default: false,
+    },
 
-  ],
-  tableNumber: {
-    type: Number,
-    required: true,
-    min: 1,
+    date: { type: Date, default: Date.now },
   },
-  delivered: {
-    type: Boolean,
-    default: false,
-
-  },
-  ready: {
-    type: Boolean,
-    default: false,
-  },
-  paid: {
-    type: Boolean,
-    default: false,
-  },
-
-  date: { type: Date, default: Date.now },
-});
-
-
+})
 
 const Bon = mongoose.model("Bon", bonSchema)
 
