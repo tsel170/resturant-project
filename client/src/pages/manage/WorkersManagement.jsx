@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useContext } from "react"
 import Header from "../../components/general/Header"
 import Sidebar from "../../components/general/Sidebar"
 import Footer from "../../components/general/Footer"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
+import { AuthContext } from "../../context/AuthContext"
 
 const WorkersManagement = () => {
   const navigate = useNavigate()
-  const [employees, setEmployees] = useState([])
+  const { employees, setEmployees } = useContext(AuthContext)
   const [selectedEmployee, setSelectedEmployee] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -39,25 +40,7 @@ const WorkersManagement = () => {
   const [userToDelete, setUserToDelete] = useState(null)
   const [sortBy, setSortBy] = useState("all")
   const [roleFilter, setRoleFilter] = useState("all")
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      setIsLoading(true)
-      try {
-        const response = await axios.get(
-          import.meta.env.VITE_SERVER + "/api/users/users"
-        )
-        setEmployees(response.data.users)
-      } catch (error) {
-        console.error("Error fetching employees:", error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchEmployees()
-  }, [])
+  const { isLoading } = useContext(AuthContext)
 
   const handleSeeMore = (employee) => {
     setSelectedEmployee(employee)

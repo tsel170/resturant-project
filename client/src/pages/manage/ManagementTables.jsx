@@ -1,32 +1,36 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useContext } from "react"
 import axios from "axios"
 import Header from "../../components/general/Header"
 import Sidebar from "../../components/general/Sidebar"
 import Footer from "../../components/general/Footer"
+import { AuthContext } from "../../context/AuthContext"
 
 const ManagementTables = () => {
   const [tables, setTables] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const { user } = useContext(AuthContext)
+  useEffect(() => {
+    const fetchTables = async () => {
+      try {
+        const response = await axios.get(
+          import.meta.env.VITE_SERVER + "/api/branches/branch/:id/",
+          user?.branch
+        )
+        console.log(response.data)
+        if (false) {
+          setTables(response.data.tables)
+          setLoading(false)
+        }
+      } catch (err) {
+        setError("Failed to fetch tables")
+        setLoading(false)
+        console.error("Error fetching tables:", err)
+      }
+    }
 
-  // useEffect(() => {
-  //   const fetchTables = async () => {
-  //     try {
-  //       const response = await axios.get(
-  //         import.meta.env.VITE_API_URL + "/api/tables"
-  //       )
-  //       console.log(response.data)
-  //       setTables(response.data)
-  //       setLoading(false)
-  //     } catch (err) {
-  //       setError("Failed to fetch tables")
-  //       setLoading(false)
-  //       console.error("Error fetching tables:", err)
-  //     }
-  //   }
-
-  //   fetchTables()
-  // }, [])
+    // fetchTables()
+  }, [])
 
   if (loading) return <div>Loading tables...</div>
   if (error) return <div>Error: {error}</div>
