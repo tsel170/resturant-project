@@ -1,26 +1,19 @@
-import React, { useContext, useEffect, useState } from "react"
+import React, { useContext } from "react"
 import { useNavigate } from "react-router-dom"
-import axios from "axios"
-import Tables from "./Tables"
-import Orders from "./Orders"
+
 import { AuthContext } from "../../context/AuthContext"
+import DashboardContentWaiter from "./DashboardContentWaiter"
+import DashboardContentChef from "./DashboardContentChef"
 
 const DashboardContentEmployee = () => {
   const navigate = useNavigate()
-  const { orders } = useContext(AuthContext)
-  return (
-    <div className="space-y-6">
-      <div
-        className="cursor-pointer rounded-lg bg-white shadow"
-        onClick={() => navigate("/orders")}
-      >
-        {orders.length > 0 && <Orders params={{ orders }} />}
-      </div>
+  const { user } = useContext(AuthContext)
 
-      <div className="rounded-lg bg-white shadow">
-        <Tables />
-      </div>
-    </div>
+  return (
+    <>
+      {user.jobTitle === "waiter" && <DashboardContentWaiter />}
+      {user.jobTitle === "chef" && <DashboardContentChef />}
+    </>
   )
 }
 
