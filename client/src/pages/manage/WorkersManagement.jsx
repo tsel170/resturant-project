@@ -41,6 +41,7 @@ const WorkersManagement = () => {
   const [sortBy, setSortBy] = useState("all")
   const [roleFilter, setRoleFilter] = useState("all")
   const { isLoading } = useContext(AuthContext)
+  const [searchQuery, setSearchQuery] = useState("")
 
   const handleSeeMore = (employee) => {
     setSelectedEmployee(employee)
@@ -180,9 +181,14 @@ const WorkersManagement = () => {
 
   const getFilteredEmployees = () => {
     return employees.filter((employee) => {
-      if (sortBy !== "all" && employee.jobTitle !== sortBy) return false
-      if (roleFilter !== "all" && employee.role !== roleFilter) return false
-      return true
+      const matchesSearch = employee.name
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase())
+
+      const matchesJobTitle = sortBy === "all" || employee.jobTitle === sortBy
+      const matchesRole = roleFilter === "all" || employee.role === roleFilter
+
+      return matchesSearch && matchesJobTitle && matchesRole
     })
   }
 
@@ -235,37 +241,60 @@ const WorkersManagement = () => {
               </h2>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="flex items-center space-x-4">
-                  {roleFilter === "employee" && (
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                      className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search employees..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                  />
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
                     >
-                      <option value="all">All Job Titles</option>
-                      <option value="waiter">Waiters</option>
-                      <option value="chef">Chefs</option>
-                    </select>
-                  )}
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                  </div>
+                </div>
 
+                {roleFilter === "employee" && (
                   <select
-                    value={roleFilter}
-                    onChange={(e) => {
-                      setRoleFilter(e.target.value)
-                      // Reset job title filter when switching away from employee role
-                      if (e.target.value !== "employee") {
-                        setSortBy("all")
-                      }
-                    }}
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
                     className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
                   >
-                    <option value="all">All Roles</option>
-                    <option value="employee">Employees</option>
-                    <option value="manager">Managers</option>
+                    <option value="all">All Job Titles</option>
+                    <option value="waiter">Waiters</option>
+                    <option value="chef">Chefs</option>
                   </select>
-                </div>
+                )}
+
+                <select
+                  value={roleFilter}
+                  onChange={(e) => {
+                    setRoleFilter(e.target.value)
+                    if (e.target.value !== "employee") {
+                      setSortBy("all")
+                    }
+                  }}
+                  className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                >
+                  <option value="all">All Roles</option>
+                  <option value="employee">Employees</option>
+                  <option value="manager">Managers</option>
+                </select>
               </div>
 
               <button
