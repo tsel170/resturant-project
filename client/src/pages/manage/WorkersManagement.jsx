@@ -42,6 +42,7 @@ const WorkersManagement = () => {
   const [roleFilter, setRoleFilter] = useState("all")
   const { isLoading } = useContext(AuthContext)
   const [searchQuery, setSearchQuery] = useState("")
+  const [isEditingEmployee, setIsEditingEmployee] = useState(false)
 
   const handleSeeMore = (employee) => {
     setSelectedEmployee(employee)
@@ -122,6 +123,7 @@ const WorkersManagement = () => {
   const handleUpdateEmployee = async (e) => {
     e.preventDefault()
     setEditFormError("")
+    setIsEditingEmployee(true)
 
     try {
       const response = await axios.put(
@@ -129,20 +131,29 @@ const WorkersManagement = () => {
         editEmployee
       )
 
+      // Update both the employees list and the selected employee
       const updatedUsers = await axios.get(
         import.meta.env.VITE_SERVER + "/api/users/users"
       )
       setEmployees(updatedUsers.data.users)
 
+      // Update the selectedEmployee with the edited data
+      const updatedEmployee = {
+        ...selectedEmployee,
+        ...editEmployee,
+      }
+      setSelectedEmployee(updatedEmployee)
+
+      // Close edit modal and show updated details modal
       setIsEditModalOpen(false)
-      setSelectedEmployee(response.data)
       setIsModalOpen(true)
     } catch (error) {
       setEditFormError(
         error.response?.data?.message ||
           "Error updating employee. Please try again."
       )
-      console.error("Error updating employee:", error)
+    } finally {
+      setIsEditingEmployee(false)
     }
   }
 
@@ -834,15 +845,43 @@ const WorkersManagement = () => {
                 <button
                   type="button"
                   onClick={handleCloseEditModal}
-                  className="rounded-lg bg-gray-100 px-6 py-2.5 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-200"
+                  disabled={isEditingEmployee}
+                  className="rounded-lg bg-gray-100 px-6 py-2.5 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-blue-500 px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-600"
+                  disabled={isEditingEmployee}
+                  className="flex min-w-[120px] items-center justify-center rounded-lg bg-blue-500 px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Save Changes
+                  {isEditingEmployee ? (
+                    <>
+                      <svg
+                        className="-ml-1 mr-3 h-5 w-5 animate-spin text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Saving...
+                    </>
+                  ) : (
+                    "Save Changes"
+                  )}
                 </button>
               </div>
             </form>
