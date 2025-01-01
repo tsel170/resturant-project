@@ -186,6 +186,21 @@ const WorkersManagement = () => {
     })
   }
 
+  const getWorkerAvatar = (email, gender) => {
+    // Provide default values if email or gender is undefined
+    const defaultEmail = "default@example.com"
+    const defaultGender = "male"
+
+    // Use nullish coalescing to handle undefined/null values
+    const sanitizedEmail = encodeURIComponent(email ?? defaultEmail)
+    const sanitizedGender = (gender ?? defaultGender).toLowerCase()
+
+    // Choose the endpoint based on gender
+    const endpoint = sanitizedGender === "female" ? "girl" : "boy"
+
+    return `https://avatar.iran.liara.run/public/${endpoint}?username=${sanitizedEmail}`
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-gray-100">
       <Header role={"manager"} />
@@ -319,7 +334,17 @@ const WorkersManagement = () => {
                         className="transition duration-150 hover:bg-gray-50"
                       >
                         <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                          {employee.name}
+                          <div className="flex items-center space-x-3">
+                            <img
+                              src={getWorkerAvatar(
+                                employee?.email,
+                                employee?.gender
+                              )}
+                              alt={`Avatar for ${employee.name}`}
+                              className="h-8 w-8 rounded-full"
+                            />
+                            <span>{employee.name}</span>
+                          </div>
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
                           {employee.role}
@@ -376,6 +401,17 @@ const WorkersManagement = () => {
 
             {selectedEmployee && (
               <div className="grid grid-cols-2 gap-6">
+                <div className="col-span-2 mb-6 flex justify-center">
+                  <img
+                    src={getWorkerAvatar(
+                      selectedEmployee?.email,
+                      selectedEmployee?.gender
+                    )}
+                    alt={`Avatar for ${selectedEmployee.name}`}
+                    className="h-32 w-32 rounded-full border-4 border-white shadow-lg"
+                  />
+                </div>
+
                 <div className="rounded-lg bg-gray-50 p-4 transition-all duration-200 hover:bg-gray-100">
                   <p className="text-sm font-medium text-gray-500">Name</p>
                   <p className="mt-2 text-lg font-semibold text-gray-900">
