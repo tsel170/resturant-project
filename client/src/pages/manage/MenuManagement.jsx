@@ -380,7 +380,7 @@ const MenuManagement = () => {
                       d="M12 4v16m8-8H4"
                     />
                   </svg>
-                  Add Meal
+                  Create Meal
                 </span>
               )}
             </button>
@@ -810,7 +810,9 @@ const MenuManagement = () => {
             </svg>
           </button>
 
-          <h2 className="mb-4 text-xl font-bold text-gray-900">Add New Meal</h2>
+          <h2 className="mb-4 text-xl font-bold text-gray-900">
+            Create New Meal
+          </h2>
 
           {error && (
             <div className="mb-4 rounded-md bg-red-50 p-4">
@@ -1002,10 +1004,10 @@ const MenuManagement = () => {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    Adding Meal...
+                    Creating Meal...
                   </div>
                 ) : (
-                  "Add Meal"
+                  "Create Meal"
                 )}
               </button>
             </div>
