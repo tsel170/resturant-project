@@ -1125,128 +1125,65 @@ const MenuManagement = () => {
             Add Meal from TheMealDB
           </h2>
 
-          <div className="h-full space-y-4 overflow-y-auto">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Search Meals
-              </label>
-              <div className="mt-1 flex gap-2">
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
-                  placeholder="Search for meals..."
-                />
-                <button
-                  onClick={() => searchMeals(searchTerm)}
-                  className="rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
-                >
-                  Search
-                </button>
-              </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">
+              Search Meals
+            </label>
+            <div className="mt-1 flex gap-2">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                placeholder="Search for meals..."
+              />
+              <button
+                onClick={() => searchMeals(searchTerm)}
+                className="rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
+              >
+                Search
+              </button>
             </div>
+          </div>
 
-            <div className="flex-1 overflow-y-auto">
-              {isSearching ? (
-                <div className="flex justify-center py-4">
-                  <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
-                </div>
-              ) : searchResults.length === 0 ? (
-                <p className="py-4 text-center text-gray-500">No meals found</p>
-              ) : (
-                <div className="grid grid-cols-3 gap-6">
-                  {searchResults.map((meal) => (
-                    <div
-                      key={meal.idMeal}
-                      onClick={() => {
-                        setSelectedMealDetails(meal)
-                        setShowMealDetailsModal(true)
-                        setSelectedMeal({
-                          title: meal.strMeal,
-                          description: meal.strInstructions,
-                          category: meal.strCategory,
-                          price: "0",
-                          Ingredients: [],
-                          theDishPreparer: "chef",
-                          recipe: meal.strInstructions,
-                        })
-                      }}
-                      className={`cursor-pointer overflow-hidden rounded-lg border transition-all duration-300 hover:shadow-lg ${
-                        selectedMeal?.title === meal.strMeal
-                          ? "border-2 border-indigo-500 ring-2 ring-indigo-500 ring-offset-2"
-                          : "border-gray-200"
-                      }`}
-                    >
-                      <div className="relative h-48 w-full">
-                        <img
-                          src={meal.strMealThumb}
-                          alt={meal.strMeal}
-                          className="h-full w-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                        <div className="absolute bottom-0 w-full p-4">
-                          <h3 className="text-lg font-semibold text-white">
-                            {meal.strMeal}
-                          </h3>
-                          <p className="text-sm text-gray-200">
-                            Category: {meal.strCategory}
-                          </p>
-                        </div>
+          <div className="h-[calc(90vh-160px)] overflow-y-auto">
+            {isSearching ? (
+              <div className="flex justify-center py-4">
+                <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
+              </div>
+            ) : searchResults.length === 0 ? (
+              <p className="py-4 text-center text-gray-500">No meals found</p>
+            ) : (
+              <div className="grid grid-cols-3 gap-6 p-4">
+                {searchResults.map((meal) => (
+                  <div
+                    key={meal.idMeal}
+                    onClick={() => {
+                      setSelectedMealDetails(meal)
+                      setShowMealDetailsModal(true)
+                    }}
+                    className="cursor-pointer overflow-hidden rounded-lg border border-gray-200 transition-all duration-300 hover:shadow-lg"
+                  >
+                    <div className="relative h-48 w-full">
+                      <img
+                        src={meal.strMealThumb}
+                        alt={meal.strMeal}
+                        className="h-full w-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      <div className="absolute bottom-0 w-full p-4">
+                        <h3 className="text-lg font-semibold text-white">
+                          {meal.strMeal}
+                        </h3>
+                        <p className="text-sm text-gray-200">
+                          Category: {meal.strCategory}
+                        </p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {selectedMeal && (
-              <div className="rounded-lg bg-gray-50 p-4">
-                <h3 className="font-medium">{selectedMeal.title}</h3>
-                <p className="mt-1 text-sm text-gray-600">
-                  {selectedMeal.description?.substring(0, 200)}...
-                </p>
-                <div className="mt-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Set Price
-                  </label>
-                  <input
-                    type="number"
-                    value={selectedMeal.price}
-                    onChange={(e) =>
-                      setSelectedMeal({
-                        ...selectedMeal,
-                        price: e.target.value,
-                      })
-                    }
-                    className="mt-1 block w-32 rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
-                  />
-                </div>
+                  </div>
+                ))}
               </div>
             )}
-
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowAddExistingForm(false)
-                  setSearchResults([])
-                  setSearchTerm("")
-                  setSelectedMeal(null)
-                }}
-                className="w-full rounded-lg bg-gray-100 py-2 text-gray-700 transition-all hover:bg-gray-200"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleAddExisting}
-                disabled={!selectedMeal || isLoading}
-                className="w-full rounded-lg bg-green-600 py-2 text-white transition-all hover:bg-green-700 disabled:bg-green-300"
-              >
-                {isLoading ? "Adding..." : "Add Meal"}
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -1283,36 +1220,24 @@ const MenuManagement = () => {
             </svg>
           </button>
 
-          {selectedRecipe && (
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-gray-900">
-                {selectedRecipe.title} Recipe
-              </h2>
+          <h2 className="mb-4 text-2xl font-bold text-gray-900">
+            {selectedMealDetails.strMeal} - Recipe Instructions
+          </h2>
 
-              <div className="rounded-lg bg-gray-50 p-4">
-                <h3 className="mb-2 text-lg font-semibold text-gray-700">
-                  Ingredients:
-                </h3>
-                <ul className="space-y-2">
-                  {selectedRecipe.Ingredients.map((ing, index) => (
-                    <li key={index} className="flex items-center text-gray-600">
-                      <span className="mr-2 h-1.5 w-1.5 rounded-full bg-indigo-400" />
-                      <span className="font-medium">{ing.ingredient}</span>
-                      <span className="mx-2">-</span>
-                      <span>{ing.quantity}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+          <div className="mt-4 max-h-[60vh] overflow-y-auto">
+            <p className="whitespace-pre-line text-gray-600">
+              {selectedMealDetails.strInstructions}
+            </p>
+          </div>
 
-              <div className="rounded-lg bg-gray-50 p-4">
-                <h3 className="mb-2 text-lg font-semibold text-gray-700">
-                  Recipe:
-                </h3>
-                <p className="text-gray-600">{selectedRecipe.recipe}</p>
-              </div>
-            </div>
-          )}
+          <div className="mt-6">
+            <button
+              onClick={() => setShowRecipeModal(false)}
+              className="w-full rounded-lg bg-gray-100 py-2 text-gray-700 transition-all hover:bg-gray-200"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1499,9 +1424,17 @@ const MenuManagement = () => {
                 </p>
 
                 <div className="mt-6">
-                  <h3 className="mb-3 text-lg font-semibold text-gray-800">
-                    Ingredients:
-                  </h3>
+                  <div className="mb-3 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Ingredients:
+                    </h3>
+                    <button
+                      onClick={() => setShowRecipeModal(true)}
+                      className="rounded-lg bg-green-500 px-4 py-2 text-white transition-colors hover:bg-green-600"
+                    >
+                      View Recipe
+                    </button>
+                  </div>
                   <div className="grid grid-cols-2 gap-4">
                     {Array.from({ length: 20 }).map((_, index) => {
                       const ingredient =
@@ -1579,6 +1512,59 @@ const MenuManagement = () => {
               </div>
             </>
           )}
+        </div>
+      </div>
+
+      <div
+        className={`fixed inset-0 z-[80] flex items-center justify-center bg-black/50 transition-opacity duration-300 ${
+          showRecipeModal ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      >
+        <div
+          className={`relative w-full max-w-2xl transform rounded-lg bg-white p-6 shadow-xl transition-all duration-300 ${
+            showRecipeModal ? "scale-100 opacity-100" : "scale-95 opacity-0"
+          }`}
+        >
+          <button
+            onClick={() => {
+              setShowRecipeModal(false)
+              setSelectedRecipe(null)
+            }}
+            className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+          >
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+
+          <h2 className="mb-4 text-2xl font-bold text-gray-900">
+            {selectedMealDetails.strMeal} - Recipe Instructions
+          </h2>
+
+          <div className="mt-4 max-h-[60vh] overflow-y-auto">
+            <p className="whitespace-pre-line text-gray-600">
+              {selectedMealDetails.strInstructions}
+            </p>
+          </div>
+
+          <div className="mt-6">
+            <button
+              onClick={() => setShowRecipeModal(false)}
+              className="w-full rounded-lg bg-gray-100 py-2 text-gray-700 transition-all hover:bg-gray-200"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </DefaultPage>
