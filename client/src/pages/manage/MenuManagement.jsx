@@ -17,6 +17,7 @@ const MenuManagement = () => {
     category: "",
     Ingredients: [{ ingredient: "", quantity: "" }],
     theDishPreparer: "chef",
+    image: "",
   })
   const [isNewCategory, setIsNewCategory] = useState(false)
   const [newCategory, setNewCategory] = useState("")
@@ -120,9 +121,13 @@ const MenuManagement = () => {
     setError(null)
 
     try {
+      const mealData = {
+        ...newMeal,
+        image: newMeal.image || "https://via.placeholder.com/400",
+      }
       await axios.post(
         import.meta.env.VITE_SERVER + "/api/meals/addMeal",
-        newMeal
+        mealData
       )
       const response = await axios.get(
         import.meta.env.VITE_SERVER + "/api/meals/getAllMeals"
@@ -135,6 +140,7 @@ const MenuManagement = () => {
         category: "",
         Ingredients: [{ ingredient: "", quantity: "" }],
         theDishPreparer: "chef",
+        image: "",
       })
       setIsNewCategory(false)
       setNewCategory("")
@@ -207,6 +213,7 @@ const MenuManagement = () => {
       category: "",
       Ingredients: [{ ingredient: "", quantity: "" }],
       theDishPreparer: "chef",
+      image: "",
     })
     setIsNewCategory(false)
     setNewCategory("")
@@ -640,6 +647,33 @@ const MenuManagement = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
+                    Image URL
+                  </label>
+                  <input
+                    type="url"
+                    value={editingMeal.image}
+                    onChange={(e) =>
+                      setEditingMeal({ ...editingMeal, image: e.target.value })
+                    }
+                    placeholder="https://example.com/image.jpg"
+                    className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                  />
+                  {editingMeal.image && (
+                    <div className="mt-2">
+                      <img
+                        src={editingMeal.image}
+                        alt="Preview"
+                        className="h-32 w-32 rounded-lg object-cover"
+                        onError={(e) =>
+                          (e.target.src = "https://via.placeholder.com/400")
+                        }
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
                     Price (₪)
                   </label>
                   <input
@@ -906,6 +940,33 @@ const MenuManagement = () => {
                     ))}
                     <option value="new">+ Add New Category</option>
                   </select>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Image URL
+                </label>
+                <input
+                  type="url"
+                  value={newMeal.image}
+                  onChange={(e) =>
+                    setNewMeal({ ...newMeal, image: e.target.value })
+                  }
+                  placeholder="https://example.com/image.jpg"
+                  className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                />
+                {newMeal.image && (
+                  <div className="mt-2">
+                    <img
+                      src={newMeal.image}
+                      alt="Preview"
+                      className="h-32 w-32 rounded-lg object-cover"
+                      onError={(e) =>
+                        (e.target.src = "https://via.placeholder.com/400")
+                      }
+                    />
+                  </div>
                 )}
               </div>
             </div>
