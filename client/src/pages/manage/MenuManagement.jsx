@@ -28,6 +28,9 @@ const MenuManagement = () => {
   const [searchTitle, setSearchTitle] = useState("")
   const [showRecipeModal, setShowRecipeModal] = useState(false)
   const [selectedRecipe, setSelectedRecipe] = useState(null)
+  const [showRecipeEditModal, setShowRecipeEditModal] = useState(false)
+  const [showRecipeAddModal, setShowRecipeAddModal] = useState(false)
+  const [tempRecipe, setTempRecipe] = useState("")
 
   const uniqueCategories = [...new Set(meals.map((meal) => meal.category))]
 
@@ -714,6 +717,17 @@ const MenuManagement = () => {
                 ))}
               </div>
 
+              <div className="mt-6 flex items-center justify-between">
+                <h3 className="text-lg font-medium">Recipe</h3>
+                <button
+                  type="button"
+                  onClick={() => setShowRecipeEditModal(true)}
+                  className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
+                >
+                  Edit Recipe
+                </button>
+              </div>
+
               <div className="flex gap-4">
                 <button
                   type="button"
@@ -928,6 +942,28 @@ const MenuManagement = () => {
               ))}
             </div>
 
+            <div className="mt-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium">Recipe</h3>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTempRecipe(newMeal.recipe)
+                    setShowRecipeAddModal(true)
+                  }}
+                  className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
+                >
+                  Add Recipe
+                </button>
+              </div>
+
+              {newMeal.recipe && (
+                <div className="mt-3 rounded-lg bg-gray-50 p-4">
+                  <p className="text-gray-600">{newMeal.recipe}</p>
+                </div>
+              )}
+            </div>
+
             <div className="flex gap-4">
               <button
                 type="button"
@@ -1039,6 +1075,141 @@ const MenuManagement = () => {
               </div>
             </div>
           )}
+        </div>
+      </div>
+
+      <div
+        className={`fixed inset-0 z-[60] flex items-center justify-center bg-black/50 transition-opacity duration-300 ${
+          showRecipeEditModal ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      >
+        <div
+          className={`relative w-full max-w-2xl transform rounded-lg bg-white p-6 shadow-xl transition-all duration-300 ${
+            showRecipeEditModal ? "scale-100 opacity-100" : "scale-95 opacity-0"
+          }`}
+        >
+          <button
+            onClick={() => setShowRecipeEditModal(false)}
+            className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+          >
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+
+          <h2 className="mb-4 text-xl font-bold text-gray-900">Edit Recipe</h2>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Recipe Instructions
+              </label>
+              <textarea
+                value={editingMeal?.recipe || ""}
+                onChange={(e) =>
+                  setEditingMeal({ ...editingMeal, recipe: e.target.value })
+                }
+                className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                rows="10"
+                placeholder="Enter the recipe instructions..."
+              />
+            </div>
+
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => setShowRecipeEditModal(false)}
+                className="w-full rounded-lg bg-gray-100 py-2 text-gray-700 transition-all hover:bg-gray-200"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowRecipeEditModal(false)}
+                className="w-full rounded-lg bg-blue-600 py-2 text-white transition-all hover:bg-blue-700"
+              >
+                Save Recipe
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className={`fixed inset-0 z-[60] flex items-center justify-center bg-black/50 transition-opacity duration-300 ${
+          showRecipeAddModal ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      >
+        <div
+          className={`relative w-full max-w-2xl transform rounded-lg bg-white p-6 shadow-xl transition-all duration-300 ${
+            showRecipeAddModal ? "scale-100 opacity-100" : "scale-95 opacity-0"
+          }`}
+        >
+          <button
+            onClick={() => setShowRecipeAddModal(false)}
+            className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+          >
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+
+          <h2 className="mb-4 text-xl font-bold text-gray-900">Add Recipe</h2>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Recipe Instructions
+              </label>
+              <textarea
+                value={tempRecipe}
+                onChange={(e) => setTempRecipe(e.target.value)}
+                className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                rows="10"
+                placeholder="Enter the recipe instructions..."
+              />
+            </div>
+
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => setShowRecipeAddModal(false)}
+                className="w-full rounded-lg bg-gray-100 py-2 text-gray-700 transition-all hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setNewMeal({ ...newMeal, recipe: tempRecipe })
+                  setShowRecipeAddModal(false)
+                }}
+                className="w-full rounded-lg bg-blue-600 py-2 text-white transition-all hover:bg-blue-700"
+              >
+                Save Recipe
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </DefaultPage>
