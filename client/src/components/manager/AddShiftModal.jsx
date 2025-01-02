@@ -169,15 +169,25 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
   }
 
   const handleRemoveUser = (shiftType, userToRemove) => {
-    setShifts((prev) => ({
-      ...prev,
-      [shiftType]: {
-        ...prev[shiftType],
-        users: prev[shiftType].users.filter(
-          (user) => user.id !== userToRemove.id
-        ),
-      },
-    }))
+    console.log("Removing user:", userToRemove)
+    console.log("From shift:", shiftType)
+    console.log("Current shifts state:", shifts)
+
+    setShifts((prevShifts) => {
+      const updatedUsers = prevShifts[shiftType].users.filter(
+        (user) => user.email !== userToRemove.email
+      )
+
+      console.log("Updated users array:", updatedUsers)
+
+      return {
+        ...prevShifts,
+        [shiftType]: {
+          ...prevShifts[shiftType],
+          users: updatedUsers,
+        },
+      }
+    })
   }
 
   const getWorkerAvatar = (email, gender) => {
