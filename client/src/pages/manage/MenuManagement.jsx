@@ -746,6 +746,219 @@ const MenuManagement = () => {
           )}
         </div>
       </div>
+
+      <div
+        className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-300 ${
+          showAddForm ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      >
+        <div
+          className={`relative w-full max-w-2xl transform rounded-lg bg-white p-6 shadow-xl transition-all duration-300 ${
+            showAddForm ? "scale-100 opacity-100" : "scale-95 opacity-0"
+          }`}
+        >
+          <button
+            onClick={() => {
+              setShowAddForm(false)
+              handleReset()
+            }}
+            className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+          >
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+
+          <h2 className="mb-4 text-xl font-bold text-gray-900">Add New Meal</h2>
+
+          {error && (
+            <div className="mb-4 rounded-md bg-red-50 p-4">
+              <p className="text-sm text-red-800">{error}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newMeal.title}
+                  onChange={(e) =>
+                    setNewMeal({ ...newMeal, title: e.target.value })
+                  }
+                  className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Price (₪)
+                </label>
+                <input
+                  type="number"
+                  required
+                  value={newMeal.price}
+                  onChange={(e) =>
+                    setNewMeal({ ...newMeal, price: e.target.value })
+                  }
+                  className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Category
+                </label>
+                {isNewCategory ? (
+                  <input
+                    type="text"
+                    value={newCategory}
+                    onChange={(e) => handleNewCategorySubmit(e.target.value)}
+                    className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                    placeholder="Enter new category"
+                  />
+                ) : (
+                  <select
+                    value={newMeal.category}
+                    onChange={handleCategoryChange}
+                    className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                  >
+                    <option value="">Select Category</option>
+                    {allCategories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                      </option>
+                    ))}
+                    <option value="new">+ Add New Category</option>
+                  </select>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Description
+              </label>
+              <textarea
+                required
+                value={newMeal.description}
+                onChange={(e) =>
+                  setNewMeal({ ...newMeal, description: e.target.value })
+                }
+                className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                rows="3"
+              />
+            </div>
+
+            <div className="mt-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium">Ingredients</h3>
+                <button
+                  type="button"
+                  onClick={handleAddIngredient}
+                  className="rounded bg-green-500 px-3 py-1 text-sm text-white hover:bg-green-600"
+                >
+                  Add Ingredient
+                </button>
+              </div>
+
+              {newMeal.Ingredients.map((ing, index) => (
+                <div key={index} className="mt-3 flex items-center gap-4">
+                  <input
+                    type="text"
+                    placeholder="Ingredient"
+                    value={ing.ingredient}
+                    onChange={(e) =>
+                      handleIngredientChange(
+                        index,
+                        "ingredient",
+                        e.target.value
+                      )
+                    }
+                    className="w-full rounded-md border border-gray-300 p-2"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Quantity"
+                    value={ing.quantity}
+                    onChange={(e) =>
+                      handleIngredientChange(index, "quantity", e.target.value)
+                    }
+                    className="w-full rounded-md border border-gray-300 p-2"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveIngredient(index)}
+                    className="rounded bg-red-500 px-3 py-2 text-white hover:bg-red-600"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAddForm(false)
+                  handleReset()
+                }}
+                className="mt-6 w-full rounded-lg bg-gray-100 py-2 text-gray-700 transition-all hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="mt-6 w-full rounded-lg bg-indigo-600 py-2 text-white transition-all hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <svg
+                      className="mr-2 h-5 w-5 animate-spin text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Adding Meal...
+                  </div>
+                ) : (
+                  "Add Meal"
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </DefaultPage>
   )
 }
