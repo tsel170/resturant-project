@@ -175,3 +175,41 @@ export const endShift = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+
+export const addTip = async (req, res) => {
+  const {userId} = req.params;
+  const {tip, shiftId} = req.body;
+
+  if(!tip || !shiftId){
+    return res.status(400).json({error: "Tip and shiftId are required"});
+  }
+
+  try {
+    const user = await User.findById(userId);
+    if(!user){
+      return res.status(404).json({error: "User not found"});
+    }
+
+    const shift = await Shift.findOneAndUpdate(
+      { 
+        _id: shiftId,
+        "users.user": userId 
+      },
+      { 
+        $set: { 
+          "users.$.tip": tip 
+        } 
+      },
+      { new: true }
+    );
+
+    if(!shift){
+      return res.status(404).json({error: "Shift not found"});
+    }
+
+    res.status(200).json(shift);
+  } catch (error) {
+    res.status(500).json({error: error.message});
+  }
+};

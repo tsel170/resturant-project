@@ -29,13 +29,15 @@ const shiftSchema = new mongoose.Schema({
         type: [Number],
         required: false,
       },
+      tip: {
+        type: Number,
+        default: 0,
+      },
       required: false,
     },
+
   ],
-  tip: {
-    type: Number,
-    default: 0,
-  },
+
 });
 
 const Shift = mongoose.model("Shift", shiftSchema);
