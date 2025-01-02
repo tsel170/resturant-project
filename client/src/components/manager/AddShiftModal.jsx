@@ -7,10 +7,8 @@ const EmployeeSelectionPopup = ({
   onSelect,
   activeShiftType,
 }) => {
-  const [selectedEmployee, setSelectedEmployee] = useState(null)
-  const dialogRef = useRef(null)
-
   const { employees } = useContext(AuthContext)
+  const dialogRef = useRef(null)
 
   useEffect(() => {
     if (isOpen) {
@@ -20,61 +18,83 @@ const EmployeeSelectionPopup = ({
     }
   }, [isOpen])
 
-  // Updated filter logic
-  const employeesByTitle = (employees || [])
-    .filter((employee) => {
-      // First filter out managers
-      if (employee?.role === "manager") return false
+  const getWorkerAvatar = (email, gender) => {
+    const defaultEmail = "default@example.com"
+    const defaultGender = "male"
+    const sanitizedEmail = encodeURIComponent(email ?? defaultEmail)
+    const sanitizedGender = (gender ?? defaultGender).toLowerCase()
+    const endpoint = sanitizedGender === "female" ? "girl" : "boy"
+    return `https://avatar.iran.liara.run/public/${endpoint}?username=${sanitizedEmail}`
+  }
 
-      // Then filter by shift type
-      if (activeShiftType === "waiters") {
-        return employee?.jobTitle === "Waiter"
-      } else if (activeShiftType === "chefs") {
-        return employee?.jobTitle === "Chef"
-      }
-      // Show all non-manager employees if no specific shift type
-      return true
-    })
-    .reduce((acc, employee) => {
-      const title = employee?.jobTitle || "Other"
-      if (!acc[title]) {
-        acc[title] = []
-      }
-      acc[title].push(employee)
-      return acc
-    }, {})
+  const waiters = (employees || []).filter(
+    (employee) =>
+      employee?.role !== "manager" &&
+      employee?.jobTitle?.toLowerCase() === "waiter"
+  )
+  const chefs = (employees || []).filter(
+    (employee) =>
+      employee?.role !== "manager" &&
+      employee?.jobTitle?.toLowerCase() === "chef"
+  )
 
   return (
-    <dialog ref={dialogRef} className="w-96 rounded-lg p-0" onClose={onClose}>
+    <dialog
+      ref={dialogRef}
+      className="w-[800px] rounded-lg p-0"
+      onClose={onClose}
+    >
       <div className="p-4">
         <h3 className="mb-4 text-lg font-semibold">Select Employee</h3>
-        {Object.keys(employeesByTitle).length > 0 ? (
-          <div className="max-h-96 space-y-4 overflow-y-auto">
-            {Object.entries(employeesByTitle).map(([title, employees]) => (
-              <div key={title} className="space-y-2">
-                <h4 className="font-medium text-gray-700">{title}</h4>
-                <div className="space-y-1">
-                  {employees.map((employee) => (
-                    <button
-                      key={employee.id}
-                      onClick={() => {
-                        onSelect(employee)
-                        onClose()
-                      }}
-                      className="w-full rounded px-3 py-2 text-left transition-colors hover:bg-gray-100"
-                    >
-                      {employee.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
+        <div className="grid grid-cols-2 gap-4">
+          {/* Waiters Section */}
+          <div className="space-y-2">
+            <h4 className="font-medium text-gray-700">Waiters</h4>
+            <div className="max-h-96 space-y-1 overflow-y-auto">
+              {waiters.map((employee) => (
+                <button
+                  key={employee.id}
+                  onClick={() => {
+                    onSelect(employee)
+                    onClose()
+                  }}
+                  className="flex w-full items-center gap-3 rounded px-3 py-2 text-left transition-colors hover:bg-gray-100"
+                >
+                  <img
+                    src={getWorkerAvatar(employee?.email, employee?.gender)}
+                    alt={`Avatar for ${employee.name}`}
+                    className="h-8 w-8 rounded-full"
+                  />
+                  {employee.name}
+                </button>
+              ))}
+            </div>
           </div>
-        ) : (
-          <p className="py-4 text-center text-gray-500">
-            No employees available
-          </p>
-        )}
+
+          {/* Chefs Section */}
+          <div className="space-y-2">
+            <h4 className="font-medium text-gray-700">Chefs</h4>
+            <div className="max-h-96 space-y-1 overflow-y-auto">
+              {chefs.map((employee) => (
+                <button
+                  key={employee.id}
+                  onClick={() => {
+                    onSelect(employee)
+                    onClose()
+                  }}
+                  className="flex w-full items-center gap-3 rounded px-3 py-2 text-left transition-colors hover:bg-gray-100"
+                >
+                  <img
+                    src={getWorkerAvatar(employee?.email, employee?.gender)}
+                    alt={`Avatar for ${employee.name}`}
+                    className="h-8 w-8 rounded-full"
+                  />
+                  {employee.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
         <div className="mt-4 flex justify-end">
           <button
             onClick={onClose}
@@ -120,17 +140,19 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
   }, [isOpen])
 
   const handleAddUserClick = (shiftType) => {
+    console.log("Setting active shift type:", shiftType) // Debug log
     setActiveShiftType(shiftType)
     setShowEmployeeSelection(true)
   }
 
   const handleEmployeeSelect = (employee) => {
+    console.log("Adding employee to shift:", activeShiftType) // Debug log
     if (activeShiftType) {
       setShifts((prev) => ({
         ...prev,
         [activeShiftType]: {
           ...prev[activeShiftType],
-          users: [...prev[activeShiftType].users, employee.name],
+          users: [...prev[activeShiftType].users, employee],
         },
       }))
     }
@@ -151,10 +173,28 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
       ...prev,
       [shiftType]: {
         ...prev[shiftType],
-        users: prev[shiftType].users.filter((user) => user !== userToRemove),
+        users: prev[shiftType].users.filter(
+          (user) => user.id !== userToRemove.id
+        ),
       },
     }))
   }
+
+  const getWorkerAvatar = (email, gender) => {
+    const defaultEmail = "default@example.com"
+    const defaultGender = "male"
+    const sanitizedEmail = encodeURIComponent(email ?? defaultEmail)
+    const sanitizedGender = (gender ?? defaultGender).toLowerCase()
+    const endpoint = sanitizedGender === "female" ? "girl" : "boy"
+    return `https://avatar.iran.liara.run/public/${endpoint}?username=${sanitizedEmail}`
+  }
+
+  console.log("Active shift type:", activeShiftType)
+  console.log("Current shifts:", shifts)
+  console.log(
+    "Current users for active shift:",
+    activeShiftType ? shifts[activeShiftType].users : []
+  )
 
   return (
     <>
@@ -193,7 +233,14 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
                         key={index}
                         className="mb-2 flex items-center justify-between rounded bg-gray-50 px-3 py-2"
                       >
-                        <span>{user}</span>
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={getWorkerAvatar(user.email, user.gender)}
+                            alt={`Avatar for ${user.name}`}
+                            className="h-8 w-8 rounded-full"
+                          />
+                          <span>{user.name}</span>
+                        </div>
                         <button
                           type="button"
                           onClick={() => handleRemoveUser("am", user)}
@@ -229,7 +276,14 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
                         key={index}
                         className="mb-2 flex items-center justify-between rounded bg-gray-50 px-3 py-2"
                       >
-                        <span>{user}</span>
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={getWorkerAvatar(user.email, user.gender)}
+                            alt={`Avatar for ${user.name}`}
+                            className="h-8 w-8 rounded-full"
+                          />
+                          <span>{user.name}</span>
+                        </div>
                         <button
                           type="button"
                           onClick={() => handleRemoveUser("pm", user)}
