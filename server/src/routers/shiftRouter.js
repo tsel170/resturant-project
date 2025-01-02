@@ -5,7 +5,8 @@ import {
   updateShift,
   deleteShift,
   startShift,
-  endShift
+  endShift,
+  addTip
 } from "../controller/shiftController.js";
 
 const router = express.Router();
@@ -16,6 +17,6 @@ router.put("/updateShift/:id", updateShift);
 router.delete("/deleteShift/:id", deleteShift);
 router.put("/startShift/:userId", startShift);
 router.put("/endShift/:userId", endShift);
-
+router.put("/addTip/:userId", addTip);
 
 export default router;

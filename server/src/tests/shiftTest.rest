@@ -61,3 +61,13 @@ Content-Type: application/json
 {
   "shiftId": "67760e001bc342ef752644fb"
 }
+
+###
+
+PUT http://localhost:5000/api/shifts/addTip/676d0934ccb270069df3e069
+Content-Type: application/json
+
+{
+  "tip": 200,
+  "shiftId": "67760e001bc342ef752644fb"
+}
