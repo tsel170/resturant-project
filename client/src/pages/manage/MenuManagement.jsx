@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react"
 import DefaultPage from "../../components/general/DefaultPage"
 import axios from "axios"
+import { toast } from "react-hot-toast"
 
 const MenuManagement = () => {
   const [meals, setMeals] = useState([])
@@ -31,6 +32,8 @@ const MenuManagement = () => {
   const [showRecipeEditModal, setShowRecipeEditModal] = useState(false)
   const [showRecipeAddModal, setShowRecipeAddModal] = useState(false)
   const [tempRecipe, setTempRecipe] = useState("")
+  const [showAddExistingForm, setShowAddExistingForm] = useState(false)
+  const [existingMeals, setExistingMeals] = useState([])
 
   const uniqueCategories = [...new Set(meals.map((meal) => meal.category))]
 
@@ -278,6 +281,30 @@ const MenuManagement = () => {
     setShowRecipeModal(true)
   }
 
+  const handleAddExisting = async () => {
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      await axios.post(
+        import.meta.env.VITE_SERVER + "/api/meals/addMeal",
+        selectedMeal
+      )
+      const response = await axios.get(
+        import.meta.env.VITE_SERVER + "/api/meals/getAllMeals"
+      )
+      setMeals(response.data.Meals)
+      setShowAddExistingForm(false)
+      setSelectedMeal(null)
+      toast.success("Meal added successfully!")
+    } catch (err) {
+      setError(err.response?.data?.message || "An error occurred")
+      toast.error(err.response?.data?.message || "An error occurred")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <DefaultPage title="Menu Management" role="manager">
       <div className="flex flex-col">
@@ -344,28 +371,52 @@ const MenuManagement = () => {
           </div>
 
           <div className="flex items-end justify-end">
-            <button
-              onClick={() => setShowAddForm(!showAddForm)}
-              className="transform rounded-md bg-gradient-to-r from-indigo-500 to-blue-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-all duration-200 hover:scale-105 hover:from-indigo-600 hover:to-blue-700 hover:shadow-lg active:scale-95"
-            >
-              {showAddForm ? (
-                <span className="flex items-center gap-1">
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                  Cancel
-                </span>
-              ) : (
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowAddForm(!showAddForm)}
+                className="transform rounded-md bg-gradient-to-r from-indigo-500 to-blue-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-all duration-200 hover:scale-105 hover:from-indigo-600 hover:to-blue-700 hover:shadow-lg active:scale-95"
+              >
+                {showAddForm ? (
+                  <span className="flex items-center gap-1">
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                    Cancel
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1">
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                    Create Meal
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => setShowAddExistingForm(true)}
+                className="transform rounded-md bg-gradient-to-r from-green-500 to-teal-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-all duration-200 hover:scale-105 hover:from-green-600 hover:to-teal-700 hover:shadow-lg active:scale-95"
+              >
                 <span className="flex items-center gap-1">
                   <svg
                     className="h-4 w-4"
@@ -380,10 +431,10 @@ const MenuManagement = () => {
                       d="M12 4v16m8-8H4"
                     />
                   </svg>
-                  Create Meal
+                  Add Meal
                 </span>
-              )}
-            </button>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1209,6 +1260,96 @@ const MenuManagement = () => {
                 className="w-full rounded-lg bg-blue-600 py-2 text-white transition-all hover:bg-blue-700"
               >
                 Save Recipe
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className={`fixed inset-0 z-[60] flex items-center justify-center bg-black/50 transition-opacity duration-300 ${
+          showAddExistingForm ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      >
+        <div
+          className={`relative w-full max-w-2xl transform rounded-lg bg-white p-6 shadow-xl transition-all duration-300 ${
+            showAddExistingForm ? "scale-100 opacity-100" : "scale-95 opacity-0"
+          }`}
+        >
+          <button
+            onClick={() => setShowAddExistingForm(false)}
+            className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+          >
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+
+          <h2 className="mb-4 text-xl font-bold text-gray-900">
+            Add Existing Meal
+          </h2>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Select Meal
+              </label>
+              <select
+                value={selectedMeal?._id || ""}
+                onChange={(e) => {
+                  const meal = existingMeals.find(
+                    (m) => m._id === e.target.value
+                  )
+                  setSelectedMeal(meal)
+                }}
+                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+              >
+                <option value="">Select a meal</option>
+                {existingMeals.map((meal) => (
+                  <option key={meal._id} value={meal._id}>
+                    {meal.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {selectedMeal && (
+              <div className="rounded-lg bg-gray-50 p-4">
+                <h3 className="font-medium">{selectedMeal.title}</h3>
+                <p className="mt-1 text-sm text-gray-600">
+                  {selectedMeal.description}
+                </p>
+                <p className="mt-2 text-sm font-medium">
+                  Price: ${selectedMeal.price}
+                </p>
+              </div>
+            )}
+
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => setShowAddExistingForm(false)}
+                className="w-full rounded-lg bg-gray-100 py-2 text-gray-700 transition-all hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleAddExisting}
+                disabled={!selectedMeal || isLoading}
+                className="w-full rounded-lg bg-green-600 py-2 text-white transition-all hover:bg-green-700 disabled:bg-green-300"
+              >
+                {isLoading ? "Adding..." : "Add Meal"}
               </button>
             </div>
           </div>
