@@ -22,7 +22,7 @@ GET http://localhost:5000/api/branches/allBranches
 
 ###
 
-GET http://localhost:5000/api/branches/branch/676e884378317a74ac0817b
+GET http://localhost:5000/api/branches/branch/676e884378317a74ac0817b2
 
 ###
 
@@ -66,15 +66,11 @@ PUT http://localhost:5000/api/branches/updateTableSeats
 Content-Type: application/json
 
 {
-    "branchId":"6763ea1d3745860377c67200",
-    "tableNumber":10,"newSeats":6
+    "branchId":"676e884378317a74ac0817b2",
+    "tableNumber":9,"newSeats":10
 
 }
 
-
-###
-
-GET http://localhost:5000/api/branches/allBranches
 ###
 
 DELETE http://localhost:5000/api/branches/deleteTable
@@ -82,7 +78,8 @@ Content-Type: application/json
 
 {
     "branchId":"676e884378317a74ac0817b2",
-    "tableNumber":1
+    "tableNumber":9
+
 
 }
 

@@ -38,9 +38,24 @@ const userschema = new mongoose.Schema({
   },
   shifts: [
     {
-      shift: { type: mongoose.Schema.Types.ObjectId, ref: "Shift" },
-      date: Date,
-      timeShift: String,
+      shift: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Shift",
+        required: true,
+      },
+      date: {
+        type: Date,
+        required: true,
+      },
+      timeShift: {
+        type: String,
+        enum: ["am", "pm"],
+        required: true,
+      },
+      table: {
+        type: [Number],
+        required: false,
+      },
     },
   ],
   branch: {
@@ -62,6 +77,10 @@ const userschema = new mongoose.Schema({
       totalSpent: { type: Number, default: 0 },
     },
   ],
+  avatar: {
+    type: String,
+    required: false,
+  },
 
 });
 
