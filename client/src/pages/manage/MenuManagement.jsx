@@ -3,6 +3,8 @@ import DefaultPage from "../../components/general/DefaultPage"
 import axios from "axios"
 import { toast } from "react-hot-toast"
 
+const MEALDB_API = "https://www.themealdb.com/api/json/v1/1/search.php?s="
+
 const MenuManagement = () => {
   const [meals, setMeals] = useState([])
   const [selectedMeal, setSelectedMeal] = useState(null)
@@ -34,6 +36,10 @@ const MenuManagement = () => {
   const [tempRecipe, setTempRecipe] = useState("")
   const [showAddExistingForm, setShowAddExistingForm] = useState(false)
   const [existingMeals, setExistingMeals] = useState([])
+  const [searchTerm, setSearchTerm] = useState("")
+  const [searchResults, setSearchResults] = useState([])
+  const [isSearching, setIsSearching] = useState(false)
+  const [activeTab, setActiveTab] = useState("search")
 
   const uniqueCategories = [...new Set(meals.map((meal) => meal.category))]
 
@@ -59,6 +65,12 @@ const MenuManagement = () => {
 
     fetchMeals()
   }, [])
+
+  useEffect(() => {
+    if (showAddExistingForm) {
+      searchMeals("")
+    }
+  }, [showAddExistingForm])
 
   const handleAddIngredient = () => {
     setNewMeal({
@@ -302,6 +314,19 @@ const MenuManagement = () => {
       toast.error(err.response?.data?.message || "An error occurred")
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const searchMeals = async (term) => {
+    setIsSearching(true)
+    try {
+      const response = await axios.get(`${MEALDB_API}${term}`)
+      setSearchResults(response.data.meals || [])
+    } catch (err) {
+      console.error("Error fetching meals:", err)
+      setSearchResults([])
+    } finally {
+      setIsSearching(false)
     }
   }
 
@@ -1296,63 +1321,160 @@ const MenuManagement = () => {
           </button>
 
           <h2 className="mb-4 text-xl font-bold text-gray-900">
-            Add Existing Meal
+            Add Meal from TheMealDB
           </h2>
 
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Select Meal
-              </label>
-              <select
-                value={selectedMeal?._id || ""}
-                onChange={(e) => {
-                  const meal = existingMeals.find(
-                    (m) => m._id === e.target.value
-                  )
-                  setSelectedMeal(meal)
-                }}
-                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
-              >
-                <option value="">Select a meal</option>
-                {existingMeals.map((meal) => (
-                  <option key={meal._id} value={meal._id}>
-                    {meal.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {selectedMeal && (
-              <div className="rounded-lg bg-gray-50 p-4">
-                <h3 className="font-medium">{selectedMeal.title}</h3>
-                <p className="mt-1 text-sm text-gray-600">
-                  {selectedMeal.description}
-                </p>
-                <p className="mt-2 text-sm font-medium">
-                  Price: ${selectedMeal.price}
-                </p>
-              </div>
-            )}
-
-            <div className="flex gap-4">
+          <div className="mb-4 border-b border-gray-200">
+            <nav className="-mb-px flex" aria-label="Tabs">
               <button
-                type="button"
-                onClick={() => setShowAddExistingForm(false)}
-                className="w-full rounded-lg bg-gray-100 py-2 text-gray-700 transition-all hover:bg-gray-200"
+                onClick={() => setActiveTab("search")}
+                className={`relative inline-flex items-center border-b-2 px-4 py-2 text-sm font-medium ${
+                  activeTab === "search"
+                    ? "border-indigo-500 text-indigo-600"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                }`}
               >
-                Cancel
+                Search Meals
               </button>
               <button
-                type="button"
-                onClick={handleAddExisting}
-                disabled={!selectedMeal || isLoading}
-                className="w-full rounded-lg bg-green-600 py-2 text-white transition-all hover:bg-green-700 disabled:bg-green-300"
+                onClick={() => setActiveTab("selected")}
+                className={`relative ml-8 inline-flex items-center border-b-2 px-4 py-2 text-sm font-medium ${
+                  activeTab === "selected"
+                    ? "border-indigo-500 text-indigo-600"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                }`}
               >
-                {isLoading ? "Adding..." : "Add Meal"}
+                Selected Meal
+                {selectedMeal && (
+                  <span className="ml-2 rounded-full bg-indigo-100 px-2 py-0.5 text-xs text-indigo-600">
+                    1
+                  </span>
+                )}
               </button>
-            </div>
+            </nav>
           </div>
+
+          {activeTab === "search" ? (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Search Meals
+                </label>
+                <div className="mt-1 flex gap-2">
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                    placeholder="Search for meals..."
+                  />
+                  <button
+                    onClick={() => searchMeals(searchTerm)}
+                    className="rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
+                  >
+                    Search
+                  </button>
+                </div>
+              </div>
+
+              <div className="max-h-96 overflow-y-auto">
+                {isSearching ? (
+                  <div className="flex justify-center py-4">
+                    <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
+                  </div>
+                ) : searchResults.length === 0 ? (
+                  <p className="py-4 text-center text-gray-500">
+                    No meals found
+                  </p>
+                ) : (
+                  searchResults.map((meal) => (
+                    <div
+                      key={meal.idMeal}
+                      className="mb-4 flex cursor-pointer items-center gap-4 rounded-lg border p-4 hover:bg-gray-50"
+                      onClick={() => {
+                        setSelectedMeal({
+                          title: meal.strMeal,
+                          description: meal.strInstructions,
+                          category: meal.strCategory,
+                          price: "0",
+                          Ingredients: [],
+                          theDishPreparer: "chef",
+                          recipe: meal.strInstructions,
+                        })
+                        setActiveTab("selected")
+                      }}
+                    >
+                      <img
+                        src={meal.strMealThumb}
+                        alt={meal.strMeal}
+                        className="h-20 w-20 rounded-lg object-cover"
+                      />
+                      <div>
+                        <h3 className="font-medium">{meal.strMeal}</h3>
+                        <p className="text-sm text-gray-600">
+                          Category: {meal.strCategory}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {selectedMeal ? (
+                <>
+                  <div className="rounded-lg bg-gray-50 p-4">
+                    <h3 className="font-medium">{selectedMeal.title}</h3>
+                    <p className="mt-1 text-sm text-gray-600">
+                      {selectedMeal.description?.substring(0, 200)}...
+                    </p>
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Set Price
+                      </label>
+                      <input
+                        type="number"
+                        value={selectedMeal.price}
+                        onChange={(e) =>
+                          setSelectedMeal({
+                            ...selectedMeal,
+                            price: e.target.value,
+                          })
+                        }
+                        className="mt-1 block w-32 rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedMeal(null)
+                        setActiveTab("search")
+                      }}
+                      className="w-full rounded-lg bg-gray-100 py-2 text-gray-700 transition-all hover:bg-gray-200"
+                    >
+                      Clear Selection
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleAddExisting}
+                      disabled={!selectedMeal || isLoading}
+                      className="w-full rounded-lg bg-green-600 py-2 text-white transition-all hover:bg-green-700 disabled:bg-green-300"
+                    >
+                      {isLoading ? "Adding..." : "Add Meal"}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <p className="py-4 text-center text-gray-500">
+                  No meal selected. Please search and select a meal first.
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </DefaultPage>
