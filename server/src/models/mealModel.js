@@ -44,6 +44,11 @@ const mealSchema = new mongoose.Schema({
       required: false,
     },
   ],
+  recipe: {
+    type: String,
+    required: false,
+    default: "emprovise",
+  },
   theDishPreparer: {
     type: String,
     // required: true,

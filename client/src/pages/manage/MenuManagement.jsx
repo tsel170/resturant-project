@@ -39,9 +39,10 @@ const MenuManagement = () => {
       setIsLoadingMeals(true)
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/meals/getAllMeals"
+          import.meta.env.VITE_SERVER+"/api/meals/getAllMeals"
         )
         setMeals(response.data.Meals)
+        
       } catch (error) {
         console.error("Error fetching meals:", error)
       } finally {
@@ -80,9 +81,9 @@ const MenuManagement = () => {
     setError(null)
 
     try {
-      await axios.post("http://localhost:5000/api/meals/addMeal", newMeal)
+      await axios.post(import.meta.env.VITE_SERVER+"/api/meals/addMeal", newMeal)
       const response = await axios.get(
-        "http://localhost:5000/api/meals/getAllMeals"
+        import.meta.env.VITE_SERVER+"/api/meals/getAllMeals"
       )
       setMeals(response.data.Meals)
       setNewMeal({
@@ -145,7 +146,7 @@ const MenuManagement = () => {
     setIsLoading(true)
     try {
       await axios.delete(
-        `http://localhost:5000/api/meals/deleteMeal/${deleteModalMeal}`
+        import.meta.env.VITE_SERVER+`/api/meals/deleteMeal/${deleteModalMeal}`
       )
       setMeals(meals.filter((meal) => meal._id !== deleteModalMeal))
       setDeleteModalMeal(null)
@@ -184,11 +185,11 @@ const MenuManagement = () => {
 
     try {
       await axios.put(
-        `http://localhost:5000/api/meals/updateMeal/${editingMeal._id}`,
+        import.meta.env.VITE_SERVER+`/api/meals/updateMeal/${editingMeal._id}`,
         editingMeal
       )
       const response = await axios.get(
-        "http://localhost:5000/api/meals/getAllMeals"
+        import.meta.env.VITE_SERVER+"/api/meals/getAllMeals"
       )
       setMeals(response.data.Meals)
       setShowEditForm(false)
