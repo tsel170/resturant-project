@@ -26,6 +26,8 @@ const MenuManagement = () => {
   const [sortBy, setSortBy] = useState("")
   const [sortOrder, setSortOrder] = useState("asc")
   const [searchTitle, setSearchTitle] = useState("")
+  const [showRecipeModal, setShowRecipeModal] = useState(false)
+  const [selectedRecipe, setSelectedRecipe] = useState(null)
 
   const uniqueCategories = [...new Set(meals.map((meal) => meal.category))]
 
@@ -39,10 +41,9 @@ const MenuManagement = () => {
       setIsLoadingMeals(true)
       try {
         const response = await axios.get(
-          import.meta.env.VITE_SERVER+"/api/meals/getAllMeals"
+          import.meta.env.VITE_SERVER + "/api/meals/getAllMeals"
         )
         setMeals(response.data.Meals)
-        
       } catch (error) {
         console.error("Error fetching meals:", error)
       } finally {
@@ -81,9 +82,12 @@ const MenuManagement = () => {
     setError(null)
 
     try {
-      await axios.post(import.meta.env.VITE_SERVER+"/api/meals/addMeal", newMeal)
+      await axios.post(
+        import.meta.env.VITE_SERVER + "/api/meals/addMeal",
+        newMeal
+      )
       const response = await axios.get(
-        import.meta.env.VITE_SERVER+"/api/meals/getAllMeals"
+        import.meta.env.VITE_SERVER + "/api/meals/getAllMeals"
       )
       setMeals(response.data.Meals)
       setNewMeal({
@@ -146,7 +150,7 @@ const MenuManagement = () => {
     setIsLoading(true)
     try {
       await axios.delete(
-        import.meta.env.VITE_SERVER+`/api/meals/deleteMeal/${deleteModalMeal}`
+        import.meta.env.VITE_SERVER + `/api/meals/deleteMeal/${deleteModalMeal}`
       )
       setMeals(meals.filter((meal) => meal._id !== deleteModalMeal))
       setDeleteModalMeal(null)
@@ -185,11 +189,12 @@ const MenuManagement = () => {
 
     try {
       await axios.put(
-        import.meta.env.VITE_SERVER+`/api/meals/updateMeal/${editingMeal._id}`,
+        import.meta.env.VITE_SERVER +
+          `/api/meals/updateMeal/${editingMeal._id}`,
         editingMeal
       )
       const response = await axios.get(
-        import.meta.env.VITE_SERVER+"/api/meals/getAllMeals"
+        import.meta.env.VITE_SERVER + "/api/meals/getAllMeals"
       )
       setMeals(response.data.Meals)
       setShowEditForm(false)
@@ -263,6 +268,11 @@ const MenuManagement = () => {
     }
 
     return filteredMeals
+  }
+
+  const handleViewRecipe = (meal) => {
+    setSelectedRecipe(meal)
+    setShowRecipeModal(true)
   }
 
   return (
@@ -411,6 +421,12 @@ const MenuManagement = () => {
                           {selectedMeal === meal._id
                             ? "Hide Ingredients"
                             : "Show Ingredients"}
+                        </button>
+                        <button
+                          onClick={() => handleViewRecipe(meal)}
+                          className="rounded-lg bg-green-500 px-3 py-2 text-sm font-medium text-white transition-all duration-300 hover:bg-green-600"
+                        >
+                          Recipe
                         </button>
                         <button
                           onClick={() => handleEditClick(meal)}
@@ -958,6 +974,71 @@ const MenuManagement = () => {
               </button>
             </div>
           </form>
+        </div>
+      </div>
+
+      <div
+        className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-300 ${
+          showRecipeModal ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      >
+        <div
+          className={`relative w-full max-w-2xl transform rounded-lg bg-white p-6 shadow-xl transition-all duration-300 ${
+            showRecipeModal ? "scale-100 opacity-100" : "scale-95 opacity-0"
+          }`}
+        >
+          <button
+            onClick={() => {
+              setShowRecipeModal(false)
+              setSelectedRecipe(null)
+            }}
+            className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+          >
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+
+          {selectedRecipe && (
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold text-gray-900">
+                {selectedRecipe.title} Recipe
+              </h2>
+
+              <div className="rounded-lg bg-gray-50 p-4">
+                <h3 className="mb-2 text-lg font-semibold text-gray-700">
+                  Ingredients:
+                </h3>
+                <ul className="space-y-2">
+                  {selectedRecipe.Ingredients.map((ing, index) => (
+                    <li key={index} className="flex items-center text-gray-600">
+                      <span className="mr-2 h-1.5 w-1.5 rounded-full bg-indigo-400" />
+                      <span className="font-medium">{ing.ingredient}</span>
+                      <span className="mx-2">-</span>
+                      <span>{ing.quantity}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="rounded-lg bg-gray-50 p-4">
+                <h3 className="mb-2 text-lg font-semibold text-gray-700">
+                  Recipe:
+                </h3>
+                <p className="text-gray-600">{selectedRecipe.recipe}</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </DefaultPage>
