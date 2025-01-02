@@ -110,3 +110,68 @@ export const deleteShift = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const startShift = async (req, res) => {
+  const { userId } = req.params;
+  const { shiftId } = req.body;
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    const shift = await Shift.findOneAndUpdate(
+      { 
+        _id: shiftId,
+        "users.user": userId 
+      },
+      { 
+        $set: { 
+          "users.$.startShift": Date.now() 
+        } 
+      },
+      { new: true }
+    );
+
+    if (!shift) {
+      return res.status(404).json({ error: "Shift not found" });
+    }
+
+    res.status(200).json({ message: "Shift ended successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const endShift = async (req, res) => {
+  const { userId } = req.params;
+  const { shiftId } = req.body;
+  console.log(userId, shiftId);
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    const shift = await Shift.findOneAndUpdate(
+      { 
+        _id: shiftId,
+        "users.user": userId 
+      },
+      { 
+        $set: { 
+          "users.$.endShift": Date.now() 
+        } 
+      },
+      { new: true }
+    );
+
+    if (!shift) {
+      return res.status(404).json({ error: "Shift not found" });
+    }
+
+    res.status(200).json({ message: "Shift ended successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

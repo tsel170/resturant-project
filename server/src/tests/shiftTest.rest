@@ -43,3 +43,21 @@ Content-Type: application/json
 ###
 
 DELETE http://localhost:5000/api/shifts/deleteShift/6772e9d735b4f270638f1127
+
+###
+
+PUT http://localhost:5000/api/shifts/startShift/676d0934ccb270069df3e069
+Content-Type: application/json
+
+{
+  "shiftId": "67760e001bc342ef752644fb"
+}
+
+###
+
+PUT http://localhost:5000/api/shifts/endShift/676d0934ccb270069df3e069
+Content-Type: application/json
+
+{
+  "shiftId": "67760e001bc342ef752644fb"
+}
