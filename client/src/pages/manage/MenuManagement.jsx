@@ -1571,6 +1571,7 @@ const MenuManagement = () => {
                         setShowMealDetailsModal(false)
                         setShowAddExistingForm(false)
                         fetchMeals()
+                        location.reload()
                       } catch (error) {
                         console.error("Error adding meal:", error)
                         setAddMealError(
