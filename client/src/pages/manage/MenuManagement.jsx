@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react"
 import DefaultPage from "../../components/general/DefaultPage"
 import axios from "axios"
 import { toast } from "react-hot-toast"
+import MealCard from "../../components/manager/MealCard"
 
 const MEALDB_API = "https://www.themealdb.com/api/json/v1/1/search.php?s="
 
@@ -483,89 +484,21 @@ const MenuManagement = () => {
         </div>
 
         <div>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {isLoadingMeals
               ? [...Array(6)].map((_, index) => <MealSkeleton key={index} />)
               : getFilteredAndSortedMeals().map((meal) => (
-                  <div
+                  <MealCard
                     key={meal._id}
-                    className="group relative transform rounded-xl border border-gray-100 bg-white p-4 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-                  >
-                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-
-                    <div className="relative">
-                      <h3 className="text-lg font-bold text-gray-800 transition-colors duration-300 group-hover:text-indigo-600">
-                        {meal.title}
-                      </h3>
-                      <p className="mt-1 text-sm text-gray-600">
-                        {meal.description}
-                      </p>
-                      <p className="mt-2 text-xl font-semibold text-indigo-600">
-                        ₪{meal.price}
-                      </p>
-                      <p className="mt-1 inline-block rounded-full bg-indigo-50 px-2 py-0.5 text-sm text-indigo-600">
-                        {meal.category}
-                      </p>
-
-                      <div className="mt-3 flex justify-between gap-2">
-                        <button
-                          onClick={() =>
-                            setSelectedMeal(
-                              selectedMeal === meal._id ? null : meal._id
-                            )
-                          }
-                          className="w-full transform rounded-lg bg-gradient-to-r from-indigo-500 to-blue-600 px-3 py-2 text-center text-sm font-medium text-white transition-all duration-300 hover:from-indigo-600 hover:to-blue-700 hover:shadow-md"
-                        >
-                          {selectedMeal === meal._id
-                            ? "Hide Ingredients"
-                            : "Show Ingredients"}
-                        </button>
-                        <button
-                          onClick={() => handleViewRecipe(meal)}
-                          className="rounded-lg bg-green-500 px-3 py-2 text-sm font-medium text-white transition-all duration-300 hover:bg-green-600"
-                        >
-                          Recipe
-                        </button>
-                        <button
-                          onClick={() => handleEditClick(meal)}
-                          className="rounded-lg bg-yellow-500 px-3 py-2 text-sm font-medium text-white transition-all duration-300 hover:bg-yellow-600"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => setDeleteModalMeal(meal._id)}
-                          className="rounded-lg bg-red-500 px-3 py-2 text-sm font-medium text-white transition-all duration-300 hover:bg-red-600"
-                        >
-                          Delete
-                        </button>
-                      </div>
-
-                      <div
-                        className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                          selectedMeal === meal._id
-                            ? "max-h-[500px] opacity-100"
-                            : "max-h-0 opacity-0"
-                        }`}
-                      >
-                        <div className="mt-3">
-                          <h4 className="mb-2 font-medium text-gray-700">
-                            Ingredients:
-                          </h4>
-                          <ul className="space-y-1">
-                            {meal.Ingredients.map((ing) => (
-                              <li
-                                key={ing._id}
-                                className="flex items-center rounded-lg bg-gray-50 px-2 py-1.5 text-sm text-gray-600 transition-colors duration-200 hover:bg-gray-100"
-                              >
-                                <span className="mr-2 h-1.5 w-1.5 rounded-full bg-indigo-400" />
-                                {ing.ingredient} - {ing.quantity}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                    meal={meal}
+                    selectedMeal={selectedMeal}
+                    onMealSelect={(id) =>
+                      setSelectedMeal(selectedMeal === id ? null : id)
+                    }
+                    onViewRecipe={handleViewRecipe}
+                    onEditClick={handleEditClick}
+                    onDeleteClick={(id) => setDeleteModalMeal(id)}
+                  />
                 ))}
           </div>
         </div>
@@ -653,7 +586,7 @@ const MenuManagement = () => {
         }`}
       >
         <div
-          className={`relative w-full max-w-2xl transform rounded-lg bg-white p-6 shadow-xl transition-all duration-300 ${
+          className={`relative max-h-[80vh] w-full max-w-2xl transform overflow-y-auto rounded-2xl bg-white p-6 shadow-xl transition-all duration-300 ${
             showEditForm ? "scale-100 opacity-100" : "scale-95 opacity-0"
           }`}
         >
