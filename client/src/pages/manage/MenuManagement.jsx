@@ -41,6 +41,12 @@ const MenuManagement = () => {
   const [isSearching, setIsSearching] = useState(false)
   const [showMealDetailsModal, setShowMealDetailsModal] = useState(false)
   const [selectedMealDetails, setSelectedMealDetails] = useState(null)
+  const [showDescriptionModal, setShowDescriptionModal] = useState(false)
+  const [showPriceModal, setShowPriceModal] = useState(false)
+  const [tempDescription, setTempDescription] = useState("")
+  const [tempPrice, setTempPrice] = useState("")
+  const [isAddingMeal, setIsAddingMeal] = useState(false)
+  const [addMealError, setAddMealError] = useState(null)
 
   const uniqueCategories = [...new Set(meals.map((meal) => meal.category))]
 
@@ -48,6 +54,18 @@ const MenuManagement = () => {
 
   // Combine default and existing categories, remove duplicates
   const allCategories = [...new Set([...uniqueCategories])]
+
+  const fetchMeals = async () => {
+    try {
+      const response = await axios.get(
+        import.meta.env.VITE_SERVER + "/api/meals/addMeal"
+      )
+      setMeals(response.data)
+    } catch (error) {
+      console.error("Error fetching meals:", error)
+      toast.error("Failed to refresh meals list")
+    }
+  }
 
   useEffect(() => {
     const fetchMeals = async () => {
@@ -102,7 +120,7 @@ const MenuManagement = () => {
 
     try {
       await axios.post(
-        import.meta.env.VITE_SERVER + "/api/meals/createMeal",
+        import.meta.env.VITE_SERVER + "/api/meals/addMeal",
         newMeal
       )
       const response = await axios.get(
@@ -1220,24 +1238,28 @@ const MenuManagement = () => {
             </svg>
           </button>
 
-          <h2 className="mb-4 text-2xl font-bold text-gray-900">
-            {selectedMealDetails.strMeal} - Recipe Instructions
-          </h2>
+          {selectedMealDetails && (
+            <>
+              <h2 className="mb-4 text-2xl font-bold text-gray-900">
+                {selectedMealDetails.strMeal} - Recipe Instructions
+              </h2>
 
-          <div className="mt-4 max-h-[60vh] overflow-y-auto">
-            <p className="whitespace-pre-line text-gray-600">
-              {selectedMealDetails.strInstructions}
-            </p>
-          </div>
+              <div className="mt-4 max-h-[60vh] overflow-y-auto">
+                <p className="whitespace-pre-line text-gray-600">
+                  {selectedMealDetails.strInstructions}
+                </p>
+              </div>
 
-          <div className="mt-6">
-            <button
-              onClick={() => setShowRecipeModal(false)}
-              className="w-full rounded-lg bg-gray-100 py-2 text-gray-700 transition-all hover:bg-gray-200"
-            >
-              Close
-            </button>
-          </div>
+              <div className="mt-6">
+                <button
+                  onClick={() => setShowRecipeModal(false)}
+                  className="w-full rounded-lg bg-gray-100 py-2 text-gray-700 transition-all hover:bg-gray-200"
+                >
+                  Close
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -1382,7 +1404,7 @@ const MenuManagement = () => {
         }`}
       >
         <div
-          className={`relative w-full max-w-2xl transform rounded-lg bg-white shadow-xl transition-all duration-300 ${
+          className={`relative max-h-[80vh] w-full max-w-2xl transform overflow-y-auto rounded-lg bg-white shadow-xl transition-all duration-300 ${
             showMealDetailsModal
               ? "scale-100 opacity-100"
               : "scale-95 opacity-0"
@@ -1390,7 +1412,7 @@ const MenuManagement = () => {
         >
           {selectedMealDetails && (
             <>
-              <div className="relative h-96 w-full">
+              <div className="relative h-72 w-full">
                 <img
                   src={selectedMealDetails.strMealThumb}
                   alt={selectedMealDetails.strMeal}
@@ -1422,6 +1444,21 @@ const MenuManagement = () => {
                 <p className="mt-2 text-lg text-gray-600">
                   Category: {selectedMealDetails.strCategory}
                 </p>
+
+                <div className="mt-4 flex gap-3">
+                  <button
+                    onClick={() => setShowDescriptionModal(true)}
+                    className="rounded-lg bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600"
+                  >
+                    Add Description
+                  </button>
+                  <button
+                    onClick={() => setShowPriceModal(true)}
+                    className="rounded-lg bg-purple-500 px-4 py-2 text-white transition-colors hover:bg-purple-600"
+                  >
+                    Set Price
+                  </button>
+                </div>
 
                 <div className="mt-6">
                   <div className="mb-3 flex items-center justify-between">
@@ -1476,39 +1513,100 @@ const MenuManagement = () => {
                     Cancel
                   </button>
                   <button
-                    onClick={() => {
-                      // Update the selectedMeal to include ingredients
-                      setSelectedMeal((prev) => ({
-                        ...prev,
-                        Ingredients: Array.from({ length: 20 })
+                    onClick={async () => {
+                      setAddMealError(null)
+                      try {
+                        if (!selectedMeal.price) {
+                          setAddMealError(
+                            "Please set a price before adding the meal"
+                          )
+                          return
+                        }
+
+                        setIsAddingMeal(true)
+
+                        // Convert ingredients from API format to your schema format
+                        const formattedIngredients = Array.from({ length: 20 })
                           .map((_, index) => {
                             const ingredient =
                               selectedMealDetails[`strIngredient${index + 1}`]
-                            const quantity =
+                            const measure =
                               selectedMealDetails[`strMeasure${index + 1}`]
+
                             if (
                               ingredient &&
-                              quantity &&
+                              measure &&
                               ingredient.trim() &&
-                              quantity.trim()
+                              measure.trim()
                             ) {
                               return {
-                                ingredient: ingredient,
-                                quantity: quantity,
+                                ingredient: ingredient.trim(),
+                                quantity: measure.trim(),
                               }
                             }
                             return null
                           })
-                          .filter(Boolean), // Remove null entries
-                      }))
-                      handleAddExisting()
-                      setShowMealDetailsModal(false)
+                          .filter(Boolean) // Remove null entries
+
+                        const mealData = {
+                          title: selectedMealDetails.strMeal,
+                          description:
+                            selectedMeal.description ||
+                            selectedMealDetails.strInstructions,
+                          price: Number(selectedMeal.price), // Convert to number
+                          image: selectedMealDetails.strMealThumb,
+                          category:
+                            selectedMealDetails.strCategory.toLowerCase(),
+                          Ingredients: formattedIngredients,
+                          recipe:
+                            selectedMealDetails.strInstructions || "improvise",
+                        }
+
+                        await axios.post(
+                          import.meta.env.VITE_SERVER + "/api/meals/addMeal",
+                          mealData
+                        )
+
+                        toast.success("Meal added successfully!")
+                        setShowMealDetailsModal(false)
+                        setShowAddExistingForm(false)
+                        fetchMeals()
+                      } catch (error) {
+                        console.error("Error adding meal:", error)
+                        setAddMealError(
+                          error.response?.data?.message ||
+                            error.message ||
+                            "Failed to add meal. Please try again."
+                        )
+                      } finally {
+                        setIsAddingMeal(false)
+                      }
                     }}
-                    className="w-full rounded-lg bg-indigo-600 py-2 text-white transition-all hover:bg-indigo-700"
+                    disabled={isAddingMeal}
+                    className={`w-full rounded-lg py-2 text-white transition-all ${
+                      isAddingMeal
+                        ? "cursor-not-allowed bg-indigo-400"
+                        : "bg-indigo-600 hover:bg-indigo-700"
+                    }`}
                   >
-                    Add This Meal
+                    {isAddingMeal ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                        <span>Adding...</span>
+                      </div>
+                    ) : (
+                      "Add This Meal"
+                    )}
                   </button>
                 </div>
+
+                {addMealError && (
+                  <div className="mt-3 text-center">
+                    <p className="rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-500">
+                      {addMealError}
+                    </p>
+                  </div>
+                )}
               </div>
             </>
           )}
@@ -1547,22 +1645,111 @@ const MenuManagement = () => {
             </svg>
           </button>
 
-          <h2 className="mb-4 text-2xl font-bold text-gray-900">
-            {selectedMealDetails.strMeal} - Recipe Instructions
-          </h2>
+          {selectedMealDetails && (
+            <>
+              <h2 className="mb-4 text-2xl font-bold text-gray-900">
+                {selectedMealDetails.strMeal} - Recipe Instructions
+              </h2>
 
-          <div className="mt-4 max-h-[60vh] overflow-y-auto">
-            <p className="whitespace-pre-line text-gray-600">
-              {selectedMealDetails.strInstructions}
-            </p>
-          </div>
+              <div className="mt-4 max-h-[60vh] overflow-y-auto">
+                <p className="whitespace-pre-line text-gray-600">
+                  {selectedMealDetails.strInstructions}
+                </p>
+              </div>
 
-          <div className="mt-6">
+              <div className="mt-6">
+                <button
+                  onClick={() => setShowRecipeModal(false)}
+                  className="w-full rounded-lg bg-gray-100 py-2 text-gray-700 transition-all hover:bg-gray-200"
+                >
+                  Close
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div
+        className={`fixed inset-0 z-[90] flex items-center justify-center bg-black/50 transition-opacity duration-300 ${
+          showDescriptionModal ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      >
+        <div
+          className={`relative w-full max-w-lg transform rounded-lg bg-white p-6 shadow-xl transition-all duration-300 ${
+            showDescriptionModal
+              ? "scale-100 opacity-100"
+              : "scale-95 opacity-0"
+          }`}
+        >
+          <h3 className="mb-4 text-lg font-semibold">Add Description</h3>
+          <textarea
+            value={tempDescription}
+            onChange={(e) => setTempDescription(e.target.value)}
+            className="h-32 w-full rounded-lg border p-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter meal description..."
+          />
+          <div className="mt-4 flex gap-3">
             <button
-              onClick={() => setShowRecipeModal(false)}
-              className="w-full rounded-lg bg-gray-100 py-2 text-gray-700 transition-all hover:bg-gray-200"
+              onClick={() => setShowDescriptionModal(false)}
+              className="flex-1 rounded-lg bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200"
             >
-              Close
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                setSelectedMeal((prev) => ({
+                  ...prev,
+                  description: tempDescription,
+                }))
+                setShowDescriptionModal(false)
+              }}
+              className="flex-1 rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className={`fixed inset-0 z-[90] flex items-center justify-center bg-black/50 transition-opacity duration-300 ${
+          showPriceModal ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      >
+        <div
+          className={`relative w-full max-w-md transform rounded-lg bg-white p-6 shadow-xl transition-all duration-300 ${
+            showPriceModal ? "scale-100 opacity-100" : "scale-95 opacity-0"
+          }`}
+        >
+          <h3 className="mb-4 text-lg font-semibold">Set Price</h3>
+          <div className="relative">
+            <span className="absolute left-3 top-2 text-gray-500">₪</span>
+            <input
+              type="number"
+              value={tempPrice}
+              onChange={(e) => setTempPrice(e.target.value)}
+              className="w-full rounded-lg border py-2 pl-8 pr-4 focus:border-purple-500 focus:ring-2 focus:ring-purple-500"
+              placeholder="0.00"
+              step="0.01"
+              min="0"
+            />
+          </div>
+          <div className="mt-4 flex gap-3">
+            <button
+              onClick={() => setShowPriceModal(false)}
+              className="flex-1 rounded-lg bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                setSelectedMeal((prev) => ({ ...prev, price: tempPrice }))
+                setShowPriceModal(false)
+              }}
+              className="flex-1 rounded-lg bg-purple-500 px-4 py-2 text-white hover:bg-purple-600"
+            >
+              Save
             </button>
           </div>
         </div>
