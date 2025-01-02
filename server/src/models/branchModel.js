@@ -56,23 +56,6 @@ const branchSchema = new mongoose.Schema({
     ref: "Menu",
     required: false,
   },
-  shifts: [
-    {
-      shift: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Shift",
-        required: false,
-      },
-      date: {
-        type: Date,
-        default: Date.now,
-      },
-      timeShift: {
-        type: String,
-        required: false,
-      },
-    },
-  ],
   orders: [
     {
       bon: {

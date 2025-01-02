@@ -1,12 +1,6 @@
 import mongoose from "mongoose";
 
 const shiftSchema = new mongoose.Schema({
-  branch: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Branch",
-    required: true,
-    default: "676d0974ccb270069df3e06f",
-  },
   date: {
     type: Date,
     required: true,
@@ -18,8 +12,23 @@ const shiftSchema = new mongoose.Schema({
   },
   users: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: false,
+      },
+      startShift: {
+        type: Date,
+        default: null,
+      },
+      endShift: {
+        type: Date,
+        default: null,
+      },
+      table: {
+        type: [Number],
+        required: false,
+      },
       required: false,
     },
   ],

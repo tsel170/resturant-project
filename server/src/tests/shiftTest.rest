@@ -2,10 +2,28 @@ POST http://localhost:5000/api/shifts/addShift
 Content-Type: application/json
 
 {
-  "date": "2024-01-01",
-  "timeShift": "am",
-  "users": ["676d0974ccb270069df3e06f"],
-  "branchId": "676d0974ccb270069df3e06f"
+  "date": "2024-04-01",
+  "timeShift": "pm",
+  "users": [
+    {
+      "user": "676d07f6ccb270069df3e063",
+      "table": [1, 2, 3],
+      "startShift": null,
+      "endShift": null
+    },
+    {
+      "user": "676d083fccb270069df3e066",
+      "table": [2],
+      "startShift": null,
+      "endShift": null
+    },
+    {
+      "user": "676d0934ccb270069df3e069",
+      "table": [3],
+      "startShift": null,
+      "endShift": null
+    }
+  ]
 }
 
 ###
@@ -14,7 +32,7 @@ GET http://localhost:5000/api/shifts/allShifts
 
 ###
 
-PUT http://localhost:5000/api/shifts/editShift/6772e9d735b4f270638f1127
+PUT http://localhost:5000/api/shifts/editShift/6772d5c9735b56ed5974f385
 Content-Type: application/json
 
 {

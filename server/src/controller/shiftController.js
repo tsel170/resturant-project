@@ -1,12 +1,10 @@
 import Shift from "../models/shiftModel.js";
 import User from "../models/userModel.js";
-import Branch from "../models/branchModel.js";
+
 export const addShift = async (req, res) => {
-  const { date, timeShift, users, branchId } = req.body;
-  if (!date || !timeShift || !branchId) {
-    return res
-      .status(400)
-      .json({ error: "Date, timeShift and branchId are required" });
+  const { date, timeShift, users } = req.body;
+  if (!date || !timeShift) {
+    return res.status(400).json({ error: "Date and timeShift are required" });
   }
   if (date < new Date()) {
     return res.status(400).json({ error: "We are not supporting time travel" });
@@ -14,7 +12,8 @@ export const addShift = async (req, res) => {
 
   try {
     if (users && users.length > 0) {
-      const existingUsers = await User.find({ _id: { $in: users } });
+      const userIds = users.map((u) => u.user);
+      const existingUsers = await User.find({ _id: { $in: userIds } });
       if (existingUsers.length !== users.length) {
         return res
           .status(400)
@@ -25,21 +24,25 @@ export const addShift = async (req, res) => {
     const shift = await Shift.create(req.body);
 
     if (users && users.length > 0) {
-      await User.updateMany(
-        { _id: { $in: users } },
-        {
-          $push: {
-            shifts: { shift: shift._id, date: date, timeShift: timeShift },
+      const updatePromises = users.map(async (userObj) => {
+        return User.findByIdAndUpdate(
+          userObj.user,
+          {
+            $push: {
+              shifts: {
+                shift: shift._id,
+                date: date,
+                timeShift: timeShift,
+                table: userObj.table,
+              },
+            },
           },
-        }
-      );
-    }
+          { new: true }
+        );
+      });
 
-    await Branch.findByIdAndUpdate(branchId, {
-      $push: {
-        shifts: { shift: shift._id, date: date, timeShift: timeShift },
-      },
-    });
+      await Promise.all(updatePromises);
+    }
 
     res.status(201).json(shift);
   } catch (error) {
