@@ -1,19 +1,37 @@
 import axios from "axios"
 import React, { createContext, useEffect, useState } from "react"
-
+import { useNavigate } from "react-router-dom"
 export const AuthContext = createContext()
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null)
+  let [user, setUser] = useState(null)
+  const [employees, setEmployees] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const navigate = useNavigate()
+  // Add initial user check from cookies
+  useEffect(() => {
+    const token = localStorage.getItem("token")
+    const savedUser = localStorage.getItem("user")
+    if (token && savedUser) {
+      user = JSON.parse(savedUser)
+      setUser(user.userData)
+      // console.log(user.userData)
+    }
+  }, [])
 
   const login = (userData) => {
     setUser(userData)
+    // console.log(userData)
+
     localStorage.setItem("token", userData.token)
+    localStorage.setItem("user", JSON.stringify(userData)) // Save user data
   }
 
   const logout = () => {
     setUser(null)
     localStorage.removeItem("token")
+    localStorage.removeItem("user")
+    navigate("/")
   }
 
   const [isSidebarVisible, setIsSidebarVisible] = useState(true)
@@ -35,7 +53,7 @@ export const AuthProvider = ({ children }) => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          import.meta.env.VITE_SERVER + "/api/bons/bons"
+          import.meta.env.VITE_SERVER + "/api/bons/allBons"
         )
         // Handle the response data here
         orders.push(...response.data.Bons)
@@ -48,9 +66,22 @@ export const AuthProvider = ({ children }) => {
 
     fetchData()
   }, [])
-
   useEffect(() => {
-    //add axios here
+    const fetchEmployees = async () => {
+      setIsLoading(true)
+      try {
+        const response = await axios.get(
+          import.meta.env.VITE_SERVER + "/api/users/users"
+        )
+        setEmployees(response.data.users)
+      } catch (error) {
+        console.error("Error fetching employees:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchEmployees()
   }, [])
 
   const updateTable = (tableId, updates) => {
@@ -78,6 +109,10 @@ export const AuthProvider = ({ children }) => {
         tables,
         setTables,
         updateTable,
+        navigate,
+        employees,
+        setEmployees,
+        isLoading,
       }}
     >
       {children}

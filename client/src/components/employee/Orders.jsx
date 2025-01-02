@@ -26,7 +26,7 @@ const Orders = ({ params }) => {
                 table number {order.tableNumber}
               </p>
               <p className="text-sm text-gray-600">
-                {order.meals.length} items
+                {order.meals?.length} items
               </p>
             </div>
             <span
