@@ -1,11 +1,44 @@
 import React, { useState, useEffect, useRef, useContext } from "react"
 import { AuthContext } from "../../context/AuthContext"
 
+const WaiterIcon = () => (
+  <svg
+    className="h-5 w-5 text-blue-600"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+  >
+    <path d="M19 12c0 1.1-3.1 2-7 2s-7-.9-7-2" strokeLinecap="round" />
+    <path d="M5 12c0-1.1 3.1-2 7-2s7 .9 7 2" strokeLinecap="round" />
+    <path d="M5 12v3c0 1.1 3.1 2 7 2s7-.9 7-2v-3" strokeLinecap="round" />
+    <line x1="12" y1="6" x2="12" y2="10" strokeLinecap="round" />
+    <line x1="8" y1="7" x2="16" y2="7" strokeLinecap="round" />
+  </svg>
+)
+
+const ChefIcon = () => (
+  <svg
+    className="h-5 w-5 text-orange-600"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+  >
+    <path
+      d="M12 4c-1.5 0-2.5 1-2.5 2.5c0-1-1-2-2.5-2S4 5.5 4 7c0 2.5 3 3 3 4l1 9h8l1-9c0-1 3-1.5 3-4c0-1.5-1.5-3-3-3S14 5.5 14 6.5C14 5 13 4 12 4z"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+)
+
 const EmployeeSelectionPopup = ({
   isOpen,
   onClose,
   onSelect,
   activeShiftType,
+  shifts,
 }) => {
   const { employees } = useContext(AuthContext)
   const dialogRef = useRef(null)
@@ -38,6 +71,14 @@ const EmployeeSelectionPopup = ({
       employee?.jobTitle?.toLowerCase() === "chef"
   )
 
+  // Helper function to check if employee is already in the shift
+  const isEmployeeInShift = (employee) => {
+    if (!activeShiftType || !shifts[activeShiftType]) return false
+    return shifts[activeShiftType].users.some(
+      (user) => user.email === employee.email
+    )
+  }
+
   return (
     <dialog
       ref={dialogRef}
@@ -58,7 +99,12 @@ const EmployeeSelectionPopup = ({
                     onSelect(employee)
                     onClose()
                   }}
-                  className="flex w-full items-center gap-3 rounded px-3 py-2 text-left transition-colors hover:bg-gray-100"
+                  disabled={isEmployeeInShift(employee)}
+                  className={`flex w-full items-center gap-3 rounded px-3 py-2 text-left transition-colors ${
+                    isEmployeeInShift(employee)
+                      ? "cursor-not-allowed bg-gray-100 opacity-50"
+                      : "hover:bg-gray-100"
+                  }`}
                 >
                   <img
                     src={getWorkerAvatar(employee?.email, employee?.gender)}
@@ -66,6 +112,11 @@ const EmployeeSelectionPopup = ({
                     className="h-8 w-8 rounded-full"
                   />
                   {employee.name}
+                  {isEmployeeInShift(employee) && (
+                    <span className="ml-2 text-sm text-gray-500">
+                      (Already in shift)
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -82,7 +133,12 @@ const EmployeeSelectionPopup = ({
                     onSelect(employee)
                     onClose()
                   }}
-                  className="flex w-full items-center gap-3 rounded px-3 py-2 text-left transition-colors hover:bg-gray-100"
+                  disabled={isEmployeeInShift(employee)}
+                  className={`flex w-full items-center gap-3 rounded px-3 py-2 text-left transition-colors ${
+                    isEmployeeInShift(employee)
+                      ? "cursor-not-allowed bg-gray-100 opacity-50"
+                      : "hover:bg-gray-100"
+                  }`}
                 >
                   <img
                     src={getWorkerAvatar(employee?.email, employee?.gender)}
@@ -90,6 +146,11 @@ const EmployeeSelectionPopup = ({
                     className="h-8 w-8 rounded-full"
                   />
                   {employee.name}
+                  {isEmployeeInShift(employee) && (
+                    <span className="ml-2 text-sm text-gray-500">
+                      (Already in shift)
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -112,7 +173,9 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
   const [isAnimating, setIsAnimating] = useState(false)
   const [showEmployeeSelection, setShowEmployeeSelection] = useState(false)
   const [activeShiftType, setActiveShiftType] = useState(null)
-  const [shifts, setShifts] = useState({
+
+  // Initialize shifts with empty state
+  const initialShiftState = {
     am: {
       users: [],
       startTime: "08:00",
@@ -123,7 +186,14 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
       startTime: "15:00",
       endTime: "22:00",
     },
-  })
+  }
+
+  // Reset shifts when date changes
+  useEffect(() => {
+    setShifts(initialShiftState)
+  }, [selectedDate])
+
+  const [shifts, setShifts] = useState(initialShiftState)
   const dialogRef = useRef(null)
 
   useEffect(() => {
@@ -146,8 +216,18 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
   }
 
   const handleEmployeeSelect = (employee) => {
-    console.log("Adding employee to shift:", activeShiftType) // Debug log
     if (activeShiftType) {
+      // Check if employee already exists in the shift
+      const isEmployeeAlreadyInShift = shifts[activeShiftType].users.some(
+        (user) => user.email === employee.email
+      )
+
+      if (isEmployeeAlreadyInShift) {
+        // You might want to add a toast/alert here to inform the user
+        console.log("Employee already exists in this shift")
+        return
+      }
+
       setShifts((prev) => ({
         ...prev,
         [activeShiftType]: {
@@ -166,6 +246,8 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
       shifts,
     })
     onClose()
+    // Reset shifts after submission
+    setShifts(initialShiftState)
   }
 
   const handleRemoveUser = (shiftType, userToRemove) => {
@@ -250,6 +332,11 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
                             className="h-8 w-8 rounded-full"
                           />
                           <span>{user.name}</span>
+                          {user.jobTitle?.toLowerCase() === "waiter" ? (
+                            <WaiterIcon />
+                          ) : (
+                            <ChefIcon />
+                          )}
                         </div>
                         <button
                           type="button"
@@ -332,6 +419,7 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
         onClose={() => setShowEmployeeSelection(false)}
         onSelect={handleEmployeeSelect}
         activeShiftType={activeShiftType}
+        shifts={shifts}
       />
     </>
   )
