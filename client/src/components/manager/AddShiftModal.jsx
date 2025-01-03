@@ -217,23 +217,23 @@ const TableAssignmentPopup = ({ isOpen, onClose, onConfirm }) => {
         </h3>
         <div className="mb-4 grid grid-cols-4 gap-3">
           {(tables || [])
-            .sort((a, b) => a.number - b.number)
+            .sort((a, b) => a.tableNumber - b.tableNumber)
             .map((table) => (
               <button
-                key={table.number}
-                onClick={() => handleTableToggle(table.number)}
+                key={table.tableNumber}
+                onClick={() => handleTableToggle(table.tableNumber)}
                 className={`group flex flex-col items-center justify-center rounded-lg border-2 p-4 transition-all duration-300 ${
-                  selectedTables.includes(table.number)
+                  selectedTables.includes(table.tableNumber)
                     ? "border-blue-600 bg-blue-50 text-blue-700 shadow-md"
                     : "border-gray-200 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md"
                 }`}
               >
                 <div className="mb-2 text-3xl font-semibold">
-                  {table.number}
+                  {table.tableNumber}
                 </div>
                 <div
                   className={`flex items-center gap-2 rounded-full px-3 py-1 transition-colors duration-300 ${
-                    selectedTables.includes(table.number)
+                    selectedTables.includes(table.tableNumber)
                       ? "bg-blue-100 text-blue-700"
                       : "bg-gray-100 text-gray-600 group-hover:bg-blue-50 group-hover:text-blue-600"
                   }`}
@@ -289,34 +289,28 @@ const TableAssignmentPopup = ({ isOpen, onClose, onConfirm }) => {
   )
 }
 
-const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
-  const { tables } = useContext(AuthContext)
+const AddShiftModal = ({
+  isOpen,
+  onClose,
+  selectedDate,
+  shifts: allShifts,
+  setShifts: setAllShifts,
+  events,
+  setEvents,
+  fetchShifts,
+}) => {
   const [isAnimating, setIsAnimating] = useState(false)
   const [showEmployeeSelection, setShowEmployeeSelection] = useState(false)
   const [activeShiftType, setActiveShiftType] = useState(null)
   const [showTableAssignment, setShowTableAssignment] = useState(false)
   const [selectedEmployee, setSelectedEmployee] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [modalShifts, setModalShifts] = useState({
+    am: { users: [], startTime: "08:00", endTime: "15:00" },
+    pm: { users: [], startTime: "15:00", endTime: "22:00" },
+  })
 
-  // Initialize shifts with empty state
-  const initialShiftState = {
-    am: {
-      users: [],
-      startTime: "08:00",
-      endTime: "15:00",
-    },
-    pm: {
-      users: [],
-      startTime: "15:00",
-      endTime: "22:00",
-    },
-  }
-
-  // Reset shifts when date changes
-  useEffect(() => {
-    setShifts(initialShiftState)
-  }, [selectedDate])
-
-  const [shifts, setShifts] = useState(initialShiftState)
   const dialogRef = useRef(null)
 
   useEffect(() => {
@@ -341,7 +335,7 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
   const handleEmployeeSelect = (employee) => {
     if (activeShiftType) {
       // Check if employee already exists in the shift
-      const isEmployeeAlreadyInShift = shifts[activeShiftType].users.some(
+      const isEmployeeAlreadyInShift = modalShifts[activeShiftType].users.some(
         (user) => user.email === employee.email
       )
 
@@ -362,7 +356,7 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
   }
 
   const addEmployeeToShift = (employee, tables = []) => {
-    setShifts((prev) => ({
+    setModalShifts((prev) => ({
       ...prev,
       [activeShiftType]: {
         ...prev[activeShiftType],
@@ -379,65 +373,95 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setIsLoading(true)
+    setError(null)
 
-    // Helper function to format users data
     const formatUsersData = (users) => {
       return users.map((user) => ({
-        user: user.id, // Assuming this is the MongoDB _id
-        table:
-          user.jobTitle?.toLowerCase() === "waiter" ? user.assignedTables : [],
+        user: user._id,
         startShift: null,
         endShift: null,
+        table:
+          user.jobTitle?.toLowerCase() === "waiter" ? user.assignedTables : [],
+        tip: 0,
       }))
     }
 
     try {
+      if (
+        modalShifts.am.users.length === 0 &&
+        modalShifts.pm.users.length === 0
+      ) {
+        throw new Error("Please add at least one employee to a shift")
+      }
+
+      let newShifts = []
+
       // Format AM shift request
-      if (shifts.am.users.length > 0) {
+      if (modalShifts.am.users.length > 0) {
         const amShiftData = {
-          date: selectedDate.toISOString().split("T")[0], // Format: YYYY-MM-DD
+          date: new Date(selectedDate).toISOString(),
           timeShift: "am",
-          users: formatUsersData(shifts.am.users),
+          users: formatUsersData(modalShifts.am.users),
         }
 
-        await axios.post(
-          import.meta.env.VITE_SERVER + "/api/shifts/addShift",
+        const amResponse = await axios.post(
+          "http://localhost:5000/api/shifts/addShift",
           amShiftData
         )
+        newShifts.push(amResponse.data)
       }
 
       // Format PM shift request
-      if (shifts.pm.users.length > 0) {
+      if (modalShifts.pm.users.length > 0) {
         const pmShiftData = {
-          date: selectedDate.toISOString().split("T")[0], // Format: YYYY-MM-DD
+          date: new Date(selectedDate).toISOString(),
           timeShift: "pm",
-          users: formatUsersData(shifts.pm.users),
+          users: formatUsersData(modalShifts.pm.users),
         }
 
-        await axios.post(
+        const pmResponse = await axios.post(
           "http://localhost:5000/api/shifts/addShift",
           pmShiftData
         )
+        newShifts.push(pmResponse.data)
       }
 
+      // Update the shifts array directly
+      //   setAllShifts((prevShifts) => {
+      //     // Remove any existing shifts for this date
+      //     const filteredShifts = prevShifts.filter(
+      //       (shift) =>
+      //         new Date(shift.date).toDateString() !== selectedDate.toDateString()
+      //     )
+      //     // Add the new shifts
+      //     return [...filteredShifts, ...newShifts]
+      //   })
+
       onClose()
-      // Reset shifts after successful submission
-      setShifts({
+      setModalShifts({
         am: { users: [], startTime: "08:00", endTime: "15:00" },
         pm: { users: [], startTime: "15:00", endTime: "22:00" },
       })
+      fetchShifts
     } catch (error) {
       console.error("Error saving shifts:", error)
-      // You might want to add error handling/notification here
+      setError(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to save shifts"
+      )
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const handleRemoveUser = (shiftType, userToRemove) => {
     console.log("Removing user:", userToRemove)
     console.log("From shift:", shiftType)
-    console.log("Current shifts state:", shifts)
+    console.log("Current shifts state:", modalShifts)
 
-    setShifts((prevShifts) => {
+    setModalShifts((prevShifts) => {
       const updatedUsers = prevShifts[shiftType].users.filter(
         (user) => user.email !== userToRemove.email
       )
@@ -464,10 +488,10 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
   }
 
   console.log("Active shift type:", activeShiftType)
-  console.log("Current shifts:", shifts)
+  console.log("Current shifts:", modalShifts)
   console.log(
     "Current users for active shift:",
-    activeShiftType ? shifts[activeShiftType].users : []
+    activeShiftType ? modalShifts[activeShiftType].users : []
   )
 
   return (
@@ -502,7 +526,7 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
                   </button>
 
                   <div className="max-h-[400px] space-y-3 overflow-y-auto">
-                    {shifts.am.users.map((user, index) => (
+                    {modalShifts.am.users.map((user, index) => (
                       <div
                         key={index}
                         className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3"
@@ -571,7 +595,7 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
                   </button>
 
                   <div className="max-h-[400px] space-y-3 overflow-y-auto">
-                    {shifts.pm.users.map((user, index) => (
+                    {modalShifts.pm.users.map((user, index) => (
                       <div
                         key={index}
                         className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3"
@@ -624,19 +648,71 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
               </div>
             </div>
 
+            {error && (
+              <div className="mb-4 rounded-md bg-red-50 p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg
+                      className="h-5 w-5 text-red-400"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-red-800">Error</h3>
+                    <div className="mt-2 text-sm text-red-700">{error}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="mt-8 flex justify-end space-x-3">
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                className="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
+                disabled={isLoading}
               >
                 Cancel
               </button>
               <button
+                onClick={handleSubmit}
                 type="submit"
-                className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                disabled={isLoading}
+                className={`rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition-all ${isLoading ? "cursor-not-allowed opacity-50" : "hover:bg-blue-700"}`}
               >
-                Save Shifts
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <svg
+                      className="mr-2 h-4 w-4 animate-spin text-white"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    Saving...
+                  </div>
+                ) : (
+                  "Save Shifts"
+                )}
               </button>
             </div>
           </form>
@@ -648,7 +724,7 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
         onClose={() => setShowEmployeeSelection(false)}
         onSelect={handleEmployeeSelect}
         activeShiftType={activeShiftType}
-        shifts={shifts}
+        shifts={modalShifts}
       />
 
       <TableAssignmentPopup

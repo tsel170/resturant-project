@@ -18,13 +18,13 @@ const Tables = () => {
       <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
         {tables.map((table) => (
           <div
-            key={table.id}
+            key={table.tableNumber}
             className={`rounded-xl border-2 ${getTableStyle(
               table.isOccupied
             )} p-4 text-center shadow-sm transition-all duration-200`}
           >
             <h3 className="mb-2 text-lg font-semibold text-gray-700">
-              Table {table.id}
+              Table {table.tableNumber}
             </h3>
             <div className="mb-2 flex justify-center text-3xl">
               {"🪑".repeat(table.seats / 2)}

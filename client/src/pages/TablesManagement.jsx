@@ -12,7 +12,7 @@ const TablesManagement = () => {
   const { tables, updateTable, setTables } = useContext(AuthContext)
 
   const handleAssignTable = (table) => {
-    updateTable(table.number, { isOccupied: !table.isOccupied })
+    updateTable(table.tableNumber, { isOccupied: !table.isOccupied })
   }
 
   return (
@@ -48,8 +48,8 @@ const TablesManagement = () => {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {tables.map((table) => (
               <TableCard
-                key={table.number}
-                tableNumber={table.number}
+                key={table.tableNumber}
+                tableNumber={table.tableNumber}
                 seats={table.seats}
                 orders={table.orders}
                 isOccupied={table.isOccupied}

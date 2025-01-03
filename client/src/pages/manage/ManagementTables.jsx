@@ -21,11 +21,8 @@ const TableIcon = () => (
 )
 
 const ManagementTables = () => {
-  const [tables, setTables] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [branchId, setBranchId] = useState(null)
+
   const [newTable, setNewTable] = useState({
     tableNumber: 0,
     seats: 0,
@@ -49,36 +46,10 @@ const ManagementTables = () => {
 
   const [isEditing, setIsEditing] = useState(false)
   const [editError, setEditError] = useState(null)
-
+  const { tables, loading, error, branchId } = useContext(AuthContext)
   const filteredTables = tables.filter((table) =>
     table.tableNumber?.toString().includes(searchQuery.trim())
   )
-
-  useEffect(() => {
-    const fetchTables = async () => {
-      try {
-        const response = await axios.get(
-          import.meta.env.VITE_SERVER + "/api/branches/allBranches"
-        )
-        console.log(response.data[0].tables)
-
-        if (response.data[0].tables) {
-          const sortedTables = response.data[0].tables.sort(
-            (a, b) => a.tableNumber - b.tableNumber
-          )
-          setTables(sortedTables)
-          setBranchId(response.data[0]._id)
-          setLoading(false)
-        }
-      } catch (err) {
-        setError("Failed to fetch tables")
-        setLoading(false)
-        console.error("Error fetching tables:", err)
-      }
-    }
-
-    fetchTables()
-  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()

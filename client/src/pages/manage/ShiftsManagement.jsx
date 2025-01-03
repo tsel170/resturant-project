@@ -16,7 +16,7 @@ const ShiftsManagement = () => {
       end: "2024-03-21",
     },
   ])
-  const { employees, setEmployees } = useContext(AuthContext)
+
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState(null)
 
@@ -114,6 +114,9 @@ const ShiftsManagement = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         selectedDate={selectedDate}
+        fetchShifts={fetchShifts}
+        events={events}
+        setEvents={setEvents}
       />
     </DefaultPage>
   )
