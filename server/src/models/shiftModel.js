@@ -35,9 +35,20 @@ const shiftSchema = new mongoose.Schema({
       },
       required: false,
     },
-
   ],
-
+  meals: [
+    {
+      meal: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Meal",
+        required: false,
+      },
+      title: {
+        type: String,
+        required: false,
+      },
+    },
+  ],
 });
 
 const Shift = mongoose.model("Shift", shiftSchema);
