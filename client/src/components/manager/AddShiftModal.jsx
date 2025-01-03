@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useContext } from "react"
 import { AuthContext } from "../../context/AuthContext"
+import axios from "axios"
 
 const WaiterIcon = () => (
   <svg
@@ -42,12 +43,18 @@ const EmployeeSelectionPopup = ({
 }) => {
   const { employees } = useContext(AuthContext)
   const dialogRef = useRef(null)
+  const [isAnimating, setIsAnimating] = useState(false)
 
   useEffect(() => {
     if (isOpen) {
+      setIsAnimating(true)
       dialogRef.current?.showModal()
     } else {
-      dialogRef.current?.close()
+      setIsAnimating(false)
+      const timer = setTimeout(() => {
+        dialogRef.current?.close()
+      }, 400) // Match this with the transition duration
+      return () => clearTimeout(timer)
     }
   }, [isOpen])
 
@@ -82,10 +89,11 @@ const EmployeeSelectionPopup = ({
   return (
     <dialog
       ref={dialogRef}
-      className="w-[800px] rounded-lg p-0"
-      onClose={onClose}
+      className={`w-[800px] rounded-lg p-0 backdrop:bg-gray-800/60 backdrop:backdrop-blur-sm ${isAnimating ? "scale-100 opacity-100" : "scale-95 opacity-0"} duration-400 transition-all ease-out`}
     >
-      <div className="p-4">
+      <div
+        className={`p-4 ${isAnimating ? "translate-y-0" : "-translate-y-4"} duration-400 transition-transform ease-out`}
+      >
         <h3 className="mb-4 text-lg font-semibold">Select Employee</h3>
         <div className="grid grid-cols-2 gap-4">
           {/* Waiters Section */}
@@ -100,7 +108,7 @@ const EmployeeSelectionPopup = ({
                     onClose()
                   }}
                   disabled={isEmployeeInShift(employee)}
-                  className={`flex w-full items-center gap-3 rounded px-3 py-2 text-left transition-colors ${
+                  className={`flex w-full items-center gap-3 rounded px-3 py-2 text-left transition-all duration-300 ${
                     isEmployeeInShift(employee)
                       ? "cursor-not-allowed bg-gray-100 opacity-50"
                       : "hover:bg-gray-100"
@@ -134,7 +142,7 @@ const EmployeeSelectionPopup = ({
                     onClose()
                   }}
                   disabled={isEmployeeInShift(employee)}
-                  className={`flex w-full items-center gap-3 rounded px-3 py-2 text-left transition-colors ${
+                  className={`flex w-full items-center gap-3 rounded px-3 py-2 text-left transition-all duration-300 ${
                     isEmployeeInShift(employee)
                       ? "cursor-not-allowed bg-gray-100 opacity-50"
                       : "hover:bg-gray-100"
@@ -169,10 +177,125 @@ const EmployeeSelectionPopup = ({
   )
 }
 
+const TableAssignmentPopup = ({ isOpen, onClose, onConfirm }) => {
+  const { tables } = useContext(AuthContext)
+  const [selectedTables, setSelectedTables] = useState([])
+  const [isAnimating, setIsAnimating] = useState(false)
+  const dialogRef = useRef(null)
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsAnimating(true)
+      dialogRef.current?.showModal()
+    } else {
+      setIsAnimating(false)
+      const timer = setTimeout(() => {
+        dialogRef.current?.close()
+      }, 400) // Match this with the transition duration
+      return () => clearTimeout(timer)
+    }
+  }, [isOpen])
+
+  const handleTableToggle = (tableNumber) => {
+    setSelectedTables((prev) =>
+      prev.includes(tableNumber)
+        ? prev.filter((t) => t !== tableNumber)
+        : [...prev, tableNumber]
+    )
+  }
+
+  return (
+    <dialog
+      ref={dialogRef}
+      className={`w-[800px] rounded-lg p-0 backdrop:bg-gray-800/60 backdrop:backdrop-blur-sm ${isAnimating ? "scale-100 opacity-100" : "scale-95 opacity-0"} duration-400 transition-all ease-out`}
+    >
+      <div
+        className={`p-6 ${isAnimating ? "translate-y-0" : "-translate-y-4"} duration-400 transition-transform ease-out`}
+      >
+        <h3 className="mb-4 text-xl font-semibold text-gray-800">
+          Assign Tables
+        </h3>
+        <div className="mb-4 grid grid-cols-4 gap-3">
+          {(tables || [])
+            .sort((a, b) => a.number - b.number)
+            .map((table) => (
+              <button
+                key={table.number}
+                onClick={() => handleTableToggle(table.number)}
+                className={`group flex flex-col items-center justify-center rounded-lg border-2 p-4 transition-all duration-300 ${
+                  selectedTables.includes(table.number)
+                    ? "border-blue-600 bg-blue-50 text-blue-700 shadow-md"
+                    : "border-gray-200 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md"
+                }`}
+              >
+                <div className="mb-2 text-3xl font-semibold">
+                  {table.number}
+                </div>
+                <div
+                  className={`flex items-center gap-2 rounded-full px-3 py-1 transition-colors duration-300 ${
+                    selectedTables.includes(table.number)
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-gray-100 text-gray-600 group-hover:bg-blue-50 group-hover:text-blue-600"
+                  }`}
+                >
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  <span className="text-sm font-medium">
+                    {table.seats} seats
+                  </span>
+                </div>
+              </button>
+            ))}
+        </div>
+        <div className="flex justify-end gap-2 border-t pt-4">
+          <button
+            onClick={() => {
+              setSelectedTables([])
+              onClose()
+            }}
+            className="rounded-md px-4 py-2 text-gray-600 transition-colors duration-300 hover:bg-gray-100"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => {
+              onConfirm(selectedTables)
+              setSelectedTables([])
+              onClose()
+            }}
+            className={`rounded-md px-4 py-2 transition-all duration-300 ${
+              selectedTables.length === 0
+                ? "cursor-not-allowed bg-gray-300"
+                : "bg-blue-600 text-white shadow-md hover:bg-blue-700 hover:shadow-lg"
+            }`}
+            disabled={selectedTables.length === 0}
+          >
+            Confirm ({selectedTables.length} tables)
+          </button>
+        </div>
+      </div>
+    </dialog>
+  )
+}
+
 const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
+  const { tables } = useContext(AuthContext)
   const [isAnimating, setIsAnimating] = useState(false)
   const [showEmployeeSelection, setShowEmployeeSelection] = useState(false)
   const [activeShiftType, setActiveShiftType] = useState(null)
+  const [showTableAssignment, setShowTableAssignment] = useState(false)
+  const [selectedEmployee, setSelectedEmployee] = useState(null)
 
   // Initialize shifts with empty state
   const initialShiftState = {
@@ -223,31 +346,90 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
       )
 
       if (isEmployeeAlreadyInShift) {
-        // You might want to add a toast/alert here to inform the user
         console.log("Employee already exists in this shift")
         return
       }
 
-      setShifts((prev) => ({
-        ...prev,
-        [activeShiftType]: {
-          ...prev[activeShiftType],
-          users: [...prev[activeShiftType].users, employee],
-        },
-      }))
+      // If employee is a waiter, show table assignment popup
+      if (employee.jobTitle?.toLowerCase() === "waiter") {
+        setSelectedEmployee(employee)
+        setShowTableAssignment(true)
+      } else {
+        // For non-waiters, add directly to shift
+        addEmployeeToShift(employee, [])
+      }
     }
   }
 
-  const handleSubmit = (e) => {
+  const addEmployeeToShift = (employee, tables = []) => {
+    setShifts((prev) => ({
+      ...prev,
+      [activeShiftType]: {
+        ...prev[activeShiftType],
+        users: [
+          ...prev[activeShiftType].users,
+          {
+            ...employee,
+            assignedTables: tables,
+          },
+        ],
+      },
+    }))
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Here you can handle the submission of the shifts data
-    console.log("Submitting shifts:", {
-      date: selectedDate,
-      shifts,
-    })
-    onClose()
-    // Reset shifts after submission
-    setShifts(initialShiftState)
+
+    // Helper function to format users data
+    const formatUsersData = (users) => {
+      return users.map((user) => ({
+        user: user.id, // Assuming this is the MongoDB _id
+        table:
+          user.jobTitle?.toLowerCase() === "waiter" ? user.assignedTables : [],
+        startShift: null,
+        endShift: null,
+      }))
+    }
+
+    try {
+      // Format AM shift request
+      if (shifts.am.users.length > 0) {
+        const amShiftData = {
+          date: selectedDate.toISOString().split("T")[0], // Format: YYYY-MM-DD
+          timeShift: "am",
+          users: formatUsersData(shifts.am.users),
+        }
+
+        await axios.post(
+          import.meta.env.VITE_SERVER + "/api/shifts/addShift",
+          amShiftData
+        )
+      }
+
+      // Format PM shift request
+      if (shifts.pm.users.length > 0) {
+        const pmShiftData = {
+          date: selectedDate.toISOString().split("T")[0], // Format: YYYY-MM-DD
+          timeShift: "pm",
+          users: formatUsersData(shifts.pm.users),
+        }
+
+        await axios.post(
+          "http://localhost:5000/api/shifts/addShift",
+          pmShiftData
+        )
+      }
+
+      onClose()
+      // Reset shifts after successful submission
+      setShifts({
+        am: { users: [], startTime: "08:00", endTime: "15:00" },
+        pm: { users: [], startTime: "15:00", endTime: "22:00" },
+      })
+    } catch (error) {
+      console.error("Error saving shifts:", error)
+      // You might want to add error handling/notification here
+    }
   }
 
   const handleRemoveUser = (shiftType, userToRemove) => {
@@ -292,46 +474,57 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
     <>
       <dialog
         ref={dialogRef}
-        className={`w-full max-w-2xl rounded-lg p-0 backdrop:bg-gray-800/60 backdrop:backdrop-blur-sm ${isAnimating ? "scale-100 opacity-100" : "scale-95 opacity-0"} transition-all duration-200 ease-out`}
+        className={`w-full max-w-5xl rounded-lg p-0 backdrop:bg-gray-800/60 backdrop:backdrop-blur-sm ${isAnimating ? "scale-100 opacity-100" : "scale-95 opacity-0"} transition-all duration-200 ease-out`}
         onClose={onClose}
       >
         <div
           className={`p-6 ${isAnimating ? "translate-y-0" : "-translate-y-4"} transition-transform duration-200 ease-out`}
         >
-          <h2 className="mb-4 text-xl font-semibold">
+          <h2 className="mb-6 text-2xl font-semibold">
             Add Shifts for {selectedDate?.toLocaleDateString()}
           </h2>
           <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-8">
               {/* AM Shift Section */}
-              <div className="rounded-lg border border-gray-200 p-4">
-                <div className="mb-4 text-center">
-                  <h3 className="text-lg font-semibold">AM Shift</h3>
+              <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div className="mb-6 text-center">
+                  <h3 className="text-xl font-semibold">AM Shift</h3>
                   <p className="text-sm text-gray-600">08:00 - 15:00</p>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <button
                     type="button"
                     onClick={() => handleAddUserClick("am")}
-                    className="w-full rounded-md bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700"
+                    className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700"
                   >
                     Add Employee
                   </button>
 
-                  <div className="max-h-40 overflow-y-auto">
+                  <div className="max-h-[400px] space-y-3 overflow-y-auto">
                     {shifts.am.users.map((user, index) => (
                       <div
                         key={index}
-                        className="mb-2 flex items-center justify-between rounded bg-gray-50 px-3 py-2"
+                        className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3"
                       >
                         <div className="flex items-center gap-3">
                           <img
                             src={getWorkerAvatar(user.email, user.gender)}
                             alt={`Avatar for ${user.name}`}
-                            className="h-8 w-8 rounded-full"
+                            className="h-10 w-10 rounded-full"
                           />
-                          <span>{user.name}</span>
+                          <div>
+                            <span className="font-medium">{user.name}</span>
+                            {user.jobTitle?.toLowerCase() === "waiter" &&
+                              user.assignedTables?.length > 0 && (
+                                <div className="mt-1 text-sm text-gray-500">
+                                  Tables:{" "}
+                                  {user.assignedTables
+                                    .sort((a, b) => a - b)
+                                    .join(", ")}
+                                </div>
+                              )}
+                          </div>
                           {user.jobTitle?.toLowerCase() === "waiter" ? (
                             <WaiterIcon />
                           ) : (
@@ -341,9 +534,19 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
                         <button
                           type="button"
                           onClick={() => handleRemoveUser("am", user)}
-                          className="text-red-600 hover:text-red-800"
+                          className="rounded-full p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600"
                         >
-                          ×
+                          <svg
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
                         </button>
                       </div>
                     ))}
@@ -351,42 +554,68 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
                 </div>
               </div>
 
-              {/* PM Shift Section */}
-              <div className="rounded-lg border border-gray-200 p-4">
-                <div className="mb-4 text-center">
-                  <h3 className="text-lg font-semibold">PM Shift</h3>
+              {/* PM Shift Section - Same structure as AM but with pm data */}
+              <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div className="mb-6 text-center">
+                  <h3 className="text-xl font-semibold">PM Shift</h3>
                   <p className="text-sm text-gray-600">15:00 - 22:00</p>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <button
                     type="button"
                     onClick={() => handleAddUserClick("pm")}
-                    className="w-full rounded-md bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700"
+                    className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700"
                   >
                     Add Employee
                   </button>
 
-                  <div className="max-h-40 overflow-y-auto">
+                  <div className="max-h-[400px] space-y-3 overflow-y-auto">
                     {shifts.pm.users.map((user, index) => (
                       <div
                         key={index}
-                        className="mb-2 flex items-center justify-between rounded bg-gray-50 px-3 py-2"
+                        className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3"
                       >
                         <div className="flex items-center gap-3">
                           <img
                             src={getWorkerAvatar(user.email, user.gender)}
                             alt={`Avatar for ${user.name}`}
-                            className="h-8 w-8 rounded-full"
+                            className="h-10 w-10 rounded-full"
                           />
-                          <span>{user.name}</span>
+                          <div>
+                            <span className="font-medium">{user.name}</span>
+                            {user.jobTitle?.toLowerCase() === "waiter" &&
+                              user.assignedTables?.length > 0 && (
+                                <div className="mt-1 text-sm text-gray-500">
+                                  Tables:{" "}
+                                  {user.assignedTables
+                                    .sort((a, b) => a - b)
+                                    .join(", ")}
+                                </div>
+                              )}
+                          </div>
+                          {user.jobTitle?.toLowerCase() === "waiter" ? (
+                            <WaiterIcon />
+                          ) : (
+                            <ChefIcon />
+                          )}
                         </div>
                         <button
                           type="button"
                           onClick={() => handleRemoveUser("pm", user)}
-                          className="text-red-600 hover:text-red-800"
+                          className="rounded-full p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600"
                         >
-                          ×
+                          <svg
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
                         </button>
                       </div>
                     ))}
@@ -395,17 +624,17 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end space-x-3">
+            <div className="mt-8 flex justify-end space-x-3">
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
               >
                 Save Shifts
               </button>
@@ -420,6 +649,19 @@ const AddShiftModal = ({ isOpen, onClose, selectedDate }) => {
         onSelect={handleEmployeeSelect}
         activeShiftType={activeShiftType}
         shifts={shifts}
+      />
+
+      <TableAssignmentPopup
+        isOpen={showTableAssignment}
+        onClose={() => {
+          setShowTableAssignment(false)
+          setSelectedEmployee(null)
+        }}
+        onConfirm={(tables) => {
+          addEmployeeToShift(selectedEmployee, tables)
+          setShowTableAssignment(false)
+          setSelectedEmployee(null)
+        }}
       />
     </>
   )
