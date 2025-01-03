@@ -2,26 +2,22 @@ POST http://localhost:5000/api/bons/addBon
 Content-Type: application/json
 
 {
-
-  "user": "676d0974ccb270069df3e06f",
   "branch": "676e884378317a74ac0817b2",
+  "user": "676d0974ccb270069df3e06f",
   "meals": [
     {
       "meal": "67672a1939cb7bdf4c03f9ae",
       "quantity": 2,
-      "note": "Extra spicy",
-      "mealTitle": "Pizza"
-
+      "note": "Extra spicy"
     },
     {
       "meal": "676aa582b08100a707be237e",
       "quantity": 1,
-      "note": "No onions",
-      "mealTitle": "Burger"
-
+      "note": "No onions"
     }
   ],
-  "tableNumber": 5
+  "shiftId": "6777b1e4f8552f951fc7b69d",
+  "tableNumber": 4
 }
 
 ###
@@ -46,6 +42,7 @@ Content-Type: application/json
       "note": "No onions"
     }
   ],
+  "shift": "6772d5c9735b56ed5974f385",
   "tableNumber": 4
 }
 ###

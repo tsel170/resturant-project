@@ -51,7 +51,7 @@ export const deleteProduct = async (req, res) => {
       error: err.message,
     });
   }
-};
+}; 
 
 export const updateProduct = async (req, res) => {
   try {

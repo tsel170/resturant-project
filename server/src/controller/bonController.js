@@ -1,20 +1,19 @@
-
 import Bon from "../models/bonModel.js";
 import Meal from "../models/mealModel.js";
 import User from "../models/userModel.js";
 import Branch from "../models/branchModel.js";
+import Shift from "../models/shiftModel.js";
 
 
 export const addBon = async (req, res) => {
-  const { meals, user, tableNumber, branch, mealTitle } = req.body;
+  const { branch, meals, user, tableNumber, mealTitle, shiftId } = req.body;
 
-  if (!meals || !user || !tableNumber || !branch) {
+  if (!meals || !user || !tableNumber || !branch || !shiftId) {
     return res.status(400).json({ message: "Missing required fields" });
+
   }
 
   try {
-
-    const { branch, user, meals, tableNumber, mealTitle } = req.body
     const newBon = await Bon.create(req.body)
 
 
@@ -23,10 +22,10 @@ export const addBon = async (req, res) => {
     })
 
 
-    const newMealsWithTitle = newMeals.map((meal) => ({
-      ...meal,
-      mealTitle: mealTitle,
-    }))
+    const mealsForShift = meals.map(meal => ({
+      meal: meal.meal,
+      title: mealTitle
+    }));
 
 
     if (!newMeals) {
@@ -39,6 +38,15 @@ export const addBon = async (req, res) => {
 
     await User.findByIdAndUpdate(user, {
       $push: { bons: newBon._id },
+    })
+
+    const shift = await Shift.findById(shiftId);
+    if (!shift) {
+      return res.status(404).json({ message: "Shift not found" });
+    }
+
+    await Shift.findByIdAndUpdate(shiftId, {
+      $push: { meals: { $each: mealsForShift } },
     })
 
     res.status(201).json({
