@@ -5,7 +5,7 @@ const Orders = ({ params }) => {
   console.log(orders)
   return (
     <div
-      className="mx-auto max-w-3xl rounded-lg bg-white p-4 shadow-md duration-200 hover:shadow-lg"
+      className="mx-auto max-w-3xl rounded-lg bg-white p-4 shadow-md duration-200"
       key={orders.id}
     >
       <div className="mb-3 flex items-center justify-between">
@@ -19,7 +19,7 @@ const Orders = ({ params }) => {
         {orders.map((order) => (
           <div
             key={order.id}
-            className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-2 hover:bg-gray-100"
+            className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-2"
           >
             <div className="space-y-0.5">
               <p className="font-medium text-gray-800">
