@@ -41,13 +41,36 @@ export const AuthProvider = ({ children }) => {
   }
 
   const [orders, setOrders] = useState([])
-  const [tables, setTables] = useState([
-    { number: 1, seats: 4, orders: [], isOccupied: false },
-    { number: 2, seats: 2, orders: [], isOccupied: false },
-    { number: 3, seats: 6, orders: [], isOccupied: false },
-    { number: 4, seats: 4, orders: [], isOccupied: false },
-    // Add more tables as needed
-  ])
+
+  const [tables, setTables] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [branchId, setBranchId] = useState(null)
+  useEffect(() => {
+    const fetchTables = async () => {
+      try {
+        const response = await axios.get(
+          import.meta.env.VITE_SERVER + "/api/branches/allBranches"
+        )
+        console.log(response.data[0].tables)
+
+        if (response.data[0].tables) {
+          const sortedTables = response.data[0].tables.sort(
+            (a, b) => a.tableNumber - b.tableNumber
+          )
+          setTables(sortedTables)
+          setBranchId(response.data[0]._id)
+          setLoading(false)
+        }
+      } catch (err) {
+        setError("Failed to fetch tables")
+        setLoading(false)
+        console.error("Error fetching tables:", err)
+      }
+    }
+
+    fetchTables()
+  }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -113,6 +136,9 @@ export const AuthProvider = ({ children }) => {
         employees,
         setEmployees,
         isLoading,
+        loading,
+        error,
+        branchId,
       }}
     >
       {children}

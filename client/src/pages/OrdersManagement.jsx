@@ -55,7 +55,7 @@ const OrdersManagement = () => {
                       Order #{order.bonNumber}
                     </h3>
                     <ul className="ml-4 list-disc text-gray-700">
-                      {order.meals.map((item, index) => (
+                      {order.meals?.map((item, index) => (
                         <li key={index}>{item.mealTitle}</li>
                       ))}
                     </ul>
@@ -85,7 +85,7 @@ const OrdersManagement = () => {
                       Order #{order.bonNumber}
                     </h3>
                     <ul className="ml-4 list-disc text-gray-700">
-                      {order.meals.map((item, index) => (
+                      {order.meals?.map((item, index) => (
                         <li key={index}>{item.mealTitle}</li>
                       ))}
                     </ul>

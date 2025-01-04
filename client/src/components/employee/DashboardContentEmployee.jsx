@@ -11,8 +11,8 @@ const DashboardContentEmployee = () => {
 
   return (
     <>
-      {user.jobTitle === "waiter" && <DashboardContentWaiter />}
-      {user.jobTitle === "chef" && <DashboardContentChef />}
+      {user?.jobTitle === "waiter" && <DashboardContentWaiter />}
+      {user?.jobTitle === "chef" && <DashboardContentChef />}
     </>
   )
 }
