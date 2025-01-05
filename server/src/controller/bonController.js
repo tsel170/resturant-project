@@ -11,6 +11,8 @@ export const addBon = async (req, res) => {
     return res.status(400).json({ message: "Missing required fields" });
   }
 
+  console.log(req.body)
+
   try {
     const newMeals = await Meal.find({
       _id: { $in: meals.map((meal) => meal.meal) },
