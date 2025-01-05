@@ -140,6 +140,31 @@ export const updateTableSeats = async (req, res) => {
   }
 }
 
+export const updateTableOccupied = async (req, res) => {
+  const { branchId, tableNumber } = req.body
+
+  try {
+    const branch = await Branch.findById(branchId)
+    const table = branch.tables.find(
+      (table) => table.tableNumber === tableNumber
+    )
+    table.occuipied = !table.occuipied
+    await branch.save()
+
+    res.status(200).json({
+      success: true,
+      message: "Table seats updated successfully",
+      branch,
+    })
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to update table seats",
+      error: err.message,
+    })
+  }
+}
+
 export const deleteTable = async (req, res) => {
   const { branchId, tableNumber } = req.body
   

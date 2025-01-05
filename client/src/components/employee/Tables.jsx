@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom"
 
 const Tables = () => {
   const navigate = useNavigate()
-  const getTableStyle = (isOccupied) =>
-    isOccupied ? "bg-red-50 border-red-200 " : "bg-green-50 border-green-200 "
+  const getTableStyle = (occuipied) =>
+    occuipied ? "bg-red-50 border-red-200 " : "bg-green-50 border-green-200 "
 
   // Example data - you can replace this with your actual table status data
   const { tables } = useContext(AuthContext)
@@ -20,7 +20,7 @@ const Tables = () => {
           <div
             key={table.tableNumber}
             className={`rounded-xl border-2 ${getTableStyle(
-              table.isOccupied
+              table.occuipied
             )} p-4 text-center shadow-sm transition-all duration-200`}
           >
             <h3 className="mb-2 text-lg font-semibold text-gray-700">
@@ -34,12 +34,12 @@ const Tables = () => {
             </p>
             <p
               className={`rounded-full px-3 py-1 text-sm font-medium ${
-                table.isOccupied
+                table.occuipied
                   ? "bg-red-100 text-red-700"
                   : "bg-green-100 text-green-700"
               }`}
             >
-              {table.isOccupied ? "Occupied" : "Available"}
+              {table.occuipied ? "Occupied" : "Available"}
             </p>
           </div>
         ))}

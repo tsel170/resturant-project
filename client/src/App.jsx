@@ -22,30 +22,28 @@ import ManagementTables from "./pages/manage/ManagementTables.jsx"
 function App() {
   return (
     <BrowserRouter>
-      <GoogleOAuthProvider clientId={import.meta.env.VITE_CLIENT_ID}>
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Login />} />(
-            <>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/enter-shift" element={<EnterShift />} />
-              <Route path="/personal-space" element={<PersonalSpace />} />
-              <Route path="/orders" element={<OrdersManagement />} />
-              <Route path="/tables" element={<TablesManagement />} />
-              <Route path="/manager" element={<ManagerComponent />} />
-              <Route path="/management" element={<Management />} />
-              <Route path="/statistics" element={<Statistics />} />
-              <Route path="/manage" element={<Management />} />
-              <Route path="/manageshifts" element={<ShiftsManagement />} />
-              <Route path="/manageworkers" element={<WorkersManagement />} />
-              <Route path="/managemenu" element={<MenuManagement />} />
-              <Route path="/managetables" element={<ManagementTables />} />
-            </>
-            )
-            <Route path="/*" element={<E404 />} />
-          </Routes>
-        </AuthProvider>
-      </GoogleOAuthProvider>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<Login />} />(
+          <>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/enter-shift" element={<EnterShift />} />
+            <Route path="/personal-space" element={<PersonalSpace />} />
+            <Route path="/orders" element={<OrdersManagement />} />
+            <Route path="/tables" element={<TablesManagement />} />
+            <Route path="/manager" element={<ManagerComponent />} />
+            <Route path="/management" element={<Management />} />
+            <Route path="/statistics" element={<Statistics />} />
+            <Route path="/manage" element={<Management />} />
+            <Route path="/manageshifts" element={<ShiftsManagement />} />
+            <Route path="/manageworkers" element={<WorkersManagement />} />
+            <Route path="/managemenu" element={<MenuManagement />} />
+            <Route path="/managetables" element={<ManagementTables />} />
+          </>
+          )
+          <Route path="/*" element={<E404 />} />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   )
 }

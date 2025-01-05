@@ -5,11 +5,14 @@ import Branch from "../models/branchModel.js";
 
 
 export const addBon = async (req, res) => {
+
   const { branch, meals, user, tableNumber, mealTitle } = req.body;
 
   if (!meals || !user || !tableNumber || !branch) {
+
     return res.status(400).json({ message: "Missing required fields" });
   }
+
 
   try {
     const newMeals = await Meal.find({
@@ -32,7 +35,9 @@ export const addBon = async (req, res) => {
 
     await Branch.findByIdAndUpdate(branch, {
       $push: { bons: newBon._id },
+
     });
+
 
     res.status(201).json({
       success: true,

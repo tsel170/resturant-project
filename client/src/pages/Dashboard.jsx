@@ -10,7 +10,7 @@ import DefaultPage from "../components/general/DefaultPage"
 const Dashboard = () => {
   const { user } = useContext(AuthContext)
   return (
-    <DefaultPage role={user?.role} title="Dashboard">
+    <DefaultPage role={user?.role} title="Dashboard" backButton>
       {user?.role === "manager" ? (
         <DashboardContentManager />
       ) : (
