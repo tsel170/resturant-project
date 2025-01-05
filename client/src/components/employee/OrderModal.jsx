@@ -11,7 +11,7 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
     paid: false,
   })
 
-  const { orders, fetchOrsers } = useContext(AuthContext)
+  const { orders, fetchOrsers, user } = useContext(AuthContext)
 
   const [mealSearch, setMealSearch] = useState("")
   const [selectedMeal, setSelectedMeal] = useState(null)
@@ -34,7 +34,7 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
       ...newOrder,
       BonDate: new Date(),
       branch: "676e884378317a74ac0817b2",
-      user: "676d0974ccb270069df3e06f", //TODO: get user id from context
+      user: user._id, //TODO: get user id from context
       tableNumber: tableNumber,
       ready: false,
       paid: false,
@@ -55,7 +55,7 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
   const addItem = (meal) => {
     setNewOrder((prev) => ({
       ...prev,
-      meals: [...prev.meals, { title: meal.title, quantity: 1, notes: "" }],
+      meals: [...prev.meals, { ...meal, quantity: 1, notes: "" }],
     }))
   }
 
@@ -79,7 +79,7 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
     console.log(selectedMeal)
 
     const newMeal = {
-      mealId: selectedMeal._id,
+      meal: selectedMeal._id,
       title: selectedMeal.title,
       quantity: 1,
       price: selectedMeal.price,
