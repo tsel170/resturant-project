@@ -14,12 +14,9 @@ export const addBon = async (req, res) => {
   }
 
 
-  console.log(req.body)
-
-
   try {
     const newMeals = await Meal.find({
-      _id: { $in: meals.map((meal) => meal.meal) },
+      _id: { $in: meals.map((meal) => meal.meal) }
     }).lean();
 
     if (!newMeals || newMeals.length === 0) {
@@ -44,7 +41,6 @@ export const addBon = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      bonNumber: newBon.bonNumber,
       bon: newBon,
       meals: newMeals,
       message: "Bon created successfully",
@@ -58,6 +54,7 @@ export const addBon = async (req, res) => {
 export const getAllBons = async (req, res) => {
   try {
     const Bons = await Bon.find();
+    console.log(Bons)
     res.status(200).json({
       success: true,
       Bons,
