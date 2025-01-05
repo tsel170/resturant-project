@@ -6,17 +6,16 @@ Content-Type: application/json
   "user": "676d0974ccb270069df3e06f",
   "meals": [
     {
-      "meal": "67672a1939cb7bdf4c03f9ae",
+      "meal": "677690cbbcdd3093b1ca96e9",
       "quantity": 2,
       "note": "Extra spicy"
     },
     {
-      "meal": "676aa582b08100a707be237e",
+      "meal": "67769729bcdd3093b1ca990d",
       "quantity": 1,
       "note": "No onions"
     }
   ],
-  "shiftId": "6777b1e4f8552f951fc7b69d",
   "tableNumber": 4
 }
 

@@ -10,18 +10,6 @@ Content-Type: application/json
       "table": [1, 2, 3],
       "startShift": null,
       "endShift": null
-    },
-    {
-      "user": "676d083fccb270069df3e066",
-      "table": [2],
-      "startShift": null,
-      "endShift": null
-    },
-    {
-      "user": "676d0934ccb270069df3e069",
-      "table": [3],
-      "startShift": null,
-      "endShift": null
     }
   ]
 }
