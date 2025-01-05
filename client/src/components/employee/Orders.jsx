@@ -16,7 +16,7 @@ const Orders = ({ params }) => {
       </div>
 
       <div className="grid gap-2" key={orders.id}>
-        {orders.map((order) => (
+        {orders.slice(0, 3).map((order) => (
           <div
             key={order.id}
             className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-2"

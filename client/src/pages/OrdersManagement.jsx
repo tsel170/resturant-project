@@ -13,7 +13,7 @@ const OrdersManagement = () => {
   const handleDelivered = (orderId) => {
     setOrders(
       orders.map((order) =>
-        order.id === orderId ? { ...order, delivered: true } : order
+        order.number === orderId ? { ...order, delivered: true } : order
       )
     )
   }
@@ -52,11 +52,13 @@ const OrdersManagement = () => {
                     className="transform rounded-lg border border-gray-200 bg-white p-4 shadow-md transition-transform hover:scale-105 hover:shadow-lg"
                   >
                     <h3 className="font-bold text-gray-800">
-                      Order #{order.bonNumber}
+                      Order #{order.bonNumber} for table {order.tableNumber}
                     </h3>
                     <ul className="ml-4 list-disc text-gray-700">
                       {order.meals?.map((item, index) => (
-                        <li key={index}>{item.mealTitle}</li>
+                        <li key={index}>
+                          {item.mealTitle} {item.quantity}
+                        </li>
                       ))}
                     </ul>
                     <button
