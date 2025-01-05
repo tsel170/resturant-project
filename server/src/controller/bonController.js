@@ -6,7 +6,7 @@ import Branch from "../models/branchModel.js";
 
 export const addBon = async (req, res) => {
 
-  const { branch, meals, user, tableNumber, mealTitle } = req.body;
+  const { branch, meals, user, tableNumber, mealTitle, note } = req.body;
 
   if (!meals || !user || !tableNumber || !branch) {
 
@@ -27,21 +27,39 @@ export const addBon = async (req, res) => {
       ...req.body,
       meals: newMeals.map(meal => ({
         meal: meal._id,
+        mealTitle: meal.title,
         quantity: meals.find(m => m.meal.toString() === meal._id.toString())?.quantity || 1
       }))
     };
 
     const newBon = await Bon.create(bonData);
+    console.log('Created new bon:', newBon);
 
     await Branch.findByIdAndUpdate(branch, {
-      $push: { bons: newBon._id },
-
+      $push: { 
+        bons: {
+          bon: newBon._id,
+          delivered: false,
+          ready: false,
+          paid: false
+        }
+      },
     });
 
+    await User.findByIdAndUpdate(user, {
+      $push: { 
+        bons: {
+          bon: newBon._id,
+          delivered: false,
+          ready: false,
+          paid: false
+        }
+      },
+    });
 
     res.status(201).json({
       success: true,
-      bon: newBon,
+      newBon,
       meals: newMeals,
       message: "Bon created successfully",
     });
@@ -53,13 +71,21 @@ export const addBon = async (req, res) => {
 
 export const getAllBons = async (req, res) => {
   try {
-    const Bons = await Bon.find();
-    console.log(Bons)
+    const bons = await Bon.find()
+      .populate('meals.meal')
+      .populate('branch')
+      .populate('user')
+      .lean();
+    
+    console.log('Retrieved bons:', bons);
+    
     res.status(200).json({
       success: true,
-      Bons,
+      count: bons.length,
+      bons,
     });
   } catch (err) {
+    console.error('Error in getAllBons:', err);
     res.status(500).json({
       success: false,
       message: "Failed to get Bons",
