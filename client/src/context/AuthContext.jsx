@@ -76,10 +76,8 @@ export const AuthProvider = ({ children }) => {
       const response = await axios.get(
         import.meta.env.VITE_SERVER + "/api/bons/allBons"
       )
-      // Handle the response data here
-      orders.push(...response.data.Bons)
-
-      setOrders((prev) => [...prev])
+      // console.log("Response data:", response.data.bons) // Log the raw response
+      setOrders(response.data.bons)
     } catch (error) {
       console.error("Error fetching data:", error)
     }
@@ -87,6 +85,12 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     fetchOrsers()
   }, [])
+
+  // Add this useEffect to monitor orders state
+  // useEffect(() => {
+  //   console.log(orders)
+  // }, [orders])
+
   useEffect(() => {
     const fetchEmployees = async () => {
       setIsLoading(true)

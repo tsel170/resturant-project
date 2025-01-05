@@ -28,7 +28,6 @@ const TablesManagement = () => {
       console.error("Error assigning table:", error)
     }
   }
-  console.log(tables)
 
   return (
     <DefaultPage role={"employee"} title="Tables Management">
