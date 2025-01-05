@@ -1,4 +1,4 @@
-import { useContext, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import OrderModal from "./OrderModal"
 import axios from "axios"
 import { AuthContext } from "../../context/AuthContext"
@@ -7,7 +7,9 @@ const TableCard = ({
   tableNumber,
   seats,
   occuipied,
-  orders = [],
+  tableOrders,
+  ordersNumber,
+  setOrdersNumber,
   onAssign,
   updateTable,
   branchId,
@@ -15,6 +17,11 @@ const TableCard = ({
   const { fetchTables, meals } = useContext(AuthContext)
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [showOrderModal, setShowOrderModal] = useState(false)
+  const [orders, setOrders] = useState(tableOrders)
+
+  useEffect(() => {
+    setOrders(tableOrders)
+  }, [tableOrders])
 
   const handleFreeTable = () => {
     setShowConfirmation(true)
@@ -42,8 +49,10 @@ const TableCard = ({
         import.meta.env.VITE_SERVER + "/api/Bons/addBon",
         newOrder
       )
+      const updatedOrders = [...orders, newOrder]
+      setOrders(updatedOrders)
       updateTable(tableNumber, {
-        orders: [...orders, newOrder],
+        tableOrders: updatedOrders,
       })
       setShowOrderModal(false)
     } catch (error) {
@@ -76,7 +85,13 @@ const TableCard = ({
           </p>
           <p className="text-gray-600">
             <span className="font-medium">Active Orders:</span>{" "}
-            {orders.length > 0 ? orders.length : "None"}
+            <ul>
+              {orders.length > 0
+                ? orders.map((order, index) => (
+                    <li key={order.number || index}>{order.number}</li>
+                  ))
+                : "None"}
+            </ul>
           </p>
         </div>
 

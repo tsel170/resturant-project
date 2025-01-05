@@ -71,25 +71,26 @@ export const AuthProvider = ({ children }) => {
     fetchTables()
   }, [])
 
-  const fetchOrsers = async () => {
+  const fetchOrders = async () => {
     try {
       const response = await axios.get(
         import.meta.env.VITE_SERVER + "/api/bons/allBons"
       )
-      // console.log("Response data:", response.data.bons) // Log the raw response
       setOrders(response.data.bons)
+      await fetchTables()
     } catch (error) {
       console.error("Error fetching data:", error)
     }
   }
-  useEffect(() => {
-    fetchOrsers()
-  }, [])
 
-  // Add this useEffect to monitor orders state
-  // useEffect(() => {
-  //   console.log(orders)
-  // }, [orders])
+  useEffect(() => {
+    fetchOrders()
+    const interval = setInterval(() => {
+      fetchOrders()
+    }, 3000)
+
+    return () => clearInterval(interval)
+  }, [])
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -146,7 +147,7 @@ export const AuthProvider = ({ children }) => {
         toggleSidebar,
         orders,
         setOrders,
-        fetchOrsers,
+        fetchOrders,
         tables,
         setTables,
         fetchTables,
