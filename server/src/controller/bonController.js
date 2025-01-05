@@ -2,65 +2,48 @@ import Bon from "../models/bonModel.js";
 import Meal from "../models/mealModel.js";
 import User from "../models/userModel.js";
 import Branch from "../models/branchModel.js";
-import Shift from "../models/shiftModel.js";
 
 
 export const addBon = async (req, res) => {
-  const { branch, meals, user, tableNumber, mealTitle, shiftId } = req.body;
+  const { branch, meals, user, tableNumber, mealTitle } = req.body;
 
-  if (!meals || !user || !tableNumber || !branch || !shiftId) {
+  if (!meals || !user || !tableNumber || !branch) {
     return res.status(400).json({ message: "Missing required fields" });
-
   }
 
   try {
-    const newBon = await Bon.create(req.body)
-
-
     const newMeals = await Meal.find({
       _id: { $in: meals.map((meal) => meal.meal) },
-    })
+    }).lean();
 
-
-    const mealsForShift = meals.map(meal => ({
-      meal: meal.meal,
-      title: mealTitle
-    }));
-
-
-    if (!newMeals) {
-      return res.status(404).json({ message: "Meals not found" })
+    if (!newMeals || newMeals.length === 0) {
+      return res.status(404).json({ message: "Meals not found" });
     }
+
+    const bonData = {
+      ...req.body,
+      meals: newMeals.map(meal => ({
+        meal: meal._id,
+        quantity: meals.find(m => m.meal.toString() === meal._id.toString())?.quantity || 1
+      }))
+    };
+
+    const newBon = await Bon.create(bonData);
 
     await Branch.findByIdAndUpdate(branch, {
       $push: { bons: newBon._id },
-    })
-
-    await User.findByIdAndUpdate(user, {
-      $push: { bons: newBon._id },
-    })
-
-    const shift = await Shift.findById(shiftId);
-    if (!shift) {
-      return res.status(404).json({ message: "Shift not found" });
-    }
-
-    await Shift.findByIdAndUpdate(shiftId, {
-      $push: { meals: { $each: mealsForShift } },
-    })
+    });
 
     res.status(201).json({
       success: true,
       bonNumber: newBon.bonNumber,
-
       bon: newBon,
+      meals: newMeals,
       message: "Bon created successfully",
-    })
+    });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ message: "An error occurred", error: error.message });
+    res.status(500).json({ message: "An error occurred", error: error.message });
   }
 };
 
