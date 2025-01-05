@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import DefaultPage from "../../components/general/DefaultPage"
 import axios from "axios"
 import { toast } from "react-hot-toast"
 import MealCard from "../../components/manager/MealCard"
+import { AuthContext } from "../../context/AuthContext"
 
 const MEALDB_API = "https://www.themealdb.com/api/json/v1/1/search.php?s="
 
 const MenuManagement = () => {
-  const [meals, setMeals] = useState([])
+  const { meals, setMeals, isLoadingMeals, fetchMeals } =
+    useContext(AuthContext)
   const [selectedMeal, setSelectedMeal] = useState(null)
   const [showAddForm, setShowAddForm] = useState(false)
   const [newMeal, setNewMeal] = useState({
@@ -23,7 +25,7 @@ const MenuManagement = () => {
   const [newCategory, setNewCategory] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [isLoadingMeals, setIsLoadingMeals] = useState(true)
+
   const [deleteModalMeal, setDeleteModalMeal] = useState(null)
   const [showEditForm, setShowEditForm] = useState(false)
   const [editingMeal, setEditingMeal] = useState(null)
@@ -56,36 +58,6 @@ const MenuManagement = () => {
 
   // Combine default and existing categories, remove duplicates
   const allCategories = [...new Set([...uniqueCategories])]
-
-  const fetchMeals = async () => {
-    try {
-      const response = await axios.get(
-        import.meta.env.VITE_SERVER + "/api/meals/addMeal"
-      )
-      setMeals(response.data)
-    } catch (error) {
-      console.error("Error fetching meals:", error)
-      toast.error("Failed to refresh meals list")
-    }
-  }
-
-  useEffect(() => {
-    const fetchMeals = async () => {
-      setIsLoadingMeals(true)
-      try {
-        const response = await axios.get(
-          import.meta.env.VITE_SERVER + "/api/meals/getAllMeals"
-        )
-        setMeals(response.data.Meals)
-      } catch (error) {
-        console.error("Error fetching meals:", error)
-      } finally {
-        setIsLoadingMeals(false)
-      }
-    }
-
-    fetchMeals()
-  }, [])
 
   useEffect(() => {
     if (showAddExistingForm) {

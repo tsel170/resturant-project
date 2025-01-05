@@ -10,11 +10,25 @@ import DefaultPage from "../components/general/DefaultPage"
 
 const TablesManagement = () => {
   const navigate = useNavigate()
-  const { tables, updateTable, setTables } = useContext(AuthContext)
-
-  const handleAssignTable = (table) => {
-    updateTable(table.tableNumber, { isOccupied: !table.isOccupied })
+  const { tables, updateTable, branchId, fetchTables, orders } =
+    useContext(AuthContext)
+  console.log(orders)
+  const handleAssignTable = async (table) => {
+    try {
+      const response = await axios.put(
+        import.meta.env.VITE_SERVER + "/api/branches/updateTableOccupied",
+        {
+          branchId: branchId,
+          tableNumber: table.tableNumber,
+        }
+      )
+      fetchTables()
+      console.log(response)
+    } catch (error) {
+      console.error("Error assigning table:", error)
+    }
   }
+  console.log(tables)
 
   return (
     <DefaultPage role={"employee"} title="Tables Management">
@@ -25,9 +39,10 @@ const TablesManagement = () => {
             tableNumber={table.tableNumber}
             seats={table.seats}
             orders={table.orders}
-            isOccupied={table.isOccupied}
+            occuipied={table.occuipied}
             onAssign={() => handleAssignTable(table)}
             updateTable={updateTable}
+            branchId={branchId}
           />
         ))}
       </div>

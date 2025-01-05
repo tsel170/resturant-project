@@ -3,15 +3,29 @@ import { motion, AnimatePresence } from "framer-motion"
 import { AuthContext } from "../../context/AuthContext"
 import { useContext } from "react"
 
-const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber }) => {
+const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
   const [newOrder, setNewOrder] = useState({
-    meals: [{ name: "", quantity: 1, notes: "" }],
+    meals: [],
     tableNumber: tableNumber,
     ready: false,
     paid: false,
   })
 
-  const { orders } = useContext(AuthContext)
+  const { orders, fetchOrsers } = useContext(AuthContext)
+
+  const [mealSearch, setMealSearch] = useState("")
+  const [selectedMeal, setSelectedMeal] = useState(null)
+  const [order, setOrder] = useState([])
+
+  const filteredMeals = meals.filter((meal) =>
+    meal.title.toLowerCase().includes(mealSearch.toLowerCase())
+  )
+
+  const handleMealSelect = (meal) => {
+    setSelectedMeal(meal)
+    setMealSearch(meal.title)
+    setOrder([...order, meal])
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -21,7 +35,6 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber }) => {
       BonDate: new Date(),
       branch: "676e884378317a74ac0817b2",
       user: "676d0974ccb270069df3e06f", //TODO: get user id from context
-      number: orders.length + 1,
       tableNumber: tableNumber,
       ready: false,
       paid: false,
@@ -31,17 +44,18 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber }) => {
     onSubmit(orderWithTimestamp)
 
     setNewOrder({
-      meals: [{ name: "", quantity: 1, notes: "" }],
+      meals: [],
       tableNumber,
       ready: false,
       paid: false,
     })
+    fetchOrsers()
   }
 
-  const addItem = () => {
+  const addItem = (meal) => {
     setNewOrder((prev) => ({
       ...prev,
-      meals: [...prev.meals, { name: "", quantity: 1, notes: "" }],
+      meals: [...prev.meals, { title: meal.title, quantity: 1, notes: "" }],
     }))
   }
 
@@ -61,8 +75,25 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber }) => {
     }))
   }
 
-  if (!isOpen) return null
+  const handleAddMeal = (selectedMeal) => {
+    console.log(selectedMeal)
 
+    const newMeal = {
+      mealId: selectedMeal._id,
+      title: selectedMeal.title,
+      quantity: 1,
+      price: selectedMeal.price,
+      notes: "",
+    }
+    addItem(newMeal)
+    setOrder((prevOrder) => [...prevOrder, newMeal])
+
+    setOrder((prev) => [...prev])
+    setMealSearch("") // Clear search after selection
+  }
+
+  if (!isOpen) return null
+  console.log({ mealSearch })
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <motion.div className="rounded-lg bg-white p-6" layout>
@@ -94,6 +125,41 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber }) => {
               }
             `}</style>
 
+            <div className="relative mb-4">
+              <input
+                type="text"
+                value={mealSearch}
+                onChange={(e, value) => {
+                  setMealSearch(e.target.value)
+                  const mealNames = meals.map((meal) => meal.title)
+                  if (mealNames.includes(e.target.value)) {
+                    handleAddMeal(e.target.value)
+                  }
+                }}
+                placeholder="Search for a meal..."
+                className="w-full rounded-lg border p-2"
+                autoComplete="off"
+              />
+
+              {mealSearch && (
+                <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border bg-white shadow-lg">
+                  {filteredMeals.map((meal) => (
+                    <div
+                      key={meal._id}
+                      onClick={() => {
+                        setMealSearch(meal.title)
+
+                        handleAddMeal(meal)
+                      }}
+                      className="cursor-pointer p-2 hover:bg-gray-100"
+                    >
+                      {meal.title}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <AnimatePresence mode="popLayout">
               {newOrder.meals.map((item, index) => (
                 <motion.div
@@ -111,9 +177,9 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber }) => {
                         placeholder="Meal name"
                         required
                         className="w-full rounded-md border p-2"
-                        value={item.name}
+                        value={item.title}
                         onChange={(e) =>
-                          updateItem(index, "name", e.target.value)
+                          updateItem(index, "title", e.target.value)
                         }
                       />
                       <div className="mt-1 text-sm text-red-500" />

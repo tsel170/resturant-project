@@ -1,15 +1,18 @@
-import { useState } from "react"
+import { useContext, useState } from "react"
 import OrderModal from "./OrderModal"
 import axios from "axios"
+import { AuthContext } from "../../context/AuthContext"
 
 const TableCard = ({
   tableNumber,
   seats,
-  isOccupied,
+  occuipied,
   orders = [],
   onAssign,
   updateTable,
+  branchId,
 }) => {
+  const { fetchTables, meals } = useContext(AuthContext)
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [showOrderModal, setShowOrderModal] = useState(false)
 
@@ -17,11 +20,15 @@ const TableCard = ({
     setShowConfirmation(true)
   }
 
-  const confirmFreeTable = () => {
-    updateTable(tableNumber, {
-      isOccupied: false,
-      orders: [],
-    })
+  const confirmFreeTable = async () => {
+    await axios.put(
+      import.meta.env.VITE_SERVER + "/api/branches/updateTableOccupied",
+      {
+        branchId: branchId,
+        tableNumber: tableNumber,
+      }
+    )
+    fetchTables()
     setShowConfirmation(false)
   }
 
@@ -29,30 +36,27 @@ const TableCard = ({
     setShowOrderModal(true)
   }
 
-  const handleSubmitOrder = (newOrder) => {
-    axios
-      .post(import.meta.env.VITE_SERVER + "/api/Bons/addBon", newOrder)
-      .then((response) => {
-        updateTable(tableNumber, {
-          orders: [...orders, newOrder],
-        })
-        setShowOrderModal(false)
+  const handleSubmitOrder = async (newOrder) => {
+    try {
+      await axios.post(
+        import.meta.env.VITE_SERVER + "/api/Bons/addBon",
+        newOrder
+      )
+      updateTable(tableNumber, {
+        orders: [...orders, newOrder],
       })
-      .catch((error) => {
-        console.error("Error submitting order:", error)
-        alert("Error submitting order")
-      })
-    updateTable(tableNumber, {
-      orders: [...orders, newOrder],
-    })
-    setShowOrderModal(false)
+      setShowOrderModal(false)
+    } catch (error) {
+      console.error("Error submitting order:", error)
+      alert("Error submitting order")
+    }
   }
 
   return (
     <>
       <div
         className={`rounded-xl border-2 ${
-          isOccupied ? "bg-red-50" : "bg-white"
+          occuipied ? "bg-red-50" : "bg-white"
         } p-6 shadow-sm transition-all hover:shadow-md`}
       >
         <div className="mb-4 flex items-center justify-between">
@@ -61,7 +65,7 @@ const TableCard = ({
           </h2>
           <div
             className={`h-4 w-4 rounded-full ${
-              isOccupied ? "bg-red-500" : "bg-green-500"
+              occuipied ? "bg-red-500" : "bg-green-500"
             }`}
           ></div>
         </div>
@@ -76,7 +80,7 @@ const TableCard = ({
           </p>
         </div>
 
-        {!isOccupied && (
+        {!occuipied && (
           <button
             onClick={onAssign}
             className="mt-4 w-full rounded-lg bg-blue-600 py-2 text-white transition-colors hover:bg-blue-700 active:bg-blue-800"
@@ -85,7 +89,7 @@ const TableCard = ({
           </button>
         )}
 
-        {isOccupied && (
+        {occuipied && (
           <div className="mt-4 space-y-2">
             <button
               onClick={handleAddOrder}
@@ -111,6 +115,7 @@ const TableCard = ({
         onClose={() => setShowOrderModal(false)}
         onSubmit={handleSubmitOrder}
         tableNumber={tableNumber}
+        meals={meals}
       />
 
       {/* Confirmation Dialog */}

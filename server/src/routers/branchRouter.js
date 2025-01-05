@@ -8,6 +8,7 @@ import {
   addTable,
   updateTableSeats,
   deleteTable,
+  updateTableOccupied
 } from "../controller/branchController.js";
 
 const Router = express.Router();
@@ -20,6 +21,7 @@ Router.put("/updateBranch/:id", updateBranch);
 Router.delete("/deleteBranch/:id", deleteBranch);
 Router.put("/addTable", addTable);
 Router.put("/updateTableSeats", updateTableSeats);
+Router.put("/updateTableOccupied", updateTableOccupied);
 Router.delete("/deleteTable", deleteTable);
 
 export default Router;

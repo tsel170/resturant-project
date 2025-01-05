@@ -71,22 +71,21 @@ export const AuthProvider = ({ children }) => {
     fetchTables()
   }, [])
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          import.meta.env.VITE_SERVER + "/api/bons/allBons"
-        )
-        // Handle the response data here
-        orders.push(...response.data.Bons)
+  const fetchOrsers = async () => {
+    try {
+      const response = await axios.get(
+        import.meta.env.VITE_SERVER + "/api/bons/allBons"
+      )
+      // Handle the response data here
+      orders.push(...response.data.Bons)
 
-        setOrders((prev) => [...prev])
-      } catch (error) {
-        console.error("Error fetching data:", error)
-      }
+      setOrders((prev) => [...prev])
+    } catch (error) {
+      console.error("Error fetching data:", error)
     }
-
-    fetchData()
+  }
+  useEffect(() => {
+    fetchOrsers()
   }, [])
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -112,10 +111,25 @@ export const AuthProvider = ({ children }) => {
         table.number === tableId ? { ...table, ...updates } : table
       )
     )
-
-    // If you're connecting to a backend, add API call here
-    // await axios.patch(`/api/tables/${tableId}`, updates);
   }
+  const [meals, setMeals] = useState([])
+  const [isLoadingMeals, setIsLoadingMeals] = useState(true)
+  const fetchMeals = async () => {
+    setIsLoadingMeals(true)
+    try {
+      const response = await axios.get(
+        import.meta.env.VITE_SERVER + "/api/meals/getAllMeals"
+      )
+      setMeals(response.data.Meals)
+    } catch (error) {
+      console.error("Error fetching meals:", error)
+    } finally {
+      setIsLoadingMeals(false)
+    }
+  }
+  useEffect(() => {
+    fetchMeals()
+  }, [])
 
   return (
     <AuthContext.Provider
@@ -128,6 +142,7 @@ export const AuthProvider = ({ children }) => {
         toggleSidebar,
         orders,
         setOrders,
+        fetchOrsers,
         tables,
         setTables,
         fetchTables,
@@ -139,6 +154,10 @@ export const AuthProvider = ({ children }) => {
         loading,
         error,
         branchId,
+        fetchMeals,
+        meals,
+        setMeals,
+        isLoadingMeals,
       }}
     >
       {children}
