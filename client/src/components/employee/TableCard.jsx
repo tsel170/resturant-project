@@ -20,6 +20,7 @@ const TableCard = ({
   const [orders, setOrders] = useState(tableOrders)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [totalAmount, setTotalAmount] = useState(0)
+  const [mealsSummary, setMealsSummary] = useState({})
 
   useEffect(() => {
     setOrders(tableOrders)
@@ -64,14 +65,7 @@ const TableCard = ({
   }
 
   const handlePayment = () => {
-    const randomAmount = Math.floor(Math.random() * (500 - 50 + 1)) + 50
-    setTotalAmount(randomAmount)
-
-    // Add debug logs
-    console.log("Local table orders:", orders)
-    console.log("All orders from context:", allOrders)
-
-    // Get full order details by matching order numbersnow - make that the filal
+    // Get full order details from allOrders
     const fullOrderDetails = orders
       .map((localOrder) => {
         return allOrders.find((order) => order.bonNumber === localOrder.number)
@@ -80,28 +74,25 @@ const TableCard = ({
 
     console.log("Full order details:", fullOrderDetails)
 
-    // Log the meals summary calculation with safety checks
-    const mealsSummary = fullOrderDetails.reduce((acc, order) => {
-      console.log("Processing order:", order)
-
+    const summary = fullOrderDetails.reduce((acc, order) => {
       if (order && Array.isArray(order.meals)) {
-        console.log("Order meals:", order.meals)
-
         order.meals.forEach((meal) => {
           if (meal && meal.mealTitle) {
             if (!acc[meal.mealTitle]) {
-              acc[meal.mealTitle] = 0
+              acc[meal.mealTitle] = {
+                quantity: 0,
+                price: meal.meal.price, // Get price from the meal object in allOrders
+              }
             }
-            acc[meal.mealTitle] += meal.quantity || 1
+            acc[meal.mealTitle].quantity += meal.quantity || 1
           }
         })
       }
-
       return acc
     }, {})
 
-    console.log("Meals summary:", mealsSummary)
-
+    console.log("Meals summary:", summary)
+    setMealsSummary(summary)
     setShowPaymentModal(true)
   }
 
@@ -235,57 +226,39 @@ const TableCard = ({
           <div className="rounded-lg bg-white p-6 shadow-xl">
             <h3 className="mb-4 text-xl font-semibold">Payment Details</h3>
             <div className="mb-4">
-              <p className="text-lg">
-                Total Amount: <span className="font-bold">₪{totalAmount}</span>
-              </p>
-
               {/* Meals Summary */}
               <div className="mt-4">
                 <p className="mb-2 font-medium">Meals Summary:</p>
                 <div className="max-h-48 overflow-y-auto">
-                  {Object.entries(
-                    orders.reduce((acc, order) => {
-                      order.meals?.forEach((meal) => {
-                        if (!acc[meal.name]) {
-                          acc[meal.name] = 0
-                        }
-                        acc[meal.name] += meal.quantity
-                      })
-                      return acc
-                    }, {})
-                  ).map(([mealName, quantity]) => (
-                    <div
-                      key={mealName}
-                      className="mb-2 flex items-center justify-between rounded-lg bg-gray-50 p-2"
-                    >
-                      <span>{mealName}</span>
-                      <span className="font-medium">x{quantity}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Orders List */}
-              <div className="mt-4">
-                <p className="mb-2 font-medium">
-                  Orders for Table {tableNumber}:
-                </p>
-                <div className="max-h-48 overflow-y-auto">
-                  {orders.map((order) => (
-                    <div
-                      key={order._id}
-                      className="mb-2 flex items-center justify-between rounded-lg bg-gray-50 p-2"
-                    >
-                      <span>Order #{order.number}</span>
-                      <span
-                        className={`text-sm ${
-                          order.ready ? "text-green-600" : "text-yellow-600"
-                        }`}
+                  {Object.entries(mealsSummary).map(([mealTitle, details]) => {
+                    const subtotal = details.price * details.quantity
+                    return (
+                      <div
+                        key={mealTitle}
+                        className="mb-2 flex items-center justify-between rounded-lg bg-gray-50 p-2"
                       >
-                        {order.ready ? "Ready" : "Preparing"}
-                      </span>
-                    </div>
-                  ))}
+                        <span>{mealTitle}</span>
+                        <span>
+                          ₪{details.price} x{details.quantity} = ₪{subtotal}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {/* Total */}
+                <div className="mt-4 border-t pt-4">
+                  <div className="flex justify-between text-xl font-bold">
+                    <span>Total:</span>
+                    <span>
+                      ₪
+                      {Object.values(mealsSummary).reduce(
+                        (total, details) =>
+                          total + details.price * details.quantity,
+                        0
+                      )}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
