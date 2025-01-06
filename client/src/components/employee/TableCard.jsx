@@ -65,14 +65,18 @@ const TableCard = ({
   }
 
   const handlePayment = () => {
-    // Get full order details from allOrders
+    // Get full order details from allOrders and filter for delivered orders only
     const fullOrderDetails = orders
       .map((localOrder) => {
-        return allOrders.find((order) => order.bonNumber === localOrder.number)
+        return allOrders.find(
+          (order) =>
+            order.bonNumber === localOrder.number &&
+            order.status === "delivered" // Only include delivered orders
+        )
       })
-      .filter((order) => order)
+      .filter((order) => order) // Remove any undefined orders
 
-    console.log("Full order details:", fullOrderDetails)
+    console.log("Delivered orders:", fullOrderDetails)
 
     const summary = fullOrderDetails.reduce((acc, order) => {
       if (order && Array.isArray(order.meals)) {
@@ -81,7 +85,7 @@ const TableCard = ({
             if (!acc[meal.mealTitle]) {
               acc[meal.mealTitle] = {
                 quantity: 0,
-                price: meal.meal.price, // Get price from the meal object in allOrders
+                price: meal.meal.price,
               }
             }
             acc[meal.mealTitle].quantity += meal.quantity || 1
@@ -91,7 +95,7 @@ const TableCard = ({
       return acc
     }, {})
 
-    console.log("Meals summary:", summary)
+    console.log("Delivered meals summary:", summary)
     setMealsSummary(summary)
     setShowPaymentModal(true)
   }
