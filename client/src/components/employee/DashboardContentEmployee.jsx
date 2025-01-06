@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 import { AuthContext } from "../../context/AuthContext"
 import DashboardContentWaiter from "./DashboardContentWaiter"
 import DashboardContentChef from "./DashboardContentChef"
+import OrdersManagement from "../../pages/OrdersManagement"
 
 const DashboardContentEmployee = () => {
   const navigate = useNavigate()
@@ -12,7 +13,7 @@ const DashboardContentEmployee = () => {
   return (
     <>
       {user?.jobTitle === "waiter" && <DashboardContentWaiter />}
-      {user?.jobTitle === "chef" && <DashboardContentChef />}
+      {user?.jobTitle === "chef" && <OrdersManagement />}
     </>
   )
 }
