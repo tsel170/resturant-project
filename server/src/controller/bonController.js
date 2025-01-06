@@ -33,7 +33,7 @@ export const addBon = async (req, res) => {
     };
 
     const newBon = await Bon.create(bonData);
-    console.log('Created new bon:', newBon);
+    
 
     await Branch.findByIdAndUpdate(branch, {
       $push: { 
@@ -77,7 +77,7 @@ export const getAllBons = async (req, res) => {
       .populate('user')
       .lean();
     
-    console.log('Retrieved bons:', bons);
+    
     
     res.status(200).json({
       success: true,
@@ -154,6 +154,7 @@ export const deleteBon = async (req, res) => {
 
 export const updateDeliveredBon = async (req, res) => {
   const { id } = req.params;
+  console.log(id)
   try {
     const bon = await Bon.findById(id);
     if (!bon) {

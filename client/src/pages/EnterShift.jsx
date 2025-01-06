@@ -66,7 +66,11 @@ const EnterShift = () => {
     </>
   )
 
-  return <DefaultPage role="employee">{content}</DefaultPage>
+  return (
+    <DefaultPage role="employee" backButton>
+      {content}
+    </DefaultPage>
+  )
 }
 
 export default EnterShift

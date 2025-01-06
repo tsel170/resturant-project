@@ -51,7 +51,6 @@ export const AuthProvider = ({ children }) => {
       const response = await axios.get(
         import.meta.env.VITE_SERVER + "/api/branches/allBranches"
       )
-      console.log(response.data[0].tables)
 
       if (response.data[0].tables) {
         const sortedTables = response.data[0].tables.sort(
