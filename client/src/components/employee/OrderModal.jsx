@@ -34,12 +34,12 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
       ...newOrder,
       BonDate: new Date(),
       branch: "676e884378317a74ac0817b2",
-      user: user._id, //TODO: get user id from context
+      user: user._id,
       tableNumber: tableNumber,
       ready: false,
       paid: false,
     }
-    console.log(orderWithTimestamp)
+    console.log("orderWithTimestamp", orderWithTimestamp)
 
     onSubmit(orderWithTimestamp)
 
@@ -49,23 +49,27 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
       ready: false,
       paid: false,
     })
-    fetchOrsers()
   }
 
   const addItem = (meal) => {
     setNewOrder((prev) => ({
       ...prev,
-      meals: [...prev.meals, { ...meal, quantity: 1, notes: "" }],
+      meals: [...prev.meals, { ...meal, quantity: 1, note: "" }],
     }))
   }
 
   const updateItem = (index, field, value) => {
-    setNewOrder((prev) => ({
-      ...prev,
-      meals: prev.meals.map((item, i) =>
-        i === index ? { ...item, [field]: value } : item
-      ),
-    }))
+    console.log("Updating item:", { index, field, value })
+    setNewOrder((prev) => {
+      const updatedOrder = {
+        ...prev,
+        meals: prev.meals.map((item, i) =>
+          i === index ? { ...item, [field]: value } : item
+        ),
+      }
+      console.log("Updated newOrder:", updatedOrder)
+      return updatedOrder
+    })
   }
 
   const removeItem = (index) => {
@@ -83,12 +87,11 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
       title: selectedMeal.title,
       quantity: 1,
       price: selectedMeal.price,
-      notes: "",
+      note: "",
     }
     addItem(newMeal)
     setOrder((prevOrder) => [...prevOrder, newMeal])
 
-    setOrder((prev) => [...prev])
     setMealSearch("") // Clear search after selection
   }
 
@@ -197,9 +200,9 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
                       placeholder="Meal notes..."
                       maxLength={500}
                       className="w-40 rounded-md border p-2"
-                      value={item.notes}
+                      value={item.note}
                       onChange={(e) =>
-                        updateItem(index, "notes", e.target.value)
+                        updateItem(index, "note", e.target.value)
                       }
                     />
                     {newOrder.meals.length > 1 && (

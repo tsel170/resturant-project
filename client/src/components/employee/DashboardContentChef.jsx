@@ -79,6 +79,24 @@ const DashboardContentChef = () => {
                       <span className="font-medium text-gray-700">
                         {meal.quantity}x {meal.meal.title}
                       </span>
+                      {meal.note && (
+                        <span className="rounded-full bg-yellow-100 px-2 py-1 text-sm font-medium text-red-500">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={1.5}
+                            stroke="currentColor"
+                            className="h-5 w-5"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
+                            />
+                          </svg>
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -115,14 +133,14 @@ const DashboardContentChef = () => {
                     Table {order.tableNumber}
                   </span>
                 </div>
-                <div className="space-y-2">
+                <div className="justify-between space-y-2">
                   {order.meals?.map((meal, index) => (
                     <div
                       key={index}
                       className="flex items-center justify-between rounded-lg p-3 transition-colors"
                     >
                       <span className="font-medium text-gray-700">
-                        {meal.quantity}x {meal.meal.title}
+                        {meal.quantity} x {meal.meal.title}
                       </span>
                     </div>
                   ))}
@@ -140,8 +158,30 @@ const DashboardContentChef = () => {
             <div className="mb-6 flex items-start justify-between">
               <div>
                 <h3 className="text-2xl font-bold text-gray-800">
-                  {selectedMeal?.meal?.mealTitle}
+                  {selectedMeal?.meal?.title}
                 </h3>
+                {selectedMeal?.note && (
+                  <div className="mt-2 rounded-lg bg-yellow-50 p-3">
+                    <div className="flex items-center gap-2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="h-5 w-5 text-yellow-600"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
+                        />
+                      </svg>
+                      <span className="font-medium text-yellow-800">Note:</span>
+                    </div>
+                    <p className="mt-1 text-gray-700">{selectedMeal.note}</p>
+                  </div>
+                )}
                 <div className="mt-2 flex items-center gap-2">
                   <span className="text-sm font-medium text-gray-500">
                     Preparation time:

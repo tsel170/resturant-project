@@ -19,8 +19,11 @@ import MenuManagement from "./pages/manage/MenuManagement"
 import TablesManagement from "./pages/TablesManagement"
 import ManagementTables from "./pages/manage/ManagementTables.jsx"
 import DashboardContentChef from "./components/employee/DashboardContentChef.jsx"
+import { useNotifications } from "./hooks/useNotifications"
 
 function App() {
+  useNotifications()
+
   return (
     <BrowserRouter>
       <AuthProvider>

@@ -47,6 +47,7 @@ const TableCard = ({
   }
 
   const handleSubmitOrder = async (newOrder) => {
+    console.log("newOrder", newOrder)
     try {
       await axios.post(
         import.meta.env.VITE_SERVER + "/api/Bons/addBon",

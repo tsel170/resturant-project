@@ -1,7 +1,52 @@
-import React from "react"
+import React, { useEffect, useRef } from "react"
+import { useNotifications } from "../../hooks/useNotifications.jsx"
 
 const Orders = ({ params }) => {
   const { orders } = params
+  const { sendNotification } = useNotifications()
+  const previousOrders = useRef([])
+
+  // Debug logging
+  useEffect(() => {
+    console.log("Current orders:", orders)
+    console.log("Previous orders:", previousOrders.current)
+  }, [orders])
+
+  // Check for newly ready orders
+  useEffect(() => {
+    const newlyReadyOrders = orders.filter((order) => {
+      const previousOrder = previousOrders.current.find(
+        (prev) => prev._id === order._id
+      )
+      // Debug logging
+      console.log("Checking order:", order._id, {
+        isReady: order.ready,
+        wasReady: previousOrder?.ready,
+        isDelivered: order.delivered,
+      })
+
+      return (
+        order.ready && !order.delivered && previousOrder && !previousOrder.ready
+      )
+    })
+
+    // Debug logging
+    console.log("Newly ready orders:", newlyReadyOrders)
+
+    // Send notification for each newly ready order
+    newlyReadyOrders.forEach((order) => {
+      console.log("Sending notification for order:", order._id)
+      sendNotification(`Order for Table ${order.tableNumber} is Ready! 🍽️`, {
+        body: `Order #${order.bonNumber} is ready for delivery`,
+        icon: "/favicon.ico", // Using favicon as temporary icon
+        requireInteraction: true, // Keep notification until user interacts
+        vibrate: [200, 100, 200],
+      })
+    })
+
+    // Update previous orders reference
+    previousOrders.current = JSON.parse(JSON.stringify(orders))
+  }, [orders, sendNotification])
 
   // Sort orders: ready but not delivered first, then not ready, then delivered
   const sortedOrders = [...orders].sort((a, b) => {

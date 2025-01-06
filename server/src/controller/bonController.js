@@ -22,15 +22,17 @@ export const addBon = async (req, res) => {
     if (!newMeals || newMeals.length === 0) {
       return res.status(404).json({ message: "Meals not found" });
     }
-
+    console.log("req.body", req.body)
     const bonData = {
       ...req.body,
       meals: newMeals.map(meal => ({
         meal: meal._id,
         mealTitle: meal.title,
-        quantity: meals.find(m => m.meal.toString() === meal._id.toString())?.quantity || 1
+        quantity: meals.find(m => m.meal.toString() === meal._id.toString())?.quantity || 1,
+        note: meals.find(m => m.meal.toString() === meal._id.toString())?.note || ""
       }))
     };
+    console.log("bonData", bonData)
 
     const newBon = await Bon.create(bonData);
     
