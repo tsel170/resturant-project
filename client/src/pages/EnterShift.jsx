@@ -23,13 +23,13 @@ const EnterShift = () => {
       <div className="mb-10 flex items-center justify-between rounded-lg bg-white p-6 shadow-md">
         <div className="flex items-center gap-4">
           <img
-            src={`https://avatar.iran.liara.run/username?username=${user.name.replace(" ", "+")}+${user.jobTitle.replace(" ", "+")}`}
-            alt={`${user.name}'s avatar`}
+            src={`https://avatar.iran.liara.run/username?username=${user?.name.replace(" ", "+")}+${user?.jobTitle.replace(" ", "+")}`}
+            alt={`${user?.name}'s avatar`}
             className="h-12 w-12 rounded-full"
           />
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">{user.name}</h1>
-            <p className="text-lg text-gray-600">{user.jobTitle}</p>
+            <h1 className="text-3xl font-bold text-gray-800">{user?.name}</h1>
+            <p className="text-lg text-gray-600">{user?.jobTitle}</p>
           </div>
         </div>
         <div className="text-2xl font-medium text-blue-600">{currentTime}</div>

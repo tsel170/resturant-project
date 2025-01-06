@@ -23,9 +23,9 @@ const OrdersManagement = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
-      <Navbar role={"employee"} />
+      {/* <Navbar role={"employee"} /> */}
       <div className="flex flex-1">
-        <Sidebar />
+        {/* <Sidebar /> */}
         <div className="mx-auto flex-1 content-center bg-slate-50 p-6">
           <div className="mb-6 flex items-center gap-4">
             <button

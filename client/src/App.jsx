@@ -18,6 +18,7 @@ import WorkersManagement from "./pages/manage/WorkersManagement"
 import MenuManagement from "./pages/manage/MenuManagement"
 import TablesManagement from "./pages/TablesManagement"
 import ManagementTables from "./pages/manage/ManagementTables.jsx"
+import DashboardContentChef from "./components/employee/DashboardContentChef.jsx"
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Route path="/" element={<Login />} />(
           <>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard-chef" element={<DashboardContentChef />} />
             <Route path="/enter-shift" element={<EnterShift />} />
             <Route path="/personal-space" element={<PersonalSpace />} />
             <Route path="/orders" element={<OrdersManagement />} />

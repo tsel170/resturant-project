@@ -6,7 +6,7 @@ const Chef = ({ params }) => {
   return (
     <div className="rounded-lg bg-slate-50 p-6 shadow-md">
       <h1 className="mb-6 text-center text-3xl font-bold text-red-600">
-        Chef Dashboard
+        Chef Dashboard/
       </h1>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {/* Not Ready Orders */}
