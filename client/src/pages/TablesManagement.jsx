@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { AuthContext } from "../context/AuthContext"
 import Header from "../components/general/Header"
@@ -12,7 +12,8 @@ const TablesManagement = () => {
   const navigate = useNavigate()
   const { tables, updateTable, branchId, fetchTables, orders } =
     useContext(AuthContext)
-  console.log(orders)
+  const [ordersNumber, setOrdersNumber] = useState([])
+
   const handleAssignTable = async (table) => {
     try {
       const response = await axios.put(
@@ -22,12 +23,28 @@ const TablesManagement = () => {
           tableNumber: table.tableNumber,
         }
       )
-      fetchTables()
+      await fetchTables()
       console.log(response)
     } catch (error) {
       console.error("Error assigning table:", error)
     }
   }
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchTables()
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    setOrdersNumber(
+      orders.map((order) => {
+        return { number: order.bonNumber, table: order.tableNumber }
+      })
+    )
+  }, [orders])
 
   return (
     <DefaultPage role={"employee"} title="Tables Management">
@@ -37,7 +54,11 @@ const TablesManagement = () => {
             key={table.tableNumber}
             tableNumber={table.tableNumber}
             seats={table.seats}
-            orders={table.orders}
+            tableOrders={ordersNumber.filter(
+              (order) => order.table === table.tableNumber
+            )}
+            ordersNumber={ordersNumber}
+            setOrdersNumber={setOrdersNumber}
             occuipied={table.occuipied}
             onAssign={() => handleAssignTable(table)}
             updateTable={updateTable}
