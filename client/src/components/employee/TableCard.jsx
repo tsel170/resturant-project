@@ -14,7 +14,12 @@ const TableCard = ({
   updateTable,
   branchId,
 }) => {
-  const { fetchTables, meals, orders: allOrders } = useContext(AuthContext)
+  const {
+    fetchTables,
+    meals,
+    orders: allOrders,
+    user,
+  } = useContext(AuthContext)
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [showOrderModal, setShowOrderModal] = useState(false)
   const [orders, setOrders] = useState(tableOrders)
@@ -190,6 +195,10 @@ const TableCard = ({
           <h2 className="text-2xl font-bold text-gray-800">
             Table {tableNumber}
           </h2>
+          <p className="rounded-full bg-gray-200 px-4 py-2 text-base font-semibold text-gray-600">
+            <span className="mr-1 text-gray-500">served by</span>
+            {user.name}
+          </p>
           <div
             className={`h-4 w-4 rounded-full ${
               occuipied ? "bg-red-500" : "bg-green-500"

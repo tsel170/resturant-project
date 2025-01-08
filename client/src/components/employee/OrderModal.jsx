@@ -98,8 +98,8 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <motion.div className="rounded-lg bg-white p-6" layout>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-65">
+      <motion.div className="min-w-[40%] rounded-lg bg-white p-6" layout>
         <h2 className="mb-4 text-xl font-bold">
           New Order - Table {tableNumber}
         </h2>
@@ -179,8 +179,9 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
                         type="text"
                         placeholder="Meal name"
                         required
-                        className="w-full rounded-md border p-2"
+                        className="w-full rounded-md border bg-gray-50 p-2"
                         value={item.title}
+                        readOnly
                         onChange={(e) =>
                           updateItem(index, "title", e.target.value)
                         }
@@ -199,7 +200,7 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
                     <textarea
                       placeholder="Meal notes..."
                       maxLength={500}
-                      className="w-40 rounded-md border p-2"
+                      className="h-[42px] w-40 resize-none rounded-md border p-2"
                       value={item.note}
                       onChange={(e) =>
                         updateItem(index, "note", e.target.value)
