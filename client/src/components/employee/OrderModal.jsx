@@ -96,7 +96,7 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
   }
 
   if (!isOpen) return null
-  console.log({ mealSearch })
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <motion.div className="rounded-lg bg-white p-6" layout>
@@ -205,21 +205,20 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
                         updateItem(index, "note", e.target.value)
                       }
                     />
-                    {newOrder.meals.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeItem(index)}
-                        className="rounded-md bg-red-100 p-2 text-red-600 hover:bg-red-200"
-                      >
-                        ✕
-                      </button>
-                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => removeItem(index)}
+                      className="rounded-md bg-red-100 p-2 text-red-600 hover:bg-red-200"
+                    >
+                      ✕
+                    </button>
                   </div>
                 </motion.div>
               ))}
             </AnimatePresence>
 
-            <motion.button
+            {/* <motion.button
               layout
               type="button"
               onClick={addItem}
@@ -228,7 +227,7 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
               whileTap={{ scale: 0.99 }}
             >
               + Add Item
-            </motion.button>
+            </motion.button> */}
           </motion.div>
 
           <div className="mt-4 flex justify-end gap-4 border-t pt-4">
@@ -241,7 +240,8 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
             </button>
             <button
               type="submit"
-              className="rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+              className={`rounded-lg ${newOrder.meals.length === 0 ? "bg-gray-300" : "bg-blue-500 hover:bg-blue-600"} px-4 py-2 text-white`}
+              disabled={newOrder.meals.length === 0}
             >
               Create Order
             </button>

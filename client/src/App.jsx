@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 import { AuthProvider } from "./context/AuthContext.jsx"
 import { GoogleOAuthProvider } from "@react-oauth/google"
+import NotificationHandler from "./components/general/NotificationHandler"
 import "./App.css"
 
 import Login from "./components/general/Login.jsx"
@@ -27,6 +28,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <NotificationHandler />
         <Routes>
           <Route path="/" element={<Login />} />(
           <>

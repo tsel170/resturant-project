@@ -21,6 +21,11 @@ const TableCard = ({
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [totalAmount, setTotalAmount] = useState(0)
   const [mealsSummary, setMealsSummary] = useState({})
+  const [isPaymentLoading, setIsPaymentLoading] = useState(false)
+  const [paymentError, setPaymentError] = useState(null)
+  const [isFreeingTable, setIsFreeingTable] = useState(false)
+  const [freeTableError, setFreeTableError] = useState(null)
+  const [isConfirmationVisible, setIsConfirmationVisible] = useState(false)
 
   useEffect(() => {
     setOrders(tableOrders)
@@ -28,18 +33,38 @@ const TableCard = ({
 
   const handleFreeTable = () => {
     setShowConfirmation(true)
+    setTimeout(() => setIsConfirmationVisible(true), 50)
+  }
+
+  const handleCloseConfirmation = () => {
+    setIsConfirmationVisible(false)
+    setTimeout(() => setShowConfirmation(false), 300)
+    setFreeTableError(null)
   }
 
   const confirmFreeTable = async () => {
-    await axios.put(
-      import.meta.env.VITE_SERVER + "/api/branches/updateTableOccupied",
-      {
-        branchId: branchId,
-        tableNumber: tableNumber,
-      }
-    )
-    fetchTables()
-    setShowConfirmation(false)
+    setIsFreeingTable(true)
+    setFreeTableError(null)
+
+    try {
+      await axios.put(
+        import.meta.env.VITE_SERVER + "/api/branches/updateTableOccupied",
+        {
+          branchId: branchId,
+          tableNumber: tableNumber,
+        }
+      )
+      fetchTables()
+      setShowConfirmation(false)
+    } catch (error) {
+      console.error("Error freeing table:", error)
+      setFreeTableError(
+        error.response?.data?.message ||
+          "Failed to free table. Please try again."
+      )
+    } finally {
+      setIsFreeingTable(false)
+    }
   }
 
   const handleAddOrder = () => {
@@ -66,18 +91,19 @@ const TableCard = ({
   }
 
   const handlePayment = () => {
-    // Get full order details from allOrders and filter for delivered orders only
+    // Get full order details from allOrders and filter for delivered AND unpaid orders only
     const fullOrderDetails = orders
       .map((localOrder) => {
         return allOrders.find(
           (order) =>
             order.bonNumber === localOrder.number &&
-            order.status === "delivered" // Only include delivered orders
+            order.delivered === true &&
+            order.paid === false // Add this condition
         )
       })
       .filter((order) => order) // Remove any undefined orders
 
-    console.log("Delivered orders:", fullOrderDetails)
+    console.log("Unpaid delivered orders:", fullOrderDetails)
 
     const summary = fullOrderDetails.reduce((acc, order) => {
       if (order && Array.isArray(order.meals)) {
@@ -96,26 +122,60 @@ const TableCard = ({
       return acc
     }, {})
 
-    console.log("Delivered meals summary:", summary)
     setMealsSummary(summary)
     setShowPaymentModal(true)
   }
 
   const confirmPayment = async () => {
+    setIsPaymentLoading(true)
+    setPaymentError(null)
+
     try {
-      await axios.post(import.meta.env.VITE_SERVER + "/api/Bons/payOrders", {
-        tableNumber,
-        branchId,
-        orders,
+      // Get delivered and unpaid orders only
+      const unpaidDeliveredOrders = orders.filter((localOrder) => {
+        const fullOrder = allOrders.find(
+          (order) =>
+            order.bonNumber === localOrder.number &&
+            order.delivered === true &&
+            order.paid === false
+        )
+        return fullOrder
       })
+
+      // Process each order payment sequentially
+      for (const order of unpaidDeliveredOrders) {
+        try {
+          await axios.put(
+            `${import.meta.env.VITE_SERVER}/api/Bons/updatePaidBon/${order.number}`,
+            {
+              tableNumber,
+              branchId,
+              bonNumber: order.number,
+            }
+          )
+        } catch (orderError) {
+          throw new Error(
+            `Failed to process payment for order #${order.number}: ${orderError.message}`
+          )
+        }
+      }
+
+      // If all payments successful, clear orders and close modal
       setOrders([])
       updateTable(tableNumber, {
         tableOrders: [],
       })
       setShowPaymentModal(false)
+      setOrders([])
     } catch (error) {
-      console.error("Error processing payment:", error)
-      alert("Error processing payment")
+      console.error("Error processing payments:", error)
+      setPaymentError(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to process payments. Please try again."
+      )
+    } finally {
+      setIsPaymentLoading(false)
     }
   }
 
@@ -202,23 +262,66 @@ const TableCard = ({
 
       {/* Confirmation Dialog */}
       {showConfirmation && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="rounded-lg bg-white p-6 shadow-xl">
+        <div
+          className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 ease-in-out ${isConfirmationVisible ? "bg-black bg-opacity-50" : "bg-black bg-opacity-0"}`}
+        >
+          <div
+            className={`rounded-lg bg-white p-6 shadow-xl transition-all duration-300 ease-in-out ${isConfirmationVisible ? "scale-100 opacity-100" : "scale-95 opacity-0"}`}
+          >
             <h3 className="mb-4 text-lg font-semibold">
               Are you sure you want to free this table?
             </h3>
+
+            {freeTableError && (
+              <div className="mb-4 rounded-md bg-red-50 p-4 text-red-600">
+                <p className="font-medium">Error</p>
+                <p className="text-sm">{freeTableError}</p>
+              </div>
+            )}
+
             <div className="flex justify-end gap-4">
               <button
-                onClick={() => setShowConfirmation(false)}
+                onClick={handleCloseConfirmation}
                 className="rounded-lg bg-gray-100 px-4 py-2 text-gray-600 hover:bg-gray-200"
+                disabled={isFreeingTable}
               >
                 Cancel
               </button>
               <button
                 onClick={confirmFreeTable}
-                className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+                disabled={isFreeingTable}
+                className={`rounded-lg px-4 py-2 text-white transition-colors ${
+                  isFreeingTable
+                    ? "cursor-not-allowed bg-red-400"
+                    : "bg-red-600 hover:bg-red-700"
+                }`}
               >
-                Free Table
+                {isFreeingTable ? (
+                  <div className="flex items-center">
+                    <svg
+                      className="mr-2 h-4 w-4 animate-spin"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    Processing...
+                  </div>
+                ) : (
+                  "Free Table"
+                )}
               </button>
             </div>
           </div>
@@ -230,8 +333,15 @@ const TableCard = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="rounded-lg bg-white p-6 shadow-xl">
             <h3 className="mb-4 text-xl font-semibold">Payment Details</h3>
+
+            {paymentError && (
+              <div className="mb-4 rounded-md bg-red-50 p-4 text-red-600">
+                <p className="font-medium">Payment Error</p>
+                <p className="text-sm">{paymentError}</p>
+              </div>
+            )}
+
             <div className="mb-4">
-              {/* Meals Summary */}
               <div className="mt-4">
                 <p className="mb-2 font-medium">Meals Summary:</p>
                 <div className="max-h-48 overflow-y-auto">
@@ -251,7 +361,6 @@ const TableCard = ({
                   })}
                 </div>
 
-                {/* Total */}
                 <div className="mt-4 border-t pt-4">
                   <div className="flex justify-between text-xl font-bold">
                     <span>Total:</span>
@@ -267,18 +376,53 @@ const TableCard = ({
                 </div>
               </div>
             </div>
+
             <div className="flex justify-end gap-4">
               <button
-                onClick={() => setShowPaymentModal(false)}
+                onClick={() => {
+                  setShowPaymentModal(false)
+                  setPaymentError(null)
+                }}
                 className="rounded-lg bg-gray-100 px-4 py-2 text-gray-600 hover:bg-gray-200"
+                disabled={isPaymentLoading}
               >
                 Cancel
               </button>
               <button
                 onClick={confirmPayment}
-                className="rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+                disabled={isPaymentLoading}
+                className={`rounded-lg px-4 py-2 text-white transition-colors ${
+                  isPaymentLoading
+                    ? "cursor-not-allowed bg-green-400"
+                    : "bg-green-600 hover:bg-green-700"
+                }`}
               >
-                Confirm Payment
+                {isPaymentLoading ? (
+                  <div className="flex items-center">
+                    <svg
+                      className="mr-2 h-4 w-4 animate-spin"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    Processing...
+                  </div>
+                ) : (
+                  "Confirm Payment"
+                )}
               </button>
             </div>
           </div>

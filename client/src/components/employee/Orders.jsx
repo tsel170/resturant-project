@@ -18,52 +18,70 @@ const Orders = ({ params }) => {
       const previousOrder = previousOrders.current.find(
         (prev) => prev._id === order._id
       )
-      // Debug logging
-      console.log("Checking order:", order._id, {
-        isReady: order.ready,
-        wasReady: previousOrder?.ready,
-        isDelivered: order.delivered,
-      })
 
       return (
-        order.ready && !order.delivered && previousOrder && !previousOrder.ready
+        order.ready &&
+        !order.delivered &&
+        !order.paid &&
+        (!previousOrder || !previousOrder.ready)
       )
     })
 
-    // Debug logging
-    console.log("Newly ready orders:", newlyReadyOrders)
-
-    // Send notification for each newly ready order
+    // Create alert for each newly ready order
     newlyReadyOrders.forEach((order) => {
-      console.log("Sending notification for order:", order._id)
-      sendNotification(`Order for Table ${order.tableNumber} is Ready! 🍽️`, {
-        body: `Order #${order.bonNumber} is ready for delivery`,
-        icon: "/favicon.ico", // Using favicon as temporary icon
-        requireInteraction: true, // Keep notification until user interacts
-        vibrate: [200, 100, 200],
-      })
+      const alertDiv = document.createElement("div")
+      alertDiv.id = `notification-${order._id}`
+      alertDiv.className =
+        "fixed top-4 right-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded shadow-lg z-50"
+      alertDiv.innerHTML = `
+        <div class="flex items-center">
+          <div class="py-1">
+            <svg class="h-6 w-6 text-yellow-500 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="font-bold">New Order Ready!</p>
+            <p class="text-sm">Order #${order.bonNumber} for Table ${order.tableNumber} is ready for delivery</p>
+          </div>
+        </div>
+      `
+
+      // Add close button
+      const closeButton = document.createElement("button")
+      closeButton.className =
+        "absolute top-0 right-0 mt-2 mr-2 text-yellow-700 hover:text-yellow-900"
+      closeButton.innerHTML = "×"
+      closeButton.onclick = () => document.body.removeChild(alertDiv)
+      alertDiv.appendChild(closeButton)
+
+      // Add to document
+      document.body.appendChild(alertDiv)
     })
 
     // Update previous orders reference
     previousOrders.current = JSON.parse(JSON.stringify(orders))
-  }, [orders, sendNotification])
+  }, [orders])
 
   // Sort orders: ready but not delivered first, then not ready, then delivered
-  const sortedOrders = [...orders].sort((a, b) => {
-    // Ready but not delivered orders come first
-    if (a.ready && !a.delivered && (!b.ready || b.delivered)) return -1
-    if (b.ready && !b.delivered && (!a.ready || a.delivered)) return 1
+  // Only include unpaid orders in the sorting
+  const sortedOrders = [...orders]
+    .filter((order) => !order.paid) // Filter out paid orders
+    .sort((a, b) => {
+      // Ready but not delivered orders come first
+      if (a.ready && !a.delivered && (!b.ready || b.delivered)) return -1
+      if (b.ready && !b.delivered && (!a.ready || a.delivered)) return 1
 
-    // Not ready orders come second
-    if (!a.ready && !a.delivered && (b.ready || b.delivered)) return -1
-    if (!b.ready && !b.delivered && (a.ready || a.delivered)) return 1
+      // Not ready orders come second
+      if (!a.ready && !a.delivered && (b.ready || b.delivered)) return -1
+      if (!b.ready && !b.delivered && (a.ready || a.delivered)) return 1
 
-    // Delivered orders come last
-    if (a.delivered && !b.delivered) return 1
-    if (b.delivered && !a.delivered) return -1
+      // Delivered orders come last
+      if (a.delivered && !b.delivered) return 1
+      if (b.delivered && !a.delivered) return -1
 
-    return 0
-  })
+      return 0
+    })
 
   return (
     <div
@@ -73,7 +91,7 @@ const Orders = ({ params }) => {
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-xl font-bold text-gray-800">Recent Orders</h2>
         <span className="rounded-full bg-blue-100 px-2 py-0.5 text-sm text-blue-800">
-          {orders.length} orders
+          {sortedOrders.length} orders
         </span>
       </div>
 

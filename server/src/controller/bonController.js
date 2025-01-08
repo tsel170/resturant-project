@@ -22,7 +22,7 @@ export const addBon = async (req, res) => {
     if (!newMeals || newMeals.length === 0) {
       return res.status(404).json({ message: "Meals not found" });
     }
-    console.log("req.body", req.body)
+
     const bonData = {
       ...req.body,
       meals: newMeals.map(meal => ({
@@ -32,7 +32,7 @@ export const addBon = async (req, res) => {
         note: meals.find(m => m.meal.toString() === meal._id.toString())?.note || ""
       }))
     };
-    console.log("bonData", bonData)
+    
 
     const newBon = await Bon.create(bonData);
     
@@ -156,7 +156,7 @@ export const deleteBon = async (req, res) => {
 
 export const updateDeliveredBon = async (req, res) => {
   const { id } = req.params;
-  console.log(id)
+  
   try {
     const bon = await Bon.findById(id);
     if (!bon) {
@@ -230,14 +230,34 @@ export const updateReadyBon = async (req, res) => {
 };
 
 export const updatePaidBon = async (req, res) => {
-  const { id } = req.params;
   try {
-    const bon = await Bon.findById(id);
+    const { bonNumber } = req.body;
+    console.log("Searching for bon with number:", bonNumber);
+
+    // Log all bons to see what we have
+    const allBons = await Bon.find({});
+    console.log("All bons in database:", allBons.map(bon => ({
+      id: bon._id,
+      bonNumber: bon.bonNumber,
+      paid: bon.paid
+    })));
+
+    const bon = await Bon.findOne({ bonNumber: bonNumber });
+    console.log("Found bon:", bon);
+
+    if (!bon) {
+      return res.status(404).json({ 
+        message: "Bon not found", 
+        searchedBonNumber: bonNumber,
+        availableBonNumbers: allBons.map(b => b.bonNumber)
+      });
+    }
+
     bon.paid = true;
     await bon.save();
 
     await User.findOneAndUpdate(
-      { "bons.bon": id },
+      { "bons.bon": bon._id },
       {
         $set: {
           "bons.$.paid": true,
@@ -246,7 +266,7 @@ export const updatePaidBon = async (req, res) => {
     );
 
     await Branch.findOneAndUpdate(
-      { "bons.bon": id },
+      { "bons.bon": bon._id },
       {
         $set: {
           "bons.$.paid": true,
@@ -255,8 +275,11 @@ export const updatePaidBon = async (req, res) => {
     );
     res.status(200).json({ message: "Bon updated successfully" });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Failed to update bon", error: error.message });
+    console.error("Error in updatePaidBon:", error);
+    res.status(500).json({ 
+      message: "Failed to update bon", 
+      error: error.message,
+      stack: error.stack 
+    });
   }
 };

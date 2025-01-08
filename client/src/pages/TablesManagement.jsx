@@ -40,9 +40,10 @@ const TablesManagement = () => {
 
   useEffect(() => {
     setOrdersNumber(
-      orders.map((order) => {
-        return { number: order.bonNumber, table: order.tableNumber }
-      })
+      orders.map(
+        (order) =>
+          !order.paid && { number: order.bonNumber, table: order.tableNumber }
+      )
     )
   }, [orders])
 

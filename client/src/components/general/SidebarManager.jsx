@@ -26,7 +26,7 @@ const SidebarManager = () => {
           Management
         </Link>
       </li>
-      <li>
+      {/* <li>
         <Link
           to="/statistics"
           className="group flex items-center rounded-lg p-2 text-sm font-medium transition-all duration-200 hover:bg-gray-700"
@@ -36,7 +36,7 @@ const SidebarManager = () => {
           </span>
           Statistics
         </Link>
-      </li>
+      </li> */}
     </ul>
   )
 }

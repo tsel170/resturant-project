@@ -20,7 +20,7 @@ const Management = () => {
           {/* Grid Layout for Management */}
           <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8">
             {/* Shifts Management Section */}
-            <div
+            {/* <div
               onClick={() => navigate("/manageshifts")}
               className="group flex transform cursor-pointer flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-8 shadow-lg transition-transform hover:scale-105 hover:shadow-xl"
             >
@@ -36,7 +36,7 @@ const Management = () => {
               <span className="text-sm font-semibold text-purple-500 group-hover:underline">
                 Manage Shifts →
               </span>
-            </div>
+            </div> */}
 
             {/* Workers Management Section */}
             <div

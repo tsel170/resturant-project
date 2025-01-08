@@ -23,8 +23,11 @@ const OrdersManagement = () => {
     )
   }
 
-  const inProcessOrders = orders.filter((order) => !order.delivered)
-  const deliveredOrders = orders.filter((order) => order.delivered)
+  // Filter for unpaid orders only
+  const unpaidOrders = orders.filter((order) => !order.paid)
+
+  const inProcessOrders = unpaidOrders.filter((order) => !order.delivered)
+  const deliveredOrders = unpaidOrders.filter((order) => order.delivered)
 
   return (
     <DefaultPage title="Orders Management">
