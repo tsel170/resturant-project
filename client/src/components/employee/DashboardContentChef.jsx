@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react"
+import React, { useContext, useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
 
@@ -10,6 +10,8 @@ const DashboardContentChef = () => {
   const [selectedMeal, setSelectedMeal] = useState(null)
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [duration, setDuration] = useState(0)
+  const [timeElapsed, setTimeElapsed] = useState({})
+
   console.log(orders)
   const ordersInMaking =
     orders?.filter(
@@ -22,6 +24,16 @@ const DashboardContentChef = () => {
 
   const handleMealClick = (meal) => {
     setSelectedMeal(meal)
+    // Find the order that contains this meal
+    const order = orders.find((order) =>
+      order.meals.some((m) => m.meal._id === meal.meal._id)
+    )
+    // Calculate total duration for all meals in the order
+    const totalDuration = order.meals.reduce(
+      (total, m) => total + 5 * m.quantity,
+      0
+    )
+    setDuration(totalDuration)
     setIsPopupOpen(true)
   }
 
@@ -44,6 +56,40 @@ const DashboardContentChef = () => {
     }
   }
 
+  const calculateTimeElapsed = (orderDate) => {
+    const now = new Date()
+    const orderTime = new Date(orderDate)
+    const diffSeconds = Math.floor((now - orderTime) / 1000) // difference in seconds
+
+    // Return both formatted string and raw seconds
+    if (diffSeconds < 60)
+      return { text: `${diffSeconds}s`, seconds: diffSeconds }
+    if (diffSeconds < 3600)
+      return { text: `${Math.floor(diffSeconds / 60)}m`, seconds: diffSeconds }
+    return {
+      text: `${Math.floor(diffSeconds / 3600)}h ${Math.floor((diffSeconds % 3600) / 60)}m`,
+      seconds: diffSeconds,
+    }
+  }
+
+  const calculateExpectedTime = (meals) => {
+    return meals.reduce((total, meal) => total + 5 * meal.quantity, 0)
+  }
+
+  useEffect(() => {
+    const updateTimes = () => {
+      const times = {}
+      orders?.forEach((order) => {
+        times[order._id] = calculateTimeElapsed(order.date)
+      })
+      setTimeElapsed(times)
+    }
+
+    updateTimes()
+    const interval = setInterval(updateTimes, 60000)
+    return () => clearInterval(interval)
+  }, [orders])
+
   return (
     <>
       <div className="grid h-full grid-cols-2 gap-8 p-6">
@@ -65,9 +111,29 @@ const DashboardContentChef = () => {
                   <h3 className="text-lg font-semibold text-gray-800">
                     Order #{order.bonNumber}
                   </h3>
-                  <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
-                    Table {order.tableNumber}
-                  </span>
+                  <div className="flex gap-2">
+                    <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
+                      Table {order.tableNumber}
+                    </span>
+                    <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-800">
+                      Est: {calculateExpectedTime(order.meals)}m
+                    </span>
+                    {timeElapsed[order._id] && (
+                      <span
+                        className={`rounded-full px-3 py-1 text-sm font-medium ${
+                          calculateExpectedTime(order.meals) * 60 >
+                          timeElapsed[order._id].seconds * 2
+                            ? "bg-green-300"
+                            : calculateExpectedTime(order.meals) * 60 >
+                                timeElapsed[order._id].seconds
+                              ? "bg-yellow-300"
+                              : "bg-red-300"
+                        }`}
+                      >
+                        {timeElapsed[order._id].text}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="mb-4 space-y-2">
                   {order.meals?.map((meal, index) => (
@@ -129,9 +195,19 @@ const DashboardContentChef = () => {
                   <h3 className="text-lg font-semibold text-gray-800">
                     Order #{order.bonNumber}
                   </h3>
-                  <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
-                    Table {order.tableNumber}
-                  </span>
+                  <div className="flex gap-2">
+                    <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
+                      Table {order.tableNumber}
+                    </span>
+                    <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-800">
+                      Est: {calculateExpectedTime(order.meals)}m
+                    </span>
+                    {timeElapsed[order._id] && (
+                      <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-600">
+                        {timeElapsed[order._id].text}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="justify-between space-y-2">
                   {order.meals?.map((meal, index) => (

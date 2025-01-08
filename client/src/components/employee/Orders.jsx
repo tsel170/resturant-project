@@ -1,15 +1,41 @@
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { useNotifications } from "../../hooks/useNotifications.jsx"
 
 const Orders = ({ params }) => {
   const { orders } = params
   const { sendNotification } = useNotifications()
   const previousOrders = useRef([])
+  const [timeElapsed, setTimeElapsed] = useState({})
 
-  // Debug logging
+  const calculateExpectedTime = (meals) => {
+    return meals.reduce((total, meal) => total + 7 * meal.quantity, 0)
+  }
+
+  const calculateTimeElapsed = (orderDate) => {
+    const now = new Date()
+    const orderTime = new Date(orderDate)
+    const diffSeconds = Math.floor((now - orderTime) / 1000)
+
+    return {
+      text:
+        diffSeconds < 60
+          ? `${diffSeconds}s`
+          : diffSeconds < 3600
+            ? `${Math.floor(diffSeconds / 60)}m`
+            : `${Math.floor(diffSeconds / 3600)}h ${Math.floor((diffSeconds % 3600) / 60)}m`,
+      seconds: diffSeconds,
+    }
+  }
   useEffect(() => {
-    console.log("Current orders:", orders)
-    console.log("Previous orders:", previousOrders.current)
+    const updateTimes = () => {
+      const times = {}
+      orders?.forEach((order) => {
+        times[order._id] = calculateTimeElapsed(order.date)
+      })
+      setTimeElapsed(times)
+    }
+
+    updateTimes()
   }, [orders])
 
   // Check for newly ready orders
@@ -109,6 +135,31 @@ const Orders = ({ params }) => {
                 {order.meals?.length} items
               </p>
             </div>
+            {!order.delivered && (
+              <span
+                className={`text-sm font-medium ${
+                  !timeElapsed[order._id]
+                    ? "text-gray-600"
+                    : (() => {
+                        const expectedSeconds =
+                          calculateExpectedTime(order.meals) * 60
+                        const elapsedSeconds = timeElapsed[order._id].seconds
+                        const percentage =
+                          (elapsedSeconds / expectedSeconds) * 100
+
+                        if (percentage <= 50)
+                          return "bg-green-100 text-green-600"
+                        if (percentage <= 75)
+                          return "bg-yellow-100 text-yellow-600"
+                        if (percentage <= 100)
+                          return "bg-orange-100 text-orange-600"
+                        return "bg-red-100 text-red-600"
+                      })()
+                }`}
+              >
+                Waiting: {timeElapsed[order._id]?.text || "0s"}
+              </span>
+            )}
             <span
               className={`rounded-full px-2 py-0.5 text-sm ${
                 order.delivered
