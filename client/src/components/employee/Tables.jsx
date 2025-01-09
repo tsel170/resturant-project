@@ -27,7 +27,7 @@ const Tables = () => {
               Table {table.tableNumber}
             </h3>
             <div className="mb-2 flex justify-center text-3xl">
-              {"🪑".repeat(table.seats / 2)}
+              {"🪑".repeat(table.seats)}
             </div>
             <p className="mb-2 text-sm font-medium text-gray-600">
               {table.seats} seats
