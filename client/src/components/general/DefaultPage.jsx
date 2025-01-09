@@ -3,6 +3,7 @@ import Header from "./Header"
 import Sidebar from "./Sidebar"
 import Footer from "./Footer"
 import { useNavigate } from "react-router-dom"
+import backgroundImage from "../../assets/A_cozy_restaurant_interior_design_with_warm_ambien_converted.png"
 
 const DefaultPage = ({ role, title, children, backButton }) => {
   const navigate = useNavigate()
@@ -11,7 +12,15 @@ const DefaultPage = ({ role, title, children, backButton }) => {
       <Header role={role} />
       <div className="flex flex-1">
         <Sidebar />
-        <div className="mx-auto flex-1 content-center bg-slate-50 p-6">
+        <div
+          className="mx-auto flex-1 content-center bg-slate-50 p-6"
+          style={{
+            backgroundImage: `url(${backgroundImage})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+        >
           <div className="mb-6 flex items-center gap-4">
             {!backButton && (
               <button

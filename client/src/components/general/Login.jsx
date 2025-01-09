@@ -24,8 +24,9 @@ const Login = () => {
       )
       login(response.data)
       setUser(response.data.userData)
+      console.log("response.data.userData", response.data.userData)
       navigate(
-        `/${response.data.userData.role === "manager" ? "dashboard" : "enter-shift"}`
+        `/${response.data.userData.role === "manager" ? "management" : "enter-shift"}`
       )
     } catch (error) {
       console.error("Login failed:", error.response.data.message)

@@ -76,15 +76,7 @@ export const login = async (req, res) => {
       expiresIn: "30d",
     });
 
-    const userData = {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      gender: user.gender,
-      role: user.role,
-      branch: user.branch,
-      jobTitle: user.jobTitle,
+    const userData = {...user._doc
     };
     console.log(userData);
 
@@ -201,4 +193,131 @@ export const deleteUser = async (req, res) => {
   }
 };
 
+export const toggleShift = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+    console.log("user", user)
+    const currentDate = new Date();
+    
+    // If currently in shift and turning it off, calculate duration
+    if (user.enteredShift) {
+      const shiftStart = new Date(user.enteredShiftDate);
+      const diffMs = currentDate - shiftStart;
+      
+      // Convert milliseconds to hours and minutes
+      const totalMinutes = Math.floor(diffMs / (1000 * 60));
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+
+      // Update last shift duration
+      user.lastShiftDuration = { hours, minutes };
+      
+      // Update total worked time this month
+      user.workedThisMonth.hours += hours;
+      user.workedThisMonth.minutes += minutes;
+      
+      // Adjust if minutes exceed 60
+      if (user.workedThisMonth.minutes >= 60) {
+        user.workedThisMonth.hours += Math.floor(user.workedThisMonth.minutes / 60);
+        user.workedThisMonth.minutes = user.workedThisMonth.minutes % 60;
+      }
+    }
+
+    // Toggle the shift status
+    user.enteredShift = !user.enteredShift;
+    
+    if (user.enteredShift) {
+      // Starting a new shift
+      const newShift = {
+        shift: user._id,
+        date: currentDate,
+        timeShift: currentDate.getHours() < 12 ? "am" : "pm",
+        table: req.body.tables || []
+      };
+      
+      user.shifts = user.shifts.filter(shift => 
+        shift.shift && shift.date && shift.timeShift
+      );
+      user.shifts.push(newShift);
+      user.enteredShiftDate = currentDate;
+    }
+
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: `Shift ${user.enteredShift ? 'started' : 'ended'} successfully`,
+      user:user
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const updateLastShiftDuration = async (req, res) => {
+  try {
+    const { hours, minutes } = req.body;
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // Update last shift duration
+    user.lastShiftDuration = { hours, minutes };
+    
+    // Update total worked time this month
+    user.workedThisMonth.hours += hours;
+    user.workedThisMonth.minutes += minutes;
+    
+    // Adjust if minutes exceed 60
+    if (user.workedThisMonth.minutes >= 60) {
+      user.workedThisMonth.hours += Math.floor(user.workedThisMonth.minutes / 60);
+      user.workedThisMonth.minutes = user.workedThisMonth.minutes % 60;
+    }
+
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: "Shift duration updated successfully",
+      user
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const updateTips = async (req, res) => {
+  try {
+    const { tipsAmount } = req.body;
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    user.tipsLastShift = tipsAmount;
+    user.tipsTotal += tipsAmount;
+
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: "Tips updated successfully",
+      user
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 

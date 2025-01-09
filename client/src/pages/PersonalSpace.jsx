@@ -21,7 +21,7 @@ const PersonalSpace = () => {
           <div className="mx-auto grid max-w-6xl grid-cols-3 gap-8">
             {/* Shifts Section */}
             <div
-              onClick={() => navigate("/shifts")}
+              onClick={() => navigate("/coming-soon")}
               className="group flex transform cursor-pointer flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-8 shadow-lg transition-transform hover:scale-105 hover:shadow-xl"
             >
               <div className="mb-6 text-blue-500 transition-transform group-hover:scale-110">
@@ -38,7 +38,7 @@ const PersonalSpace = () => {
 
             {/* Tips Section */}
             <div
-              onClick={() => navigate("/tips")}
+              onClick={() => navigate("/coming-soon")}
               className="group flex transform cursor-pointer flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-8 shadow-lg transition-transform hover:scale-105 hover:shadow-xl"
             >
               <div className="mb-6 text-green-500 transition-transform group-hover:scale-110">
@@ -55,7 +55,7 @@ const PersonalSpace = () => {
 
             {/* History Section */}
             <div
-              onClick={() => navigate("/history")}
+              onClick={() => navigate("/coming-soon")}
               className="flex transform cursor-pointer flex-col items-center justify-center rounded-lg bg-white p-6 shadow-md transition-transform hover:scale-105 hover:shadow-lg"
             >
               <div className="mb-6 text-blue-800 transition-transform group-hover:scale-110">

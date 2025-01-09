@@ -6,10 +6,7 @@ const bonSchema = new mongoose.Schema({
     unique: true,
     default: function () {
       const now = new Date()
-      return `${now.getHours()}${now.getMinutes()}${now.getSeconds()}`.replace(
-        /:/g,
-        ""
-      )
+      return `${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`
     },
     trim: true
   },

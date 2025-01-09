@@ -5,6 +5,7 @@ import Sidebar from "../../components/general/Sidebar"
 import Footer from "../../components/general/Footer"
 import { AuthContext } from "../../context/AuthContext"
 import { useNavigate } from "react-router-dom"
+import DefaultPage from "../../components/general/DefaultPage"
 
 const TableIcon = () => (
   <svg
@@ -153,257 +154,218 @@ const ManagementTables = () => {
 
   if (loading)
     return (
-      <div className="flex min-h-screen flex-col bg-gradient-to-br from-blue-50 to-gray-100">
-        <Header role={"manager"} />
-        <div className="flex flex-1">
-          <Sidebar />
-          <div className="mx-auto flex-1 content-center p-6">
-            <div className="mb-6 flex justify-between">
-              <h2 className="h-8 w-48 animate-pulse rounded bg-gray-200"></h2>
-              <div className="h-10 w-24 animate-pulse rounded bg-gray-200"></div>
-            </div>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {[1, 2, 3, 4].map((index) => (
-                <div key={index} className="rounded-lg bg-white p-6 shadow-md">
-                  <div className="mb-4 text-center">
-                    <div className="mx-auto mb-3 h-12 w-12 animate-pulse rounded-full bg-gray-200"></div>
-                    <div className="mx-auto mb-2 h-6 w-24 animate-pulse rounded bg-gray-200"></div>
-                    <div className="mx-auto mb-2 h-4 w-16 animate-pulse rounded bg-gray-200"></div>
-                    <div className="mx-auto h-4 w-20 animate-pulse rounded bg-gray-200"></div>
-                  </div>
-                  <div className="flex justify-center space-x-2">
-                    <div className="h-10 w-16 animate-pulse rounded bg-gray-200"></div>
-                    <div className="h-10 w-16 animate-pulse rounded bg-gray-200"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+      <DefaultPage role={"manager"} title={"Tables Management"}>
+        <div className="mb-6 flex justify-between">
+          <h2 className="h-8 w-48 animate-pulse rounded bg-gray-200"></h2>
+          <div className="h-10 w-24 animate-pulse rounded bg-gray-200"></div>
         </div>
-        <Footer />
-      </div>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {[1, 2, 3, 4].map((index) => (
+            <div key={index} className="rounded-lg bg-white p-6 shadow-md">
+              <div className="mb-4 text-center">
+                <div className="mx-auto mb-3 h-12 w-12 animate-pulse rounded-full bg-gray-200"></div>
+                <div className="mx-auto mb-2 h-6 w-24 animate-pulse rounded bg-gray-200"></div>
+                <div className="mx-auto mb-2 h-4 w-16 animate-pulse rounded bg-gray-200"></div>
+                <div className="mx-auto h-4 w-20 animate-pulse rounded bg-gray-200"></div>
+              </div>
+              <div className="flex justify-center space-x-2">
+                <div className="h-10 w-16 animate-pulse rounded bg-gray-200"></div>
+                <div className="h-10 w-16 animate-pulse rounded bg-gray-200"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </DefaultPage>
     )
   if (error) return <div>Error: {error}</div>
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-br from-blue-50 to-gray-100">
-      <Header role={"manager"} />
-      <div className="flex flex-1">
-        <Sidebar />
-        <div className="mx-auto flex-1 content-center p-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="group relative mr-6 flex items-center rounded-lg bg-white px-6 py-3 font-medium text-gray-700 shadow-md transition-all duration-200 hover:bg-gray-50 hover:shadow-lg active:scale-95"
-          >
-            <span className="absolute inset-0 flex h-full w-1 items-center">
-              <span className="h-8 w-1 rounded-r bg-green-500 transition-all duration-200 group-hover:h-full"></span>
-            </span>
+    <DefaultPage role={"manager"} title={"Tables Management"}>
+      <div className="mb-6 flex items-center justify-between">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search table number..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-64 rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:border-green-500 focus:outline-none"
+          />
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
             <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="mr-2 h-5 w-5 transition-transform duration-200 group-hover:-translate-x-1"
+              className="h-5 w-5 text-gray-400"
               viewBox="0 0 20 20"
               fill="currentColor"
             >
               <path
                 fillRule="evenodd"
-                d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
                 clipRule="evenodd"
               />
             </svg>
-            Back
-          </button>
-          <h2 className="mb-6 text-2xl font-bold text-gray-800">
-            Table Management
-          </h2>
-          <div className="mb-6 flex items-center justify-between">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search table number..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-64 rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:border-green-500 focus:outline-none"
-              />
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <svg
-                  className="h-5 w-5 text-gray-400"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-            </div>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
-            >
-              Add Table
-            </button>
-          </div>
-
-          {/* Add Table Modal */}
-          {isModalOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-              <div className="w-96 rounded-lg bg-white p-6 shadow-xl">
-                <h3 className="mb-4 text-xl font-bold">Add New Table</h3>
-                <form onSubmit={handleSubmit}>
-                  {errorMessage && (
-                    <div className="mb-4 rounded-md bg-red-50 p-4">
-                      <div className="flex">
-                        <div className="flex-shrink-0">
-                          <svg
-                            className="h-5 w-5 text-red-400"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </div>
-                        <div className="ml-3">
-                          <p className="text-sm text-red-700">{errorMessage}</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  <div className="mb-4">
-                    <label className="mb-2 block text-sm font-bold text-gray-700">
-                      Table Number
-                    </label>
-                    <input
-                      type="number"
-                      value={newTable.tableNumber}
-                      onChange={(e) =>
-                        setNewTable({
-                          ...newTable,
-                          tableNumber: parseInt(e.target.value) || 0,
-                        })
-                      }
-                      className="w-full rounded border p-2 focus:border-green-500 focus:outline-none"
-                      required
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="mb-2 block text-sm font-bold text-gray-700">
-                      Number of Seats
-                    </label>
-                    <input
-                      type="number"
-                      value={newTable.seats}
-                      onChange={(e) =>
-                        setNewTable({
-                          ...newTable,
-                          seats: parseInt(e.target.value) || 0,
-                        })
-                      }
-                      className="w-full rounded border p-2 focus:border-green-500 focus:outline-none"
-                      required
-                    />
-                  </div>
-                  <div className="flex justify-end space-x-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsModalOpen(false)
-                        setNewTable({ tableNumber: 0, seats: 0 })
-                      }}
-                      className="rounded bg-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-400"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="flex min-w-[80px] items-center justify-center rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-green-300"
-                    >
-                      {isSubmitting ? (
-                        <svg
-                          className="h-5 w-5 animate-spin text-white"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          ></path>
-                        </svg>
-                      ) : (
-                        "Save"
-                      )}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredTables.map((table) => (
-              <div
-                key={table.id}
-                className="rounded-lg bg-white p-6 shadow-md transition-transform hover:scale-105"
-              >
-                <div className="mb-4 text-center">
-                  <div className="mb-3 text-gray-600">
-                    <TableIcon />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-800">
-                    Table {table.tableNumber}
-                  </h3>
-                  <div className="mt-2 text-gray-600">{table.seats} Seats</div>
-                  <div className="">
-                    {"🪑".repeat(Math.round(table.seats / 2))}
-                  </div>
-                </div>
-                <div className="flex justify-center space-x-2">
-                  <button
-                    onClick={() => {
-                      setEditingTable(table)
-                      setNewSeats(table.seats)
-                    }}
-                    className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => {
-                      setTableToDelete(table)
-                      setDeleteModalOpen(true)
-                    }}
-                    className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-            {filteredTables.length === 0 && (
-              <div className="col-span-full py-8 text-center text-gray-500">
-                No tables found matching your search.
-              </div>
-            )}
           </div>
         </div>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
+        >
+          Add Table
+        </button>
       </div>
-      <Footer />
+
+      {/* Add Table Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-96 rounded-lg bg-white p-6 shadow-xl">
+            <h3 className="mb-4 text-xl font-bold">Add New Table</h3>
+            <form onSubmit={handleSubmit}>
+              {errorMessage && (
+                <div className="mb-4 rounded-md bg-red-50 p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg
+                        className="h-5 w-5 text-red-400"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-red-700">{errorMessage}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div className="mb-4">
+                <label className="mb-2 block text-sm font-bold text-gray-700">
+                  Table Number
+                </label>
+                <input
+                  type="number"
+                  value={newTable.tableNumber}
+                  onChange={(e) =>
+                    setNewTable({
+                      ...newTable,
+                      tableNumber: parseInt(e.target.value) || 0,
+                    })
+                  }
+                  className="w-full rounded border p-2 focus:border-green-500 focus:outline-none"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label className="mb-2 block text-sm font-bold text-gray-700">
+                  Number of Seats
+                </label>
+                <input
+                  type="number"
+                  value={newTable.seats}
+                  onChange={(e) =>
+                    setNewTable({
+                      ...newTable,
+                      seats: parseInt(e.target.value) || 0,
+                    })
+                  }
+                  className="w-full rounded border p-2 focus:border-green-500 focus:outline-none"
+                  required
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsModalOpen(false)
+                    setNewTable({ tableNumber: 0, seats: 0 })
+                  }}
+                  className="rounded bg-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex min-w-[80px] items-center justify-center rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-green-300"
+                >
+                  {isSubmitting ? (
+                    <svg
+                      className="h-5 w-5 animate-spin text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  ) : (
+                    "Save"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {filteredTables.map((table) => (
+          <div
+            key={table.id}
+            className="rounded-lg bg-white p-6 shadow-md transition-transform hover:scale-105"
+          >
+            <div className="mb-4 text-center">
+              <div className="mb-3 text-gray-600">
+                <TableIcon />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800">
+                Table {table.tableNumber}
+              </h3>
+              <div className="mt-2 text-gray-600">{table.seats} Seats</div>
+              <div className="">{"🪑".repeat(Math.round(table.seats / 2))}</div>
+            </div>
+            <div className="flex justify-center space-x-2">
+              <button
+                onClick={() => {
+                  setEditingTable(table)
+                  setNewSeats(table.seats)
+                }}
+                className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => {
+                  setTableToDelete(table)
+                  setDeleteModalOpen(true)
+                }}
+                className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+        {filteredTables.length === 0 && (
+          <div className="col-span-full py-8 text-center text-gray-500">
+            No tables found matching your search.
+          </div>
+        )}
+      </div>
+
       {deleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="w-96 rounded-lg bg-white p-6 shadow-xl">
@@ -544,7 +506,7 @@ const ManagementTables = () => {
           </div>
         </div>
       )}
-    </div>
+    </DefaultPage>
   )
 }
 
