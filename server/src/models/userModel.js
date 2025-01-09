@@ -36,6 +36,51 @@ const userschema = new mongoose.Schema({
       return this.role === "employee"
     },
   },
+  branch: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Branch",
+    default: "676d0974ccb270069df3e06f",
+  },
+  avatar: {
+    type: String,
+    required: false,
+  },
+  enteredShift: {
+    type: Boolean,
+    default: false,
+  },
+  enteredShiftDate: {
+    type: Date,
+    required: false,
+  },
+  lastShiftDuration: {
+    hours: {
+      type: Number,
+      default: 0
+    },
+    minutes: {
+      type: Number,
+      default: 0
+    },
+  },
+  workedThisMonth: {
+    hours: {
+      type: Number,
+      default: 0
+    },
+    minutes: {
+      type: Number,
+      default: 0
+    }
+  },
+  tipsLastShift: {
+    type: Number,
+    default: 0
+  },
+  tipsTotal: {
+    type: Number,
+    default: 0
+  },
   shifts: [
     {
       shift: {
@@ -58,11 +103,6 @@ const userschema = new mongoose.Schema({
       },
     },
   ],
-  branch: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Branch",
-    default: "676d0974ccb270069df3e06f",
-  },
   bons: [
     {
       bon: {
@@ -77,11 +117,6 @@ const userschema = new mongoose.Schema({
       totalSpent: { type: Number, default: 0 },
     },
   ],
-  avatar: {
-    type: String,
-    required: false,
-  },
-
 });
 
 

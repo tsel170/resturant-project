@@ -5,6 +5,7 @@ import Footer from "../../components/general/Footer"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
 import { AuthContext } from "../../context/AuthContext"
+import DefaultPage from "../../components/general/DefaultPage"
 
 const WorkersManagement = () => {
   const navigate = useNavigate()
@@ -219,195 +220,162 @@ const WorkersManagement = () => {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-100">
-      <Header role={"manager"} />
-      <div className="flex flex-1">
-        <Sidebar />
-        <div className="mx-auto flex-1 content-center bg-slate-50 p-8">
-          <div className="mb-8">
-            <div className="mb-6 flex items-center">
-              <button
-                onClick={() => navigate(-1)}
-                className="group relative mr-6 flex items-center rounded-lg bg-white px-6 py-3 font-medium text-gray-700 shadow-md transition-all duration-200 hover:bg-gray-50 hover:shadow-lg active:scale-95"
-              >
-                <span className="absolute inset-0 flex h-full w-1 items-center">
-                  <span className="h-8 w-1 rounded-r bg-green-500 transition-all duration-200 group-hover:h-full"></span>
-                </span>
+    <DefaultPage role={"manager"} title={"Workers Management"}>
+      <div className="mb-8">
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search employees..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
+              />
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="mr-2 h-5 w-5 transition-transform duration-200 group-hover:-translate-x-1"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
                   <path
-                    fillRule="evenodd"
-                    d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                    clipRule="evenodd"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                   />
                 </svg>
-                Back
-              </button>
-              <h2 className="text-3xl font-bold text-gray-800">
-                Employees List
-              </h2>
-            </div>
-
-            <div className="mb-6 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search employees..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
-                  />
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                      />
-                    </svg>
-                  </div>
-                </div>
-
-                {roleFilter === "employee" && (
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
-                  >
-                    <option value="all">All Job Titles</option>
-                    <option value="waiter">Waiters</option>
-                    <option value="chef">Chefs</option>
-                  </select>
-                )}
-
-                <select
-                  value={roleFilter}
-                  onChange={(e) => {
-                    setRoleFilter(e.target.value)
-                    if (e.target.value !== "employee") {
-                      setSortBy("all")
-                    }
-                  }}
-                  className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
-                >
-                  <option value="all">All Roles</option>
-                  <option value="employee">Employees</option>
-                  <option value="manager">Managers</option>
-                </select>
               </div>
-
-              <button
-                onClick={() => setIsAddModalOpen(true)}
-                className="flex items-center rounded-lg bg-green-500 px-6 py-2.5 text-sm font-medium text-white shadow-md transition-all duration-200 hover:bg-green-600 hover:shadow-lg active:scale-95"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="mr-2 h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                Add Employee
-              </button>
             </div>
+
+            {roleFilter === "employee" && (
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
+              >
+                <option value="all">All Job Titles</option>
+                <option value="waiter">Waiters</option>
+                <option value="chef">Chefs</option>
+              </select>
+            )}
+
+            <select
+              value={roleFilter}
+              onChange={(e) => {
+                setRoleFilter(e.target.value)
+                if (e.target.value !== "employee") {
+                  setSortBy("all")
+                }
+              }}
+              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
+            >
+              <option value="all">All Roles</option>
+              <option value="employee">Employees</option>
+              <option value="manager">Managers</option>
+            </select>
           </div>
 
-          <div className="overflow-hidden rounded-xl bg-white shadow-lg">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-gray-600">
-                    Name
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-gray-600">
-                    Role
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-gray-600">
-                    Job Title
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-gray-600">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {isLoading
-                  ? // Skeleton loading state
-                    Array(5)
-                      .fill(0)
-                      .map((_, index) => (
-                        <tr key={index} className="animate-pulse">
-                          <td className="whitespace-nowrap px-6 py-4">
-                            <div className="h-4 w-32 rounded bg-gray-200"></div>
-                          </td>
-                          <td className="whitespace-nowrap px-6 py-4">
-                            <div className="h-4 w-24 rounded bg-gray-200"></div>
-                          </td>
-                          <td className="whitespace-nowrap px-6 py-4">
-                            <div className="h-4 w-20 rounded bg-gray-200"></div>
-                          </td>
-                          <td className="whitespace-nowrap px-6 py-4">
-                            <div className="h-8 w-24 rounded bg-gray-200"></div>
-                          </td>
-                        </tr>
-                      ))
-                  : getFilteredEmployees().map((employee) => (
-                      <tr
-                        key={employee.id}
-                        className="transition duration-150 hover:bg-gray-50"
-                      >
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                          <div className="flex items-center space-x-3">
-                            <img
-                              src={getWorkerAvatar(
-                                employee?.email,
-                                employee?.gender
-                              )}
-                              alt={`Avatar for ${employee.name}`}
-                              className="h-8 w-8 rounded-full"
-                            />
-                            <span>{employee.name}</span>
-                          </div>
-                        </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
-                          {employee.role}
-                        </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
-                          {employee.jobTitle || "none"}
-                        </td>
-                        <td className="space-x-2 whitespace-nowrap px-6 py-4">
-                          <button
-                            onClick={() => handleSeeMore(employee)}
-                            className="rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-blue-600"
-                          >
-                            See More
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-              </tbody>
-            </table>
-          </div>
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="flex items-center rounded-lg bg-green-500 px-6 py-2.5 text-sm font-medium text-white shadow-md transition-all duration-200 hover:bg-green-600 hover:shadow-lg active:scale-95"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="mr-2 h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                clipRule="evenodd"
+              />
+            </svg>
+            Add Employee
+          </button>
         </div>
       </div>
-      <Footer />
+
+      <div className="overflow-hidden rounded-xl bg-white shadow-lg">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-gray-600">
+                Name
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-gray-600">
+                Role
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-gray-600">
+                Job Title
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-gray-600">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200 bg-white">
+            {isLoading
+              ? // Skeleton loading state
+                Array(5)
+                  .fill(0)
+                  .map((_, index) => (
+                    <tr key={index} className="animate-pulse">
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <div className="h-4 w-32 rounded bg-gray-200"></div>
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <div className="h-4 w-24 rounded bg-gray-200"></div>
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <div className="h-4 w-20 rounded bg-gray-200"></div>
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <div className="h-8 w-24 rounded bg-gray-200"></div>
+                      </td>
+                    </tr>
+                  ))
+              : getFilteredEmployees().map((employee) => (
+                  <tr
+                    key={employee.id}
+                    className="transition duration-150 hover:bg-gray-50"
+                  >
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                      <div className="flex items-center space-x-3">
+                        <img
+                          src={getWorkerAvatar(
+                            employee?.email,
+                            employee?.gender
+                          )}
+                          alt={`Avatar for ${employee.name}`}
+                          className="h-8 w-8 rounded-full"
+                        />
+                        <span>{employee.name}</span>
+                      </div>
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
+                      {employee.role}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
+                      {employee.jobTitle || "none"}
+                    </td>
+                    <td className="space-x-2 whitespace-nowrap px-6 py-4">
+                      <button
+                        onClick={() => handleSeeMore(employee)}
+                        className="rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-blue-600"
+                      >
+                        See More
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+          </tbody>
+        </table>
+      </div>
+
       {isModalOpen && (
         <div
           className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm transition-all duration-300 ${isModalClosing ? "animate-fadeOut" : "animate-fadeIn"}`}
@@ -1013,7 +981,7 @@ const WorkersManagement = () => {
           animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
       `}</style>
-    </div>
+    </DefaultPage>
   )
 }
 
