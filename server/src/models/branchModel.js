@@ -22,12 +22,16 @@ const branchSchema = new mongoose.Schema({
       tableNumber: {
         type: Number,
         required: true,
-
         unique: false,
       },
       seats: {
         type: Number,
         required: true,
+      },
+      diners: {
+        type: Number,
+        required: false,
+        default: 0,
       },
       occuipied: {
         type: Boolean,

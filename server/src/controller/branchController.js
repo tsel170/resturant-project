@@ -165,6 +165,25 @@ export const updateTableOccupied = async (req, res) => {
   }
 }
 
+export const updateTableDiners = async (req, res) => {
+  const { branchId, tableNumber, diners } = req.body
+
+  try {
+    const branch = await Branch.findById(branchId)
+    const table = branch.tables.find(
+      (table) => table.tableNumber === tableNumber
+    )
+    table.diners = diners
+    await branch.save()
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to update table diners",
+      error: err.message,
+    })
+  }
+}
+
 export const deleteTable = async (req, res) => {
   const { branchId, tableNumber } = req.body
   
