@@ -196,11 +196,13 @@ export const deleteUser = async (req, res) => {
 export const toggleShift = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
+    
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "User not found"
       });
+
     }
     console.log("user", user)
     const currentDate = new Date();
@@ -227,6 +229,10 @@ export const toggleShift = async (req, res) => {
         user.workedThisMonth.hours += Math.floor(user.workedThisMonth.minutes / 60);
         user.workedThisMonth.minutes = user.workedThisMonth.minutes % 60;
       }
+      // res.status(200).json({
+      //   success: true,
+      //   user,
+      // });
     }
 
     // Toggle the shift status

@@ -43,3 +43,48 @@
     scrollbar-color: #d1d5db #f1f1f1;
   }
 }
+.hourglass {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #3b82f6;
+  border-radius: 50%;
+  position: relative;
+}
+
+.hourglass::before,
+.hourglass::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: #3b82f6;
+  width: 45%;
+  height: 3px;
+  transform-origin: left center;
+}
+
+.hourglass::before {
+  animation: rotate1 2s linear infinite;
+}
+
+.hourglass::after {
+  animation: rotate2 8s linear infinite;
+}
+
+@keyframes rotate1 {
+  from {
+    transform: translateY(-50%) rotate(0deg);
+  }
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+@keyframes rotate2 {
+  from {
+    transform: translateY(-50%) rotate(0deg);
+  }
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}

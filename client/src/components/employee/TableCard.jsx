@@ -31,6 +31,8 @@ const TableCard = ({
   const [isFreeingTable, setIsFreeingTable] = useState(false)
   const [freeTableError, setFreeTableError] = useState(null)
   const [isConfirmationVisible, setIsConfirmationVisible] = useState(false)
+  const [showDinersModal, setShowDinersModal] = useState(false)
+  const [selectedDiners, setSelectedDiners] = useState(1)
 
   useEffect(() => {
     setOrders(tableOrders)
@@ -184,6 +186,16 @@ const TableCard = ({
     }
   }
 
+  const handleAssignClick = () => {
+    setShowDinersModal(true)
+  }
+
+  const handleDinersSubmit = () => {
+    onAssign(selectedDiners)
+    setShowDinersModal(false)
+    setSelectedDiners(1)
+  }
+
   return (
     <>
       <div
@@ -224,7 +236,7 @@ const TableCard = ({
 
         {!occuipied && (
           <button
-            onClick={onAssign}
+            onClick={handleAssignClick}
             className="mt-4 w-full rounded-lg bg-blue-600 py-2 text-white transition-colors hover:bg-blue-700 active:bg-blue-800"
           >
             Assign Table
@@ -331,6 +343,47 @@ const TableCard = ({
                 ) : (
                   "Free Table"
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Diners Selection Modal */}
+      {showDinersModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="rounded-lg bg-white p-6 shadow-xl">
+            <h3 className="mb-4 text-xl font-semibold">
+              Select Number of Diners
+            </h3>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Number of Diners
+              </label>
+              <input
+                type="number"
+                min="1"
+                value={selectedDiners}
+                onChange={(e) =>
+                  setSelectedDiners(parseInt(e.target.value) || 1)
+                }
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setShowDinersModal(false)}
+                className="rounded-lg bg-gray-100 px-4 py-2 text-gray-600 hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDinersSubmit}
+                className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+              >
+                Confirm
               </button>
             </div>
           </div>

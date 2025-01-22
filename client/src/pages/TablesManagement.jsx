@@ -14,17 +14,29 @@ const TablesManagement = () => {
     useContext(AuthContext)
   const [ordersNumber, setOrdersNumber] = useState([])
 
-  const handleAssignTable = async (table) => {
+  const handleAssignTable = async (table, diners) => {
     try {
-      const response = await axios.put(
+      // First update the table to occupied
+      await axios.put(
         import.meta.env.VITE_SERVER + "/api/branches/updateTableOccupied",
         {
           branchId: branchId,
           tableNumber: table.tableNumber,
+          diners: diners,
         }
       )
+
+      // Then update the diners count
+      await axios.put(
+        import.meta.env.VITE_SERVER + "/api/branches/updateTableDiners",
+        {
+          branchId: branchId,
+          tableNumber: table.tableNumber,
+          diners: diners,
+        }
+      )
+
       await fetchTables()
-      console.log(response)
     } catch (error) {
       console.error("Error assigning table:", error)
     }
@@ -61,7 +73,7 @@ const TablesManagement = () => {
             ordersNumber={ordersNumber}
             setOrdersNumber={setOrdersNumber}
             occuipied={table.occuipied}
-            onAssign={() => handleAssignTable(table)}
+            onAssign={(diners) => handleAssignTable(table, diners)}
             updateTable={updateTable}
             branchId={branchId}
           />
