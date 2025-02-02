@@ -63,103 +63,299 @@ const OrdersManagement = () => {
     updateTimes()
   }, [orders])
 
+  const [sortBy, setSortBy] = useState("bonNumber")
+  const [sortOrder, setSortOrder] = useState("asc")
+
+  const sortOrders = (ordersToSort) => {
+    return [...ordersToSort].sort((a, b) => {
+      let comparison = 0
+
+      switch (sortBy) {
+        case "table":
+          comparison = a.tableNumber - b.tableNumber
+          break
+        case "time":
+          comparison = new Date(a.date) - new Date(b.date)
+          break
+        case "bonNumber":
+          comparison = a.bonNumber - b.bonNumber
+          break
+        default:
+          comparison = 0
+      }
+
+      return sortOrder === "asc" ? comparison : -comparison
+    })
+  }
+
+  // Apply sorting to both order lists
+  const sortedInProcessOrders = sortOrders(inProcessOrders)
+  const sortedDeliveredOrders = sortOrders(deliveredOrders)
+
+  const handleSort = (by) => {
+    setSortBy(by)
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+  }
+
   return (
     <DefaultPage title="Orders Management">
-      <div className="flex min-h-screen flex-col bg-slate-50">
-        {/* <Navbar role={"employee"} /> */}
-        <div className="flex flex-1">
-          {/* <Sidebar /> */}
-          <div className="mx-auto w-full max-w-7xl flex-1 p-4 sm:p-6">
-            <div className="grid h-full gap-6 sm:grid-cols-1 lg:grid-cols-2">
-              {/* In Process Orders Section */}
-              <div className="overflow-y-auto rounded border border-gray-300 bg-blue-100 p-4 shadow-lg">
-                <h2 className="mb-4 text-xl font-bold text-gray-900">
-                  In Process
-                </h2>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {inProcessOrders.map((order) => (
-                    <div
-                      key={order._id}
-                      className="transform rounded-lg border border-gray-200 bg-white p-4 shadow-md transition-transform hover:scale-105 hover:shadow-lg"
-                    >
-                      <h3 className="mb-2 font-bold text-gray-800">
-                        Order #{order.bonNumber}
-                        <div className="flex gap-2">
-                          <span className="text-sm text-gray-600">
-                            Table {order.tableNumber}
-                          </span>
-                          <span className="text-sm font-medium text-blue-600">
-                            Est: {calculateExpectedTime(order.meals)}m
-                          </span>
-                          <span
-                            className={`text-sm font-medium ${
-                              !timeElapsed[order._id]
-                                ? "text-gray-600"
-                                : (() => {
-                                    const expectedSeconds =
-                                      calculateExpectedTime(order.meals) * 60
-                                    const elapsedSeconds =
-                                      timeElapsed[order._id].seconds
-                                    const percentage =
-                                      (elapsedSeconds / expectedSeconds) * 100
+      <div className="flex h-[calc(100vh-theme(spacing.32))] flex-col overflow-auto p-6">
+        {/* Sort Controls - Redesigned */}
+        <div className="mb-4 min-h-fit">
+          <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-800">Sort Orders</h3>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => handleSort("bonNumber")}
+                className={`flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-all ${
+                  sortBy === "bonNumber"
+                    ? "bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-700/10"
+                    : "text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
+                  />
+                </svg>
+                <span>Order Number</span>
+                {sortBy === "bonNumber" && (
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d={
+                        sortOrder === "asc" ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"
+                      }
+                    />
+                  </svg>
+                )}
+              </button>
 
-                                    if (percentage <= 50)
-                                      return "bg-green-100 text-green-600"
-                                    if (percentage <= 75)
-                                      return "bg-yellow-100 text-yellow-600"
-                                    if (percentage <= 100)
-                                      return "bg-orange-100 text-orange-600"
-                                    return "bg-red-100 text-red-600"
-                                  })()
-                            }`}
-                          >
-                            Waiting: {timeElapsed[order._id]?.text || "0s"}
-                          </span>
-                        </div>
-                      </h3>
-                      <ul className="ml-4 list-disc text-gray-700">
-                        {order.meals?.map((item, index) => (
-                          <li key={index}>
-                            {item.mealTitle} {item.quantity}
-                          </li>
-                        ))}
-                      </ul>
-                      {order.ready && (
-                        <button
-                          onClick={() => handleDelivered(order._id)}
-                          className="mt-2 transform rounded bg-blue-500 px-4 py-2 text-white transition-transform hover:scale-105 hover:bg-blue-600 active:scale-95 active:bg-blue-700"
+              <button
+                onClick={() => handleSort("table")}
+                className={`flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-all ${
+                  sortBy === "table"
+                    ? "bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-700/10"
+                    : "text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  />
+                </svg>
+                <span>Table</span>
+                {sortBy === "table" && (
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d={
+                        sortOrder === "asc" ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"
+                      }
+                    />
+                  </svg>
+                )}
+              </button>
+
+              <button
+                onClick={() => handleSort("time")}
+                className={`flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-all ${
+                  sortBy === "time"
+                    ? "bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-700/10"
+                    : "text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span>Time</span>
+                {sortBy === "time" && (
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d={
+                        sortOrder === "asc" ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"
+                      }
+                    />
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Orders Grid */}
+        <div className="grid min-h-fit flex-1 grid-cols-2 gap-8">
+          {/* In Process Orders Section */}
+          <div className="flex flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow duration-300 hover:shadow-md">
+            <h2 className="mb-6 flex items-center justify-between border-b pb-4 text-2xl font-bold text-gray-800">
+              In Process Orders
+              <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-normal text-gray-500">
+                {inProcessOrders.length} orders
+              </span>
+            </h2>
+            <div className="flex-1 space-y-4 overflow-y-auto">
+              {sortedInProcessOrders.map((order) => (
+                <div
+                  key={order._id}
+                  className="rounded-lg border border-gray-200 p-4 shadow-sm transition-colors hover:bg-gray-50"
+                >
+                  <div className="mb-3 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Order #{order.bonNumber}
+                    </h3>
+                    <div className="flex gap-2">
+                      <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
+                        Table {order.tableNumber}
+                      </span>
+                      <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-800">
+                        Est: {calculateExpectedTime(order.meals)}m
+                      </span>
+                      {timeElapsed[order._id] && (
+                        <span
+                          className={`rounded-full px-3 py-1 text-sm font-medium ${
+                            !timeElapsed[order._id]
+                              ? "bg-gray-100 text-gray-600"
+                              : (() => {
+                                  const expectedSeconds =
+                                    calculateExpectedTime(order.meals) * 60
+                                  const elapsedSeconds =
+                                    timeElapsed[order._id].seconds
+                                  const percentage =
+                                    (elapsedSeconds / expectedSeconds) * 100
+                                  if (percentage <= 50)
+                                    return "bg-green-100 text-green-800"
+                                  if (percentage <= 75)
+                                    return "bg-yellow-100 text-yellow-800"
+                                  if (percentage <= 100)
+                                    return "bg-orange-100 text-orange-800"
+                                  return "bg-red-100 text-red-800"
+                                })()
+                          }`}
                         >
-                          Delivered
-                        </button>
+                          {timeElapsed[order._id]?.text || "0s"}
+                        </span>
                       )}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
 
-              {/* Delivered Orders Section */}
-              <div className="overflow-y-auto rounded border border-gray-300 bg-green-100 p-4 shadow-lg">
-                <h2 className="mb-4 text-xl font-bold text-gray-900">
-                  Delivered
-                </h2>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {deliveredOrders.map((order) => (
-                    <div
-                      key={order.id}
-                      className="transform rounded-lg border border-gray-200 bg-white p-4 shadow-md transition-transform hover:scale-105 hover:shadow-lg"
+                  <div className="mb-4 space-y-2">
+                    {order.meals?.map((meal, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-gray-100"
+                      >
+                        <span className="font-medium text-gray-700">
+                          {meal.quantity}x {meal.mealTitle}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {order.ready && (
+                    <button
+                      onClick={() => handleDelivered(order._id)}
+                      className="w-full rounded-lg bg-green-500 py-2.5 font-medium text-white transition-colors hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300"
                     >
-                      <h3 className="font-bold text-gray-800">
-                        Order #{order.bonNumber}
-                      </h3>
-                      <ul className="ml-4 list-disc text-gray-700">
-                        {order.meals?.map((item, index) => (
-                          <li key={index}>{item.mealTitle}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
+                      Mark as Delivered
+                    </button>
+                  )}
                 </div>
-              </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Delivered Orders Section */}
+          <div className="flex flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow duration-300 hover:shadow-md">
+            <h2 className="mb-6 flex items-center justify-between border-b pb-4 text-2xl font-bold text-gray-800">
+              Delivered Orders
+              <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-normal text-gray-500">
+                {deliveredOrders.length} orders
+              </span>
+            </h2>
+            <div className="flex-1 space-y-4 overflow-y-auto">
+              {sortedDeliveredOrders.map((order) => (
+                <div
+                  key={order.id}
+                  className="rounded-lg border border-gray-200 p-4 shadow-sm transition-colors"
+                >
+                  <div className="mb-3 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Order #{order.bonNumber}
+                    </h3>
+                    <div className="flex gap-2">
+                      <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
+                        Table {order.tableNumber}
+                      </span>
+                      <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-600">
+                        {timeElapsed[order._id]?.text}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="justify-between space-y-2">
+                    {order.meals?.map((meal, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between rounded-lg p-3 transition-colors"
+                      >
+                        <span className="font-medium text-gray-700">
+                          {meal.quantity}x {meal.mealTitle}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
