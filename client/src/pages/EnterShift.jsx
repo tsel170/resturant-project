@@ -112,10 +112,19 @@ const EnterShift = () => {
       {/* Main Content */}
       <div className="flex h-2/4 flex-col items-center justify-center rounded-lg bg-white p-6 shadow-md backdrop-blur-md">
         <div className="mb-8 text-center">
-          <h2 className="text-4xl font-bold text-gray-800">Welcome Back!</h2>
-          <p className="mt-2 text-lg text-gray-600">
-            Ready to start your shift? Click the button below.
-          </p>
+          <h2 className="text-4xl font-bold text-gray-800">
+            {user?.enteredShift ? "Currently Working" : "Welcome Back!"}
+          </h2>
+          {user?.enteredShift ? (
+            <div className="mt-4 flex flex-col items-center">
+              <div className="hourglass mb-4"></div>
+              <p className="text-lg text-gray-600">Your shift is in progress</p>
+            </div>
+          ) : (
+            <p className="mt-2 text-lg text-gray-600">
+              Ready to start your shift? Click the button below.
+            </p>
+          )}
         </div>
         <button
           onClick={handleToggleShift}

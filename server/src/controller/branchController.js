@@ -141,7 +141,7 @@ export const updateTableSeats = async (req, res) => {
 }
 
 export const updateTableOccupied = async (req, res) => {
-  const { branchId, tableNumber } = req.body
+  const { branchId, tableNumber, diners } = req.body
 
   try {
     const branch = await Branch.findById(branchId)
@@ -149,17 +149,44 @@ export const updateTableOccupied = async (req, res) => {
       (table) => table.tableNumber === tableNumber
     )
     table.occuipied = !table.occuipied
+    if (diners) {
+      table.diners = diners
+    }
     await branch.save()
 
     res.status(200).json({
       success: true,
-      message: "Table seats updated successfully",
+      message: "Table updated successfully",
       branch,
     })
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: "Failed to update table seats",
+      message: "Failed to update table",
+      error: err.message,
+    })
+  }
+}
+
+export const updateTableDiners = async (req, res) => {
+  const { branchId, tableNumber, diners } = req.body
+
+  try {
+    const branch = await Branch.findById(branchId)
+    const table = branch.tables.find(
+      (table) => table.tableNumber === tableNumber
+    )
+    table.diners = diners
+    await branch.save()
+    res.status(200).json({
+      success: true,
+      message: "Table updated successfully",
+      branch,
+    })
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to update table diners",
       error: err.message,
     })
   }

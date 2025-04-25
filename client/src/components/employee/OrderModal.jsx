@@ -16,10 +16,13 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
   const [mealSearch, setMealSearch] = useState("")
   const [selectedMeal, setSelectedMeal] = useState(null)
   const [order, setOrder] = useState([])
+  const [isSearchFocused, setIsSearchFocused] = useState(false)
 
-  const filteredMeals = meals.filter((meal) =>
-    meal.title.toLowerCase().includes(mealSearch.toLowerCase())
-  )
+  const filteredMeals = mealSearch
+    ? meals.filter((meal) =>
+        meal.title.toLowerCase().includes(mealSearch.toLowerCase())
+      )
+    : meals
 
   const handleMealSelect = (meal) => {
     setSelectedMeal(meal)
@@ -139,19 +142,20 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
                     handleAddMeal(e.target.value)
                   }
                 }}
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
                 placeholder="Search for a meal..."
                 className="w-full rounded-lg border p-2"
                 autoComplete="off"
               />
 
-              {mealSearch && (
+              {mealSearch !== undefined && isSearchFocused && (
                 <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border bg-white shadow-lg">
                   {filteredMeals.map((meal) => (
                     <div
                       key={meal._id}
                       onClick={() => {
                         setMealSearch(meal.title)
-
                         handleAddMeal(meal)
                       }}
                       className="cursor-pointer p-2 hover:bg-gray-100"
