@@ -62,11 +62,19 @@ export const getUser = async (req, res) => {
 };
 
 export const login = async (req, res) => {
+  console.log('Login request received:', {
+    body: req.body,
+    headers: req.headers,
+    url: req.url
+  });
+  
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
+    console.log('User found:', user ? 'Yes' : 'No');
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
+      console.log('Login failed: Invalid credentials');
       return res.status(404).json({
         success: false,
         message: "User not found",
@@ -76,9 +84,8 @@ export const login = async (req, res) => {
       expiresIn: "30d",
     });
 
-    const userData = {...user._doc
-    };
-    console.log(userData);
+    const userData = {...user._doc};
+    console.log('Login successful for user:', userData.email);
 
     res.status(200).json({
       success: true,
@@ -87,6 +94,7 @@ export const login = async (req, res) => {
       token,
     });
   } catch (err) {
+    console.error('Login error:', err);
     res.status(500).json({ message: "Login failed", error: err.message });
   }
 };
