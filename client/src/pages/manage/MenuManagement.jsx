@@ -59,6 +59,23 @@ const MenuManagement = () => {
   // Combine default and existing categories, remove duplicates
   const allCategories = [...new Set([...uniqueCategories])]
 
+  // Add this new state for all meals from TheMealDB
+  const [allMealDBMeals, setAllMealDBMeals] = useState([])
+
+  // Add this useEffect to fetch all meals when the component mounts
+  useEffect(() => {
+    const fetchAllMeals = async () => {
+      try {
+        const response = await axios.get(`${MEALDB_API}`)
+        setAllMealDBMeals(response.data.meals || [])
+        setSearchResults(response.data.meals || []) // Show all meals initially
+      } catch (err) {
+        console.error("Error fetching meals:", err)
+      }
+    }
+    fetchAllMeals()
+  }, [])
+
   useEffect(() => {
     if (showAddExistingForm) {
       searchMeals("")
@@ -91,6 +108,41 @@ const MenuManagement = () => {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
+
+    // Add validation for all required fields
+    if (!newMeal.title.trim()) {
+      setError("Please enter a title")
+      setIsLoading(false)
+      return
+    }
+
+    if (!newMeal.price || newMeal.price <= 0) {
+      setError("Please enter a valid price greater than 0")
+      setIsLoading(false)
+      return
+    }
+
+    if (!newMeal.category) {
+      setError("Please select or enter a category")
+      setIsLoading(false)
+      return
+    }
+
+    if (!newMeal.description.trim()) {
+      setError("Please enter a description")
+      setIsLoading(false)
+      return
+    }
+
+    // Check if there's at least one ingredient with both fields filled
+    const hasValidIngredients = newMeal.Ingredients.some(
+      (ing) => ing.ingredient.trim() && ing.quantity.trim()
+    )
+    if (!hasValidIngredients) {
+      setError("Please add at least one ingredient with both name and quantity")
+      setIsLoading(false)
+      return
+    }
 
     try {
       const mealData = {
@@ -329,6 +381,15 @@ const MenuManagement = () => {
     }
   }
 
+  const handleMealSelect = (meal) => {
+    setSelectedMealDetails(meal)
+    setSelectedMeal({
+      price: "",
+      description: "",
+    })
+    setShowMealDetailsModal(true)
+  }
+
   return (
     <DefaultPage title="Menu Management" role="manager">
       <div className="flex flex-col">
@@ -471,9 +532,7 @@ const MenuManagement = () => {
                     key={meal._id}
                     meal={meal}
                     selectedMeal={selectedMeal}
-                    onMealSelect={(id) =>
-                      setSelectedMeal(selectedMeal === id ? null : id)
-                    }
+                    onMealSelect={handleMealSelect}
                     onViewRecipe={handleViewRecipe}
                     onEditClick={handleEditClick}
                     onDeleteClick={(id) => setDeleteModalMeal(id)}
@@ -858,7 +917,7 @@ const MenuManagement = () => {
             <div className="grid gap-6 md:grid-cols-2">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Title
+                  Title <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -868,31 +927,36 @@ const MenuManagement = () => {
                     setNewMeal({ ...newMeal, title: e.target.value })
                   }
                   className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                  placeholder="Enter meal title"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Price (₪)
+                  Price (₪) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
                   required
+                  min="0.01"
+                  step="0.01"
                   value={newMeal.price}
                   onChange={(e) =>
                     setNewMeal({ ...newMeal, price: e.target.value })
                   }
                   className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                  placeholder="0.00"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Category
+                  Category <span className="text-red-500">*</span>
                 </label>
                 {isNewCategory ? (
                   <input
                     type="text"
+                    required
                     value={newCategory}
                     onChange={(e) => handleNewCategorySubmit(e.target.value)}
                     className="mt-1 w-full rounded-md border border-gray-300 p-2"
@@ -900,6 +964,7 @@ const MenuManagement = () => {
                   />
                 ) : (
                   <select
+                    required
                     value={newMeal.category}
                     onChange={handleCategoryChange}
                     className="mt-1 w-full rounded-md border border-gray-300 p-2"
@@ -945,7 +1010,7 @@ const MenuManagement = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Description
+                Description <span className="text-red-500">*</span>
               </label>
               <textarea
                 required
@@ -955,12 +1020,15 @@ const MenuManagement = () => {
                 }
                 className="mt-1 w-full rounded-md border border-gray-300 p-2"
                 rows="3"
+                placeholder="Enter meal description"
               />
             </div>
 
             <div className="mt-6">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium">Ingredients</h3>
+                <h3 className="text-lg font-medium">
+                  Ingredients <span className="text-red-500">*</span>
+                </h3>
                 <button
                   type="button"
                   onClick={handleAddIngredient}
@@ -974,6 +1042,7 @@ const MenuManagement = () => {
                 <div key={index} className="mt-3 flex items-center gap-4">
                   <input
                     type="text"
+                    required
                     placeholder="Ingredient"
                     value={ing.ingredient}
                     onChange={(e) =>
@@ -987,6 +1056,7 @@ const MenuManagement = () => {
                   />
                   <input
                     type="text"
+                    required
                     placeholder="Quantity"
                     value={ing.quantity}
                     onChange={(e) =>
@@ -1077,7 +1147,7 @@ const MenuManagement = () => {
       </div>
 
       <div
-        className={`fixed inset-0 z-[60] flex items-center justify-center bg-black/50 transition-opacity duration-300 ${
+        className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-300 ${
           showAddExistingForm ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       >
@@ -1113,29 +1183,38 @@ const MenuManagement = () => {
             <label className="block text-sm font-medium text-gray-700">
               Search Meals
             </label>
-            <div className="mt-1 flex gap-2">
+            <div className="relative mt-1">
               <input
                 type="text"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value
+                  setSearchTerm(value)
+
+                  // Filter meals locally
+                  if (!value.trim()) {
+                    setSearchResults(allMealDBMeals) // Show all meals if search is empty
+                  } else {
+                    const filtered = allMealDBMeals.filter(
+                      (meal) =>
+                        meal.strMeal
+                          .toLowerCase()
+                          .includes(value.toLowerCase()) ||
+                        meal.strCategory
+                          .toLowerCase()
+                          .includes(value.toLowerCase())
+                    )
+                    setSearchResults(filtered)
+                  }
+                }}
                 className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
                 placeholder="Search for meals..."
               />
-              <button
-                onClick={() => searchMeals(searchTerm)}
-                className="rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
-              >
-                Search
-              </button>
             </div>
           </div>
 
           <div className="h-[calc(90vh-160px)] overflow-y-auto">
-            {isSearching ? (
-              <div className="flex justify-center py-4">
-                <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
-              </div>
-            ) : searchResults.length === 0 ? (
+            {searchResults.length === 0 ? (
               <p className="py-4 text-center text-gray-500">No meals found</p>
             ) : (
               <div className="grid grid-cols-3 gap-6 p-4">
@@ -1143,8 +1222,7 @@ const MenuManagement = () => {
                   <div
                     key={meal.idMeal}
                     onClick={() => {
-                      setSelectedMealDetails(meal)
-                      setShowMealDetailsModal(true)
+                      handleMealSelect(meal)
                     }}
                     className="cursor-pointer overflow-hidden rounded-lg border border-gray-200 transition-all duration-300 hover:shadow-lg"
                   >
@@ -1471,109 +1549,118 @@ const MenuManagement = () => {
                   </div>
                 </div>
 
-                <div className="mt-6 flex gap-4">
-                  <button
-                    onClick={() => setShowMealDetailsModal(false)}
-                    className="w-full rounded-lg bg-gray-100 py-2 text-gray-700 transition-all hover:bg-gray-200"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={async () => {
-                      setAddMealError(null)
-                      try {
-                        if (!selectedMeal.price) {
-                          setAddMealError(
-                            "Please set a price before adding the meal"
-                          )
-                          return
-                        }
+                <div className="mt-6">
+                  {addMealError && (
+                    <div className="mb-3 text-center">
+                      <p className="rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-500">
+                        {addMealError}
+                      </p>
+                    </div>
+                  )}
 
-                        setIsAddingMeal(true)
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => setShowMealDetailsModal(false)}
+                      className="w-full rounded-lg bg-gray-100 py-2 text-gray-700 transition-all hover:bg-gray-200"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={async () => {
+                        setAddMealError(null)
+                        try {
+                          if (!selectedMeal?.price) {
+                            setAddMealError(
+                              "Please set a price before adding the meal"
+                            )
+                            return
+                          }
 
-                        // Convert ingredients from API format to your schema format
-                        const formattedIngredients = Array.from({ length: 20 })
-                          .map((_, index) => {
-                            const ingredient =
-                              selectedMealDetails[`strIngredient${index + 1}`]
-                            const measure =
-                              selectedMealDetails[`strMeasure${index + 1}`]
+                          if (!selectedMeal?.description) {
+                            setAddMealError(
+                              "Please add a description before adding the meal"
+                            )
+                            return
+                          }
 
-                            if (
-                              ingredient &&
-                              measure &&
-                              ingredient.trim() &&
-                              measure.trim()
-                            ) {
-                              return {
-                                ingredient: ingredient.trim(),
-                                quantity: measure.trim(),
-                              }
-                            }
-                            return null
+                          setIsAddingMeal(true)
+
+                          // Convert ingredients from API format to your schema format
+                          const formattedIngredients = Array.from({
+                            length: 20,
                           })
-                          .filter(Boolean) // Remove null entries
+                            .map((_, index) => {
+                              const ingredient =
+                                selectedMealDetails[`strIngredient${index + 1}`]
+                              const measure =
+                                selectedMealDetails[`strMeasure${index + 1}`]
 
-                        const mealData = {
-                          title: selectedMealDetails.strMeal,
-                          description:
-                            selectedMeal.description ||
-                            selectedMealDetails.strInstructions,
-                          price: Number(selectedMeal.price), // Convert to number
-                          image: selectedMealDetails.strMealThumb,
-                          category:
-                            selectedMealDetails.strCategory.toLowerCase(),
-                          Ingredients: formattedIngredients,
-                          recipe:
-                            selectedMealDetails.strInstructions || "improvise",
+                              if (
+                                ingredient &&
+                                measure &&
+                                ingredient.trim() &&
+                                measure.trim()
+                              ) {
+                                return {
+                                  ingredient: ingredient.trim(),
+                                  quantity: measure.trim(),
+                                }
+                              }
+                              return null
+                            })
+                            .filter(Boolean)
+
+                          const mealData = {
+                            title: selectedMealDetails.strMeal,
+                            description: selectedMeal.description,
+                            price: Number(selectedMeal.price),
+                            image: selectedMealDetails.strMealThumb,
+                            category:
+                              selectedMealDetails.strCategory.toLowerCase(),
+                            Ingredients: formattedIngredients,
+                            recipe:
+                              selectedMealDetails.strInstructions ||
+                              "improvise",
+                          }
+
+                          await axios.post(
+                            import.meta.env.VITE_SERVER + "/api/meals/addMeal",
+                            mealData
+                          )
+
+                          toast.success("Meal added successfully!")
+                          setShowMealDetailsModal(false)
+                          setShowAddExistingForm(false)
+                          fetchMeals()
+                        } catch (error) {
+                          console.error("Error adding meal:", error)
+                          setAddMealError(
+                            error.response?.data?.message ||
+                              error.message ||
+                              "Failed to add meal. Please try again."
+                          )
+                        } finally {
+                          setIsAddingMeal(false)
                         }
-
-                        await axios.post(
-                          import.meta.env.VITE_SERVER + "/api/meals/addMeal",
-                          mealData
-                        )
-
-                        toast.success("Meal added successfully!")
-                        setShowMealDetailsModal(false)
-                        setShowAddExistingForm(false)
-                        fetchMeals()
-                        location.reload()
-                      } catch (error) {
-                        console.error("Error adding meal:", error)
-                        setAddMealError(
-                          error.response?.data?.message ||
-                            error.message ||
-                            "Failed to add meal. Please try again."
-                        )
-                      } finally {
-                        setIsAddingMeal(false)
-                      }
-                    }}
-                    disabled={isAddingMeal}
-                    className={`w-full rounded-lg py-2 text-white transition-all ${
-                      isAddingMeal
-                        ? "cursor-not-allowed bg-indigo-400"
-                        : "bg-indigo-600 hover:bg-indigo-700"
-                    }`}
-                  >
-                    {isAddingMeal ? (
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                        <span>Adding...</span>
-                      </div>
-                    ) : (
-                      "Add This Meal"
-                    )}
-                  </button>
-                </div>
-
-                {addMealError && (
-                  <div className="mt-3 text-center">
-                    <p className="rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-500">
-                      {addMealError}
-                    </p>
+                      }}
+                      disabled={isAddingMeal}
+                      className={`w-full rounded-lg py-2 text-white transition-all ${
+                        isAddingMeal
+                          ? "cursor-not-allowed bg-indigo-400"
+                          : "bg-indigo-600 hover:bg-indigo-700"
+                      }`}
+                    >
+                      {isAddingMeal ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                          <span>Adding...</span>
+                        </div>
+                      ) : (
+                        "Add This Meal"
+                      )}
+                    </button>
                   </div>
-                )}
+                </div>
               </div>
             </>
           )}

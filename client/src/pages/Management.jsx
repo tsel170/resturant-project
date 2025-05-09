@@ -10,7 +10,7 @@ const Management = () => {
   const navigate = useNavigate()
 
   return (
-    <DefaultPage role={"manager"} title={"Management Dashboard"}>
+    <DefaultPage role={"manager"} title={"Management Dashboard"} backButton>
       {/* Grid Layout for Management */}
       <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8">
         {/* Shifts Management Section */}

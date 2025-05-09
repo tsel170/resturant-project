@@ -44,6 +44,8 @@ const WorkersManagement = () => {
   const { isLoading } = useContext(AuthContext)
   const [searchQuery, setSearchQuery] = useState("")
   const [isEditingEmployee, setIsEditingEmployee] = useState(false)
+  const [isAddingEmployee, setIsAddingEmployee] = useState(false)
+  const [isDeletingEmployee, setIsDeletingEmployee] = useState(false)
 
   const handleSeeMore = (employee) => {
     setSelectedEmployee(employee)
@@ -53,6 +55,7 @@ const WorkersManagement = () => {
   const handleAddEmployee = async (e) => {
     e.preventDefault()
     setFormError("")
+    setIsAddingEmployee(true)
 
     try {
       const response = await axios.post(
@@ -80,6 +83,8 @@ const WorkersManagement = () => {
           "Error adding employee. Please try again."
       )
       console.error("Error adding employee:", error)
+    } finally {
+      setIsAddingEmployee(false)
     }
   }
 
@@ -174,6 +179,7 @@ const WorkersManagement = () => {
   }
 
   const handleConfirmDelete = async () => {
+    setIsDeletingEmployee(true)
     try {
       await axios.delete(
         `${import.meta.env.VITE_SERVER}/api/users/deleteUser/${userToDelete._id}`
@@ -188,6 +194,8 @@ const WorkersManagement = () => {
       handleCloseDeleteModal()
     } catch (error) {
       console.error("Error deleting employee:", error)
+    } finally {
+      setIsDeletingEmployee(false)
     }
   }
 
@@ -575,12 +583,18 @@ const WorkersManagement = () => {
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
+                <label
+                  className={`text-sm font-medium ${newEmployee.role === "manager" ? "text-gray-400" : "text-gray-700"}`}
+                >
                   Job Title <span className="text-red-500">*</span>
                 </label>
                 <select
                   required={newEmployee.role !== "manager"}
-                  className="w-full rounded-lg border border-gray-300 p-2"
+                  className={`w-full rounded-lg border border-gray-300 p-2 ${
+                    newEmployee.role === "manager"
+                      ? "cursor-not-allowed bg-gray-100 text-gray-400"
+                      : ""
+                  }`}
                   value={newEmployee.jobTitle}
                   onChange={(e) =>
                     setNewEmployee({ ...newEmployee, jobTitle: e.target.value })
@@ -643,15 +657,43 @@ const WorkersManagement = () => {
                 <button
                   type="button"
                   onClick={handleCloseAddModal}
-                  className="rounded-lg bg-gray-100 px-6 py-2.5 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-200"
+                  disabled={isAddingEmployee}
+                  className="rounded-lg bg-gray-100 px-6 py-2.5 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-green-500 px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-green-600"
+                  disabled={isAddingEmployee}
+                  className="flex min-w-[120px] items-center justify-center rounded-lg bg-green-500 px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Add Employee
+                  {isAddingEmployee ? (
+                    <>
+                      <svg
+                        className="-ml-1 mr-3 h-5 w-5 animate-spin text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Adding...
+                    </>
+                  ) : (
+                    "Add Employee"
+                  )}
                 </button>
               </div>
             </form>
@@ -754,12 +796,18 @@ const WorkersManagement = () => {
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
+                <label
+                  className={`text-sm font-medium ${editEmployee.role === "manager" ? "text-gray-400" : "text-gray-700"}`}
+                >
                   Job Title <span className="text-red-500">*</span>
                 </label>
                 <select
                   required={editEmployee.role !== "manager"}
-                  className="w-full rounded-lg border border-gray-300 p-2"
+                  className={`w-full rounded-lg border border-gray-300 p-2 ${
+                    editEmployee.role === "manager"
+                      ? "cursor-not-allowed bg-gray-100 text-gray-400"
+                      : ""
+                  }`}
                   value={editEmployee.jobTitle}
                   onChange={(e) =>
                     setEditEmployee({
@@ -895,15 +943,43 @@ const WorkersManagement = () => {
             <div className="flex justify-end space-x-3">
               <button
                 onClick={handleCloseDeleteModal}
-                className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-200"
+                disabled={isDeletingEmployee}
+                className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmDelete}
-                className="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-red-600"
+                disabled={isDeletingEmployee}
+                className="flex min-w-[100px] items-center justify-center rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Delete
+                {isDeletingEmployee ? (
+                  <>
+                    <svg
+                      className="-ml-1 mr-3 h-5 w-5 animate-spin text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete"
+                )}
               </button>
             </div>
           </div>
