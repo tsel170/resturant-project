@@ -1,21 +1,87 @@
 import React, { useState } from "react"
 import RecipeModal from "./RecipeModal"
+import axios from "axios"
 
 const MealCard = ({ meal, onEditClick, onDeleteClick }) => {
   const [isRecipeModalOpen, setIsRecipeModalOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isAvailable, setIsAvailable] = useState(meal.available)
+
+  const handleToggleAvailability = async () => {
+    setIsLoading(true)
+    try {
+      const response = await axios.put(
+        `${import.meta.env.VITE_SERVER}/api/meals/toggleAvailability/${meal._id}`
+      )
+      if (response.data.success) {
+        setIsAvailable(!isAvailable)
+      }
+    } catch (error) {
+      console.error("Error toggling meal availability:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <div className="relative flex overflow-hidden rounded-xl border border-gray-100 bg-white p-4 shadow-lg transition-all hover:shadow-xl">
+      {/* Availability Badge - Fixed positioning and z-index */}
+      <div className="absolute right-2 top-2 z-10">
+        <button
+          onClick={handleToggleAvailability}
+          disabled={isLoading}
+          className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+            isAvailable
+              ? "bg-green-100 text-green-700 hover:bg-green-200"
+              : "bg-red-100 text-red-700 hover:bg-red-200"
+          } ${isLoading ? "cursor-not-allowed opacity-50" : ""} shadow-sm hover:shadow-md`}
+        >
+          {isLoading ? (
+            <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+                fill="none"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
+            </svg>
+          ) : (
+            <span
+              className={`h-3 w-3 rounded-full ${
+                isAvailable ? "bg-green-500" : "bg-red-500"
+              }`}
+            />
+          )}
+          <span className="font-semibold">
+            {isAvailable ? "Available" : "Unavailable"}
+          </span>
+        </button>
+      </div>
+
       {/* Left side - Image */}
       <div className="h-32 w-32 flex-shrink-0">
         {meal.image ? (
           <img
             src={meal.image}
             alt={meal.title}
-            className="h-full w-full rounded-lg object-cover"
+            className={`h-full w-full rounded-lg object-cover ${
+              !isAvailable ? "opacity-50" : ""
+            }`}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center rounded-lg bg-gray-100">
+          <div
+            className={`flex h-full w-full items-center justify-center rounded-lg bg-gray-100 ${
+              !isAvailable ? "opacity-50" : ""
+            }`}
+          >
             <svg
               className="h-12 w-12 text-gray-400"
               fill="none"
@@ -35,13 +101,27 @@ const MealCard = ({ meal, onEditClick, onDeleteClick }) => {
 
       {/* Right side - Content */}
       <div className="ml-4 flex flex-1 flex-col">
-        <div className="mb-2">
-          <h3 className="text-xl font-semibold text-gray-900">{meal.title}</h3>
-          <p className="text-sm text-gray-600">
+        <div className="mb-2 pr-24">
+          <h3
+            className={`text-xl font-semibold text-gray-900 ${
+              !isAvailable ? "opacity-50" : ""
+            }`}
+          >
+            {meal.title}
+          </h3>
+          <p
+            className={`text-sm text-gray-600 ${
+              !isAvailable ? "opacity-50" : ""
+            }`}
+          >
             Category:{" "}
             {meal.category.charAt(0).toUpperCase() + meal.category.slice(1)}
           </p>
-          <p className="mt-1 text-lg font-medium text-indigo-600">
+          <p
+            className={`mt-1 text-lg font-medium text-indigo-600 ${
+              !isAvailable ? "opacity-50" : ""
+            }`}
+          >
             ₪{meal.price}
           </p>
         </div>

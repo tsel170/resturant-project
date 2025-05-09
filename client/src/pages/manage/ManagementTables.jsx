@@ -28,7 +28,8 @@ const ManagementTables = () => {
     tableNumber: 0,
     seats: 0,
   })
-  const { user } = useContext(AuthContext)
+  const { user, tables, setTables, loading, error, branchId, fetchTables } =
+    useContext(AuthContext)
 
   const navigate = useNavigate()
 
@@ -47,7 +48,7 @@ const ManagementTables = () => {
 
   const [isEditing, setIsEditing] = useState(false)
   const [editError, setEditError] = useState(null)
-  const { tables, loading, error, branchId } = useContext(AuthContext)
+
   const filteredTables = tables.filter((table) =>
     table.tableNumber?.toString().includes(searchQuery.trim())
   )
@@ -61,18 +62,15 @@ const ManagementTables = () => {
     }
 
     setIsSubmitting(true)
+    setErrorMessage(null)
     try {
-      const response = await axios.put(
-        `${import.meta.env.VITE_SERVER}/api/branches/addTable`,
-        { branchId: branchId, ...newTable }
-      )
-      const updatedTables = [...tables, response.data].sort(
-        (a, b) => a.tableNumber - b.tableNumber
-      )
-      setTables(updatedTables)
+      await axios.put(`${import.meta.env.VITE_SERVER}/api/branches/addTable`, {
+        branchId: branchId,
+        ...newTable,
+      })
+      await fetchTables()
       setIsModalOpen(false)
       setNewTable({ tableNumber: 0, seats: 0 })
-      setErrorMessage(null)
     } catch (err) {
       console.error("Error creating table:", err)
       setErrorMessage(
@@ -97,10 +95,7 @@ const ManagementTables = () => {
           },
         }
       )
-
-      setTables((prevTables) =>
-        prevTables.filter((table) => table.tableNumber !== tableId)
-      )
+      await fetchTables()
       setDeleteModalOpen(false)
       setTableToDelete(null)
     } catch (err) {
@@ -134,13 +129,7 @@ const ManagementTables = () => {
           newSeats: newSeats,
         }
       )
-
-      const updatedTables = tables.map((table) =>
-        table.tableNumber === editingTable.tableNumber
-          ? { ...table, seats: newSeats }
-          : table
-      )
-      setTables(updatedTables)
+      await fetchTables()
       setEditingTable(null)
     } catch (err) {
       console.error("Error updating table:", err)
@@ -335,7 +324,10 @@ const ManagementTables = () => {
                 Table {table.tableNumber}
               </h3>
               <div className="mt-2 text-gray-600">{table.seats} Seats</div>
-              <div className="">{"🪑".repeat(Math.round(table.seats / 2))}</div>
+              <div className="">
+                {"🪑".repeat(Math.min(table.seats, 5)) +
+                  (table.seats > 5 ? "+" : "")}
+              </div>
             </div>
             <div className="flex justify-center space-x-2">
               <button

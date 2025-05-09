@@ -2,28 +2,16 @@ import React from "react"
 
 const DashboardContentManager = () => {
   return (
-    <div className="grid gap-6">
-      {/* Manager-specific dashboard content */}
-      <div className="rounded-lg bg-white p-6 shadow-md">
-        <h2 className="mb-4 text-xl font-semibold text-gray-800">
-          Manager Overview
-        </h2>
-        {/* Add your manager-specific components here */}
-        <p className="text-gray-600">Welcome to the manager dashboard</p>
-      </div>
-
-      <div className="rounded-lg bg-white p-6 shadow-md">
-        <h2 className="mb-4 text-xl font-semibold text-gray-800">
-          Team Performance
-        </h2>
-        {/* Add team performance metrics/components here */}
-      </div>
-
-      <div className="rounded-lg bg-white p-6 shadow-md">
-        <h2 className="mb-4 text-xl font-semibold text-gray-800">
-          Recent Activity
-        </h2>
-        {/* Add recent activity components here */}
+    <div className="flex min-h-[60vh] flex-col items-center justify-center rounded-lg bg-white px-4 text-center shadow-md">
+      <h1 className="mb-4 text-4xl font-bold">Coming Soon!</h1>
+      <div className="bg-primary mb-8 h-1 w-24"></div>
+      <p className="mb-6 text-xl text-gray-600">
+        We're working hard to bring you something amazing.
+      </p>
+      <div className="flex items-center gap-2 text-gray-500">
+        <div className="animate-bounce delay-100">⚡</div>
+        <div className="animate-bounce delay-200">⚡</div>
+        <div className="animate-bounce delay-300">⚡</div>
       </div>
     </div>
   )

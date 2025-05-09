@@ -8,6 +8,7 @@ const EnterShift = () => {
   const { user, setUser } = useContext(AuthContext)
   const [showTipsModal, setShowTipsModal] = useState(false)
   const [tipsAmount, setTipsAmount] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     // Update time every second
@@ -22,22 +23,25 @@ const EnterShift = () => {
   }, [])
 
   const handleToggleShift = async () => {
+    setIsLoading(true)
     try {
       if (user?.enteredShift) {
         // Show modal instead of immediately ending shift
         if (user?.jobTitle === "waiter") {
           setShowTipsModal(true)
-        } else {
-          await axios.put(
-            `${import.meta.env.VITE_SERVER}/api/users/toggleShift/${user._id}`
-          )
-
-          // Update user data
-          const newUser = await axios.get(
-            `${import.meta.env.VITE_SERVER}/api/users/user/${user._id}`
-          )
-          setUser(newUser.data.user)
+          setIsLoading(false)
+          return
         }
+        await axios.put(
+          `${import.meta.env.VITE_SERVER}/api/users/toggleShift/${user._id}`
+        )
+
+        // Update user data
+        const newUser = await axios.get(
+          `${import.meta.env.VITE_SERVER}/api/users/user/${user._id}`
+        )
+        setUser(newUser.data.user)
+        setIsLoading(false)
         return
       }
 
@@ -46,20 +50,20 @@ const EnterShift = () => {
         `${import.meta.env.VITE_SERVER}/api/users/toggleShift/${user._id}`
       )
       if (response.data.success) {
-        // You might want to update the user context here with the new shift status
         const newUser = await axios.get(
           `${import.meta.env.VITE_SERVER}/api/users/user/${user._id}`
         )
-        console.log("newUser", newUser.data.user)
         setUser(newUser.data.user)
-        console.log("Shift toggled successfully")
       }
     } catch (error) {
       console.error("Error toggling shift:", error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const handleSubmitTips = async () => {
+    setIsLoading(true)
     try {
       // First update the tips
       await axios.put(
@@ -88,6 +92,8 @@ const EnterShift = () => {
       setTipsAmount("")
     } catch (error) {
       console.error("Error submitting tips:", error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -128,9 +134,43 @@ const EnterShift = () => {
         </div>
         <button
           onClick={handleToggleShift}
-          className={`transform rounded-lg ${user?.enteredShift ? "bg-red-500 hover:bg-red-600 active:bg-red-700" : "bg-blue-500 hover:bg-blue-600 active:bg-blue-700"} px-8 py-4 text-2xl font-semibold text-white shadow-lg transition-transform hover:scale-105 active:scale-95`}
+          disabled={isLoading}
+          className={`transform rounded-lg ${
+            user?.enteredShift
+              ? "bg-red-500 hover:bg-red-600 active:bg-red-700"
+              : "bg-blue-500 hover:bg-blue-600 active:bg-blue-700"
+          } px-8 py-4 text-2xl font-semibold text-white shadow-lg transition-transform hover:scale-105 active:scale-95 ${
+            isLoading ? "cursor-not-allowed opacity-50" : ""
+          }`}
         >
-          {user?.enteredShift ? "End Shift" : "Start Shift"}
+          {isLoading ? (
+            <div className="flex items-center justify-center">
+              <svg
+                className="mr-2 h-6 w-6 animate-spin text-white"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  fill="none"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+              {user?.enteredShift ? "Ending Shift..." : "Starting Shift..."}
+            </div>
+          ) : user?.enteredShift ? (
+            "End Shift"
+          ) : (
+            "Start Shift"
+          )}
         </button>
       </div>
 
@@ -203,15 +243,42 @@ const EnterShift = () => {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowTipsModal(false)}
-                className="rounded bg-gray-300 px-4 py-2 hover:bg-gray-400"
+                disabled={isLoading}
+                className="rounded bg-gray-300 px-4 py-2 hover:bg-gray-400 disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSubmitTips}
-                className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                disabled={isLoading}
+                className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 disabled:opacity-50"
               >
-                Submit & End Shift
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <svg
+                      className="mr-2 h-4 w-4 animate-spin text-white"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    Submitting...
+                  </div>
+                ) : (
+                  "Submit & End Shift"
+                )}
               </button>
             </div>
           </div>
