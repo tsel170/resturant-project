@@ -65,6 +65,11 @@ const bonSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  canceled: {
+    type: Boolean,
+    required:false,
+    default: false,
+  },
   date: { type: Date, default: Date.now },
 })
 

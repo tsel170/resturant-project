@@ -17,6 +17,7 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
   const [selectedMeal, setSelectedMeal] = useState(null)
   const [order, setOrder] = useState([])
   const [isSearchFocused, setIsSearchFocused] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const filteredMeals = mealSearch
     ? meals.filter((meal) =>
@@ -30,28 +31,34 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
     setOrder([...order, meal])
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setIsSubmitting(true)
 
-    const orderWithTimestamp = {
-      ...newOrder,
-      BonDate: new Date(),
-      branch: "676e884378317a74ac0817b2",
-      user: user._id,
-      tableNumber: tableNumber,
-      ready: false,
-      paid: false,
+    try {
+      const orderWithTimestamp = {
+        ...newOrder,
+        BonDate: new Date(),
+        branch: "676e884378317a74ac0817b2",
+        user: user._id,
+        tableNumber: tableNumber,
+        ready: false,
+        paid: false,
+      }
+
+      await onSubmit(orderWithTimestamp)
+
+      setNewOrder({
+        meals: [],
+        tableNumber,
+        ready: false,
+        paid: false,
+      })
+    } catch (error) {
+      console.error("Error submitting order:", error)
+    } finally {
+      setIsSubmitting(false)
     }
-    console.log("orderWithTimestamp", orderWithTimestamp)
-
-    onSubmit(orderWithTimestamp)
-
-    setNewOrder({
-      meals: [],
-      tableNumber,
-      ready: false,
-      paid: false,
-    })
   }
 
   const addItem = (meal) => {
@@ -155,12 +162,24 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
                     <div
                       key={meal._id}
                       onClick={() => {
+                        if (!meal.available) return
                         setMealSearch(meal.title)
                         handleAddMeal(meal)
                       }}
-                      className="cursor-pointer p-2 hover:bg-gray-100"
+                      className={`p-2 ${
+                        meal.available
+                          ? "cursor-pointer hover:bg-gray-100"
+                          : "cursor-not-allowed bg-gray-50 opacity-50"
+                      }`}
                     >
-                      {meal.title}
+                      <div className="flex items-center justify-between">
+                        <span>{meal.title}</span>
+                        {!meal.available && (
+                          <span className="text-sm text-red-500">
+                            (Unavailable)
+                          </span>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -240,15 +259,46 @@ const OrderModal = ({ isOpen, onClose, onSubmit, tableNumber, meals }) => {
               type="button"
               onClick={onClose}
               className="rounded-lg bg-gray-100 px-4 py-2 text-gray-600 hover:bg-gray-200"
+              disabled={isSubmitting}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className={`rounded-lg ${newOrder.meals.length === 0 ? "bg-gray-300" : "bg-blue-500 hover:bg-blue-600"} px-4 py-2 text-white`}
-              disabled={newOrder.meals.length === 0}
+              disabled={newOrder.meals.length === 0 || isSubmitting}
+              className={`rounded-lg px-4 py-2 text-white transition-all ${
+                newOrder.meals.length === 0 || isSubmitting
+                  ? "cursor-not-allowed bg-gray-300"
+                  : "bg-blue-500 hover:bg-blue-600"
+              }`}
             >
-              Create Order
+              {isSubmitting ? (
+                <div className="flex items-center gap-2">
+                  <svg
+                    className="h-5 w-5 animate-spin"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  <span>Creating Order...</span>
+                </div>
+              ) : (
+                "Create Order"
+              )}
             </button>
           </div>
         </form>

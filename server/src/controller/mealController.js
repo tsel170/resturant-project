@@ -99,3 +99,40 @@ export const deleteMeal = async (req, res) => {
     });
   }
 };
+
+export const toggleMealAvailability = async (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({
+      success: false,
+      message: "Meal id is required",
+    });
+  }
+
+  try {
+    const meal = await Meal.findById(id);
+    
+    if (!meal) {
+      return res.status(404).json({
+        success: false,
+        message: "Meal not found",
+      });
+    }
+
+    // Toggle the available status
+    meal.available = !meal.available;
+    await meal.save();
+
+    res.status(200).json({
+      success: true,
+      meal,
+      message: `Meal ${meal.available ? 'made available' : 'made unavailable'} successfully`,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to toggle meal availability",
+      error: err.message,
+    });
+  }
+};

@@ -248,39 +248,60 @@ const OrdersManagement = () => {
               {sortedInProcessOrders.map((order) => (
                 <div
                   key={order._id}
-                  className="rounded-lg border border-gray-200 p-4 shadow-sm transition-colors hover:bg-gray-50"
+                  className={`rounded-lg border border-gray-200 p-4 shadow-sm transition-colors hover:bg-gray-50 ${
+                    order.canceled ? "bg-gray-100" : ""
+                  }`}
                 >
                   <div className="mb-3 flex items-center justify-between">
                     <h3 className="text-lg font-semibold text-gray-800">
                       Order #{order.bonNumber}
+                      {order.canceled && (
+                        <span className="ml-2 rounded-full bg-gray-300 px-3 py-1 text-sm font-medium text-gray-700">
+                          Canceled
+                        </span>
+                      )}
                     </h3>
                     <div className="flex gap-2">
-                      <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
+                      <span
+                        className={`rounded-full px-3 py-1 text-sm font-medium ${
+                          order.canceled
+                            ? "bg-gray-200 text-gray-600"
+                            : "bg-blue-100 text-blue-800"
+                        }`}
+                      >
                         Table {order.tableNumber}
                       </span>
-                      <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-800">
+                      <span
+                        className={`rounded-full px-3 py-1 text-sm font-medium ${
+                          order.canceled
+                            ? "bg-gray-200 text-gray-600"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
                         Est: {calculateExpectedTime(order.meals)}m
                       </span>
                       {timeElapsed[order._id] && (
                         <span
                           className={`rounded-full px-3 py-1 text-sm font-medium ${
-                            !timeElapsed[order._id]
-                              ? "bg-gray-100 text-gray-600"
-                              : (() => {
-                                  const expectedSeconds =
-                                    calculateExpectedTime(order.meals) * 60
-                                  const elapsedSeconds =
-                                    timeElapsed[order._id].seconds
-                                  const percentage =
-                                    (elapsedSeconds / expectedSeconds) * 100
-                                  if (percentage <= 50)
-                                    return "bg-green-100 text-green-800"
-                                  if (percentage <= 75)
-                                    return "bg-yellow-100 text-yellow-800"
-                                  if (percentage <= 100)
-                                    return "bg-orange-100 text-orange-800"
-                                  return "bg-red-100 text-red-800"
-                                })()
+                            order.canceled
+                              ? "bg-gray-200 text-gray-600"
+                              : !timeElapsed[order._id]
+                                ? "bg-gray-100 text-gray-600"
+                                : (() => {
+                                    const expectedSeconds =
+                                      calculateExpectedTime(order.meals) * 60
+                                    const elapsedSeconds =
+                                      timeElapsed[order._id].seconds
+                                    const percentage =
+                                      (elapsedSeconds / expectedSeconds) * 100
+                                    if (percentage <= 50)
+                                      return "bg-green-100 text-green-800"
+                                    if (percentage <= 75)
+                                      return "bg-yellow-100 text-yellow-800"
+                                    if (percentage <= 100)
+                                      return "bg-orange-100 text-orange-800"
+                                    return "bg-red-100 text-red-800"
+                                  })()
                           }`}
                         >
                           {timeElapsed[order._id]?.text || "0s"}
@@ -293,16 +314,22 @@ const OrdersManagement = () => {
                     {order.meals?.map((meal, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-gray-100"
+                        className={`flex items-center justify-between rounded-lg p-3 transition-colors ${
+                          order.canceled ? "text-gray-500" : "hover:bg-gray-100"
+                        }`}
                       >
-                        <span className="font-medium text-gray-700">
+                        <span
+                          className={`font-medium ${
+                            order.canceled ? "text-gray-500" : "text-gray-700"
+                          }`}
+                        >
                           {meal.quantity}x {meal.mealTitle}
                         </span>
                       </div>
                     ))}
                   </div>
 
-                  {order.ready && (
+                  {order.ready && !order.canceled && (
                     <button
                       onClick={() => handleDelivered(order._id)}
                       className="w-full rounded-lg bg-green-500 py-2.5 font-medium text-white transition-colors hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300"
@@ -327,17 +354,36 @@ const OrdersManagement = () => {
               {sortedDeliveredOrders.map((order) => (
                 <div
                   key={order.id}
-                  className="rounded-lg border border-gray-200 p-4 shadow-sm transition-colors"
+                  className={`rounded-lg border border-gray-200 p-4 shadow-sm transition-colors ${
+                    order.canceled ? "bg-gray-100" : ""
+                  }`}
                 >
                   <div className="mb-3 flex items-center justify-between">
                     <h3 className="text-lg font-semibold text-gray-800">
                       Order #{order.bonNumber}
+                      {order.canceled && (
+                        <span className="ml-2 rounded-full bg-gray-300 px-3 py-1 text-sm font-medium text-gray-700">
+                          Canceled
+                        </span>
+                      )}
                     </h3>
                     <div className="flex gap-2">
-                      <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
+                      <span
+                        className={`rounded-full px-3 py-1 text-sm font-medium ${
+                          order.canceled
+                            ? "bg-gray-200 text-gray-600"
+                            : "bg-green-100 text-green-800"
+                        }`}
+                      >
                         Table {order.tableNumber}
                       </span>
-                      <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-600">
+                      <span
+                        className={`rounded-full px-3 py-1 text-sm font-medium ${
+                          order.canceled
+                            ? "bg-gray-200 text-gray-600"
+                            : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
                         {timeElapsed[order._id]?.text}
                       </span>
                     </div>
@@ -346,9 +392,15 @@ const OrdersManagement = () => {
                     {order.meals?.map((meal, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between rounded-lg p-3 transition-colors"
+                        className={`flex items-center justify-between rounded-lg p-3 transition-colors ${
+                          order.canceled ? "text-gray-500" : ""
+                        }`}
                       >
-                        <span className="font-medium text-gray-700">
+                        <span
+                          className={`font-medium ${
+                            order.canceled ? "text-gray-500" : "text-gray-700"
+                          }`}
+                        >
                           {meal.quantity}x {meal.mealTitle}
                         </span>
                       </div>

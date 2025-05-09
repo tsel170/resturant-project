@@ -15,7 +15,8 @@ const DashboardContentChef = () => {
   console.log(orders)
   const ordersInMaking =
     orders?.filter(
-      (order) => order.delivered == false && order.ready == false
+      (order) =>
+        order.delivered == false && order.ready == false && order.paid == false
     ) || []
   const readyOrders =
     orders?.filter(
@@ -105,29 +106,50 @@ const DashboardContentChef = () => {
             {ordersInMaking.map((order) => (
               <div
                 key={order._id}
-                className="rounded-lg border border-gray-200 p-4 shadow-sm transition-colors hover:bg-gray-50"
+                className={`rounded-lg border border-gray-200 p-4 shadow-sm transition-colors hover:bg-gray-50 ${
+                  order.canceled ? "bg-gray-100" : ""
+                }`}
               >
                 <div className="mb-3 flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-gray-800">
                     Order #{order.bonNumber}
+                    {order.canceled && (
+                      <span className="ml-2 rounded-full bg-gray-300 px-3 py-1 text-sm font-medium text-gray-700">
+                        Canceled
+                      </span>
+                    )}
                   </h3>
                   <div className="flex gap-2">
-                    <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
+                    <span
+                      className={`rounded-full px-3 py-1 text-sm font-medium ${
+                        order.canceled
+                          ? "bg-gray-200 text-gray-600"
+                          : "bg-blue-100 text-blue-800"
+                      }`}
+                    >
                       Table {order.tableNumber}
                     </span>
-                    <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-800">
+                    <span
+                      className={`rounded-full px-3 py-1 text-sm font-medium ${
+                        order.canceled
+                          ? "bg-gray-200 text-gray-600"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
                       Est: {calculateExpectedTime(order.meals)}m
                     </span>
                     {timeElapsed[order._id] && (
                       <span
                         className={`rounded-full px-3 py-1 text-sm font-medium ${
-                          calculateExpectedTime(order.meals) * 60 >
-                          timeElapsed[order._id].seconds * 2
-                            ? "bg-green-300"
+                          order.canceled
+                            ? "bg-gray-200 text-gray-600"
                             : calculateExpectedTime(order.meals) * 60 >
-                                timeElapsed[order._id].seconds
-                              ? "bg-yellow-300"
-                              : "bg-red-300"
+                                timeElapsed[order._id].seconds * 2
+                              ? "bg-green-300"
+                              : calculateExpectedTime(order.meals) * 60 >
+                                  timeElapsed[order._id].seconds
+                                ? "bg-yellow-300"
+                                : "bg-red-300"
                         }`}
                       >
                         {timeElapsed[order._id].text}
@@ -139,13 +161,19 @@ const DashboardContentChef = () => {
                   {order.meals?.map((meal, index) => (
                     <div
                       key={index}
-                      className="flex cursor-pointer items-center justify-between rounded-lg p-3 transition-colors hover:bg-gray-100"
-                      onClick={() => handleMealClick(meal)}
+                      className={`flex cursor-pointer items-center justify-between rounded-lg p-3 transition-colors ${
+                        order.canceled ? "text-gray-500" : "hover:bg-gray-100"
+                      }`}
+                      onClick={() => !order.canceled && handleMealClick(meal)}
                     >
-                      <span className="font-medium text-gray-700">
+                      <span
+                        className={`font-medium ${
+                          order.canceled ? "text-gray-500" : "text-gray-700"
+                        }`}
+                      >
                         {meal.quantity}x {meal.meal.title}
                       </span>
-                      {meal.note && (
+                      {meal.note && !order.canceled && (
                         <span className="rounded-full bg-yellow-100 px-2 py-1 text-sm font-medium text-red-500">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -166,12 +194,14 @@ const DashboardContentChef = () => {
                     </div>
                   ))}
                 </div>
-                <button
-                  onClick={() => handleMarkAsReady(order)}
-                  className="w-full rounded-lg bg-green-500 py-2.5 font-medium text-white transition-colors hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300"
-                >
-                  Mark Order as Ready
-                </button>
+                {!order.canceled && (
+                  <button
+                    onClick={() => handleMarkAsReady(order)}
+                    className="w-full rounded-lg bg-green-500 py-2.5 font-medium text-white transition-colors hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300"
+                  >
+                    Mark Order as Ready
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -189,21 +219,46 @@ const DashboardContentChef = () => {
             {readyOrders.map((order) => (
               <div
                 key={order._id}
-                className="rounded-lg border border-gray-200 p-4 shadow-sm transition-colors"
+                className={`rounded-lg border border-gray-200 p-4 shadow-sm transition-colors ${
+                  order.canceled ? "bg-gray-100" : ""
+                }`}
               >
                 <div className="mb-3 flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-gray-800">
                     Order #{order.bonNumber}
+                    {order.canceled && (
+                      <span className="ml-2 rounded-full bg-gray-300 px-3 py-1 text-sm font-medium text-gray-700">
+                        Canceled
+                      </span>
+                    )}
                   </h3>
                   <div className="flex gap-2">
-                    <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
+                    <span
+                      className={`rounded-full px-3 py-1 text-sm font-medium ${
+                        order.canceled
+                          ? "bg-gray-200 text-gray-600"
+                          : "bg-green-100 text-green-800"
+                      }`}
+                    >
                       Table {order.tableNumber}
                     </span>
-                    <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-800">
+                    <span
+                      className={`rounded-full px-3 py-1 text-sm font-medium ${
+                        order.canceled
+                          ? "bg-gray-200 text-gray-600"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
                       Est: {calculateExpectedTime(order.meals)}m
                     </span>
                     {timeElapsed[order._id] && (
-                      <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-600">
+                      <span
+                        className={`rounded-full px-3 py-1 text-sm font-medium ${
+                          order.canceled
+                            ? "bg-gray-200 text-gray-600"
+                            : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
                         {timeElapsed[order._id].text}
                       </span>
                     )}
@@ -213,9 +268,15 @@ const DashboardContentChef = () => {
                   {order.meals?.map((meal, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between rounded-lg p-3 transition-colors"
+                      className={`flex items-center justify-between rounded-lg p-3 transition-colors ${
+                        order.canceled ? "text-gray-500" : ""
+                      }`}
                     >
-                      <span className="font-medium text-gray-700">
+                      <span
+                        className={`font-medium ${
+                          order.canceled ? "text-gray-500" : "text-gray-700"
+                        }`}
+                      >
                         {meal.quantity} x {meal.meal.title}
                       </span>
                     </div>

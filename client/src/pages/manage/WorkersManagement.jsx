@@ -46,6 +46,7 @@ const WorkersManagement = () => {
   const [isEditingEmployee, setIsEditingEmployee] = useState(false)
   const [isAddingEmployee, setIsAddingEmployee] = useState(false)
   const [isDeletingEmployee, setIsDeletingEmployee] = useState(false)
+  const [loadingAvatars, setLoadingAvatars] = useState({})
 
   const handleSeeMore = (employee) => {
     setSelectedEmployee(employee)
@@ -227,6 +228,20 @@ const WorkersManagement = () => {
     return `https://avatar.iran.liara.run/public/${endpoint}?username=${sanitizedEmail}`
   }
 
+  const handleImageLoad = (email) => {
+    setLoadingAvatars((prev) => ({
+      ...prev,
+      [email]: false,
+    }))
+  }
+
+  const handleImageError = (email) => {
+    setLoadingAvatars((prev) => ({
+      ...prev,
+      [email]: false,
+    }))
+  }
+
   return (
     <DefaultPage role={"manager"} title={"Workers Management"}>
       <div className="mb-8">
@@ -353,14 +368,23 @@ const WorkersManagement = () => {
                   >
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
                       <div className="flex items-center space-x-3">
-                        <img
-                          src={getWorkerAvatar(
-                            employee?.email,
-                            employee?.gender
+                        <div className="relative h-8 w-8">
+                          {loadingAvatars[employee?.email] !== false && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></div>
+                            </div>
                           )}
-                          alt={`Avatar for ${employee.name}`}
-                          className="h-8 w-8 rounded-full"
-                        />
+                          <img
+                            src={getWorkerAvatar(
+                              employee?.email,
+                              employee?.gender
+                            )}
+                            alt={`Avatar for ${employee.name}`}
+                            className={`h-8 w-8 rounded-full ${loadingAvatars[employee?.email] !== false ? "opacity-0" : "opacity-100"}`}
+                            onLoad={() => handleImageLoad(employee?.email)}
+                            onError={() => handleImageError(employee?.email)}
+                          />
+                        </div>
                         <span>{employee.name}</span>
                       </div>
                     </td>
@@ -418,14 +442,27 @@ const WorkersManagement = () => {
             {selectedEmployee && (
               <div className="grid grid-cols-2 gap-6">
                 <div className="col-span-2 mb-6 flex justify-center">
-                  <img
-                    src={getWorkerAvatar(
-                      selectedEmployee?.email,
-                      selectedEmployee?.gender
+                  <div className="relative h-32 w-32">
+                    {loadingAvatars[selectedEmployee?.email] !== false && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600"></div>
+                      </div>
                     )}
-                    alt={`Avatar for ${selectedEmployee.name}`}
-                    className="h-32 w-32 rounded-full border-4 border-white shadow-lg"
-                  />
+                    <img
+                      src={getWorkerAvatar(
+                        selectedEmployee?.email,
+                        selectedEmployee?.gender
+                      )}
+                      alt={`Avatar for ${selectedEmployee.name}`}
+                      className={`h-32 w-32 rounded-full border-4 border-white shadow-lg ${
+                        loadingAvatars[selectedEmployee?.email] !== false
+                          ? "opacity-0"
+                          : "opacity-100"
+                      }`}
+                      onLoad={() => handleImageLoad(selectedEmployee?.email)}
+                      onError={() => handleImageError(selectedEmployee?.email)}
+                    />
+                  </div>
                 </div>
 
                 <div className="rounded-lg bg-gray-50 p-4 transition-all duration-200 hover:bg-gray-100">

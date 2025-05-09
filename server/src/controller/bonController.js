@@ -283,3 +283,53 @@ export const updatePaidBon = async (req, res) => {
     });
   }
 };
+
+export const toggleCancelBon = async (req, res) => {
+  const { bonNumber } = req.params;
+  
+  try {
+    const bon = await Bon.findOne({ bonNumber: bonNumber });
+
+    if (!bon) {
+      return res.status(404).json({ 
+        message: "Bon not found",
+        searchedBonNumber: bonNumber
+      });
+    }
+
+    // Toggle the canceled status
+    bon.canceled = !bon.canceled;
+    await bon.save();
+
+    // Update the status in User and Branch collections
+    await User.findOneAndUpdate(
+      { "bons.bon": bon._id },
+      {
+        $set: {
+          "bons.$.canceled": bon.canceled,
+        },
+      }
+    );
+
+    await Branch.findOneAndUpdate(
+      { "bons.bon": bon._id },
+      {
+        $set: {
+          "bons.$.canceled": bon.canceled,
+        },
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `Bon ${bon.canceled ? 'canceled' : 'uncanceled'} successfully`,
+      bon
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to update bon cancel status",
+      error: error.message,
+    });
+  }
+};

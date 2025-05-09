@@ -33,10 +33,28 @@ const TableCard = ({
   const [isConfirmationVisible, setIsConfirmationVisible] = useState(false)
   const [showDinersModal, setShowDinersModal] = useState(false)
   const [selectedDiners, setSelectedDiners] = useState(1)
+  const [isAssigning, setIsAssigning] = useState(false)
+  const [isFreeing, setIsFreeing] = useState(false)
+  const [isCanceling, setIsCanceling] = useState(false)
+  const [isDinersModalVisible, setIsDinersModalVisible] = useState(false)
+  const [isPaymentModalVisible, setIsPaymentModalVisible] = useState(false)
 
   useEffect(() => {
     setOrders(tableOrders)
   }, [tableOrders])
+
+  const handleAssignClick = async () => {
+    setIsAssigning(true)
+    try {
+      await onAssign(selectedDiners)
+      setShowDinersModal(false)
+      setSelectedDiners(1)
+    } catch (error) {
+      console.error("Error assigning table:", error)
+    } finally {
+      setIsAssigning(false)
+    }
+  }
 
   const handleFreeTable = () => {
     setShowConfirmation(true)
@@ -54,6 +72,29 @@ const TableCard = ({
     setFreeTableError(null)
 
     try {
+      const unpaidDeliveredOrders = orders.filter((localOrder) => {
+        const fullOrder = allOrders.find((order) => order.canceled === true)
+        return fullOrder
+      })
+
+      // Process each order payment sequentially
+      for (const order of unpaidDeliveredOrders) {
+        try {
+          await axios.put(
+            `${import.meta.env.VITE_SERVER}/api/Bons/updatePaidBon/${order.number}`,
+            {
+              tableNumber,
+              branchId,
+              bonNumber: order.number,
+            }
+          )
+        } catch (orderError) {
+          throw new Error(
+            `Failed to process payment for order #${order.number}: ${orderError.message}`
+          )
+        }
+      }
+
       await axios.put(
         import.meta.env.VITE_SERVER + "/api/branches/updateTableOccupied",
         {
@@ -62,7 +103,10 @@ const TableCard = ({
         }
       )
       fetchTables()
-      setShowConfirmation(false)
+      setIsConfirmationVisible(false)
+      setTimeout(() => {
+        setShowConfirmation(false)
+      }, 300)
     } catch (error) {
       console.error("Error freeing table:", error)
       setFreeTableError(
@@ -167,13 +211,17 @@ const TableCard = ({
         }
       }
 
-      // If all payments successful, clear orders and close modal
-      setOrders([])
-      updateTable(tableNumber, {
-        tableOrders: [],
-      })
-      setShowPaymentModal(false)
-      setOrders([])
+      // Start closing animation
+      setIsPaymentModalVisible(false)
+      setTimeout(() => {
+        // If all payments successful, clear orders and close modal
+        setOrders([])
+        updateTable(tableNumber, {
+          tableOrders: [],
+        })
+        setShowPaymentModal(false)
+        setOrders([])
+      }, 300)
     } catch (error) {
       console.error("Error processing payments:", error)
       setPaymentError(
@@ -186,14 +234,75 @@ const TableCard = ({
     }
   }
 
-  const handleAssignClick = () => {
-    setShowDinersModal(true)
+  const handleDinersSubmit = async () => {
+    setIsAssigning(true)
+    try {
+      await onAssign(selectedDiners)
+      setIsDinersModalVisible(false)
+      setTimeout(() => {
+        setShowDinersModal(false)
+        setSelectedDiners(1)
+      }, 300)
+    } catch (error) {
+      console.error("Error assigning table:", error)
+    } finally {
+      setIsAssigning(false)
+    }
   }
 
-  const handleDinersSubmit = () => {
-    onAssign(selectedDiners)
-    setShowDinersModal(false)
-    setSelectedDiners(1)
+  const handleCancelOrder = async (order) => {
+    setIsCanceling(true)
+    try {
+      const response = await axios.put(
+        `${import.meta.env.VITE_SERVER}/api/bons/toggleCancelBon/${order.bonNumber}`
+      )
+
+      // Refresh the orders list
+      const updatedOrders = orders.map((o) =>
+        o.number === order.bonNumber ? { ...o, canceled: !o.canceled } : o
+      )
+      setOrders(updatedOrders)
+    } catch (error) {
+      console.error("Error updating order status:", error)
+    } finally {
+      setIsCanceling(false)
+    }
+  }
+
+  // Add this helper function to check if all orders are canceled
+  const areAllOrdersCanceled = (orders) => {
+    return (
+      orders.length > 0 &&
+      orders.every((order) => {
+        const fullOrder = allOrders.find((o) => o.bonNumber === order.number)
+        return fullOrder?.canceled
+      })
+    )
+  }
+
+  const handleOpenDinersModal = () => {
+    setShowDinersModal(true)
+    setTimeout(() => setIsDinersModalVisible(true), 50)
+  }
+
+  const handleCloseDinersModal = () => {
+    setIsDinersModalVisible(false)
+    setTimeout(() => setShowDinersModal(false), 300)
+  }
+
+  const handleOpenPaymentModal = () => {
+    setShowPaymentModal(true)
+    setTimeout(() => setIsPaymentModalVisible(true), 50)
+  }
+
+  const handleClosePaymentModal = () => {
+    setIsPaymentModalVisible(false)
+    setTimeout(() => setShowPaymentModal(false), 300)
+  }
+
+  const handleOpenConfirmation = () => {
+    setShowConfirmation(true)
+    setTimeout(() => setIsConfirmationVisible(true), 50)
   }
 
   return (
@@ -224,53 +333,151 @@ const TableCard = ({
           </p>
           <p className="text-gray-600">
             <span className="font-medium">Active Orders:</span>{" "}
-            <ul>
+            <ul className="space-y-2">
               {orders.length > 0
-                ? orders.map((order, index) => (
-                    <li key={order.number || index}>{order.number}</li>
-                  ))
+                ? orders.map((order, index) => {
+                    // Add debug logging
+                    console.log("Processing order:", order)
+
+                    const fullOrder = allOrders.find(
+                      (o) => o.bonNumber === order.number
+                    )
+                    console.log("Found full order in render:", fullOrder)
+
+                    return (
+                      <li
+                        key={order.number || index}
+                        className={`flex items-center justify-between ${
+                          fullOrder?.canceled
+                            ? "rounded-md bg-gray-50 p-2 text-gray-400"
+                            : !fullOrder?.delivered
+                              ? "font-medium text-red-600"
+                              : "text-gray-600"
+                        }`}
+                      >
+                        <div className="flex items-center">
+                          {order.number}
+                          {fullOrder &&
+                            !fullOrder.delivered &&
+                            !fullOrder.canceled && (
+                              <span className="ml-2 text-xs text-red-500">
+                                (Not Delivered)
+                              </span>
+                            )}
+                          {fullOrder?.canceled && (
+                            <span className="ml-2 text-xs text-gray-500">
+                              (Canceled)
+                            </span>
+                          )}
+                        </div>
+                        {fullOrder && !fullOrder.delivered && (
+                          <button
+                            onClick={() => handleCancelOrder(fullOrder)}
+                            disabled={isCanceling}
+                            className={`ml-2 rounded-md px-2 py-1 text-xs font-medium transition-colors ${
+                              isCanceling
+                                ? "cursor-not-allowed bg-gray-100 text-gray-400"
+                                : fullOrder.canceled
+                                  ? "bg-green-100 text-green-600 hover:bg-green-200"
+                                  : "bg-red-100 text-red-600 hover:bg-red-200"
+                            }`}
+                          >
+                            {isCanceling
+                              ? "Processing..."
+                              : fullOrder.canceled
+                                ? "Add Back"
+                                : "Cancel"}
+                          </button>
+                        )}
+                      </li>
+                    )
+                  })
                 : "None"}
             </ul>
           </p>
         </div>
 
-        {!occuipied && (
-          <button
-            onClick={handleAssignClick}
-            className="mt-4 w-full rounded-lg bg-blue-600 py-2 text-white transition-colors hover:bg-blue-700 active:bg-blue-800"
-          >
-            Assign Table
-          </button>
-        )}
+        {/* Action Buttons */}
+        <div className="mt-4 space-y-2">
+          {!occuipied && (
+            <button
+              onClick={handleOpenDinersModal}
+              disabled={isAssigning}
+              className={`w-full rounded-lg bg-blue-500 px-4 py-2 text-white transition-colors ${
+                isAssigning
+                  ? "cursor-not-allowed opacity-75"
+                  : "hover:bg-blue-600"
+              }`}
+            >
+              {isAssigning ? "Assigning..." : "Assign Table"}
+            </button>
+          )}
 
-        {occuipied && (
-          <div className="mt-4 space-y-2">
+          {occuipied && (
             <button
               onClick={handleAddOrder}
-              className="w-full rounded-lg bg-green-600 px-4 py-2 text-white transition-colors hover:bg-green-700"
+              className="w-full rounded-lg bg-green-500 px-4 py-2 text-white transition-colors hover:bg-green-600"
             >
               Add Order
             </button>
+          )}
 
-            {orders.length > 0 && (
+          {occuipied && orders.length > 0 && !areAllOrdersCanceled(orders) && (
+            <button
+              onClick={handleOpenPaymentModal}
+              disabled={isPaymentLoading}
+              className={`w-full rounded-lg bg-yellow-500 px-4 py-2 text-white transition-colors ${
+                isPaymentLoading
+                  ? "cursor-not-allowed opacity-75"
+                  : "hover:bg-yellow-600"
+              }`}
+            >
+              Pay Orders
+            </button>
+          )}
+
+          {/* Show Free Table button if there are no unpaid orders OR if all orders are canceled */}
+          {occuipied &&
+            (orders.length === 0 || areAllOrdersCanceled(orders)) && (
               <button
-                onClick={handlePayment}
-                className="w-full rounded-lg bg-yellow-600 px-4 py-2 text-white transition-colors hover:bg-yellow-700"
+                onClick={handleOpenConfirmation}
+                disabled={isFreeingTable}
+                className={`w-full rounded-lg bg-red-600 px-4 py-2 text-white transition-colors ${
+                  isFreeingTable
+                    ? "cursor-not-allowed opacity-75"
+                    : "hover:bg-red-700"
+                }`}
               >
-                Pay Orders
+                {isFreeingTable ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <svg
+                      className="h-5 w-5 animate-spin"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    <span>Freeing Table...</span>
+                  </div>
+                ) : (
+                  "Free Table"
+                )}
               </button>
             )}
-
-            {orders.length === 0 && (
-              <button
-                onClick={handleFreeTable}
-                className="w-full rounded-lg bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700"
-              >
-                Free Table
-              </button>
-            )}
-          </div>
-        )}
+        </div>
       </div>
 
       <OrderModal
@@ -281,78 +488,20 @@ const TableCard = ({
         meals={meals}
       />
 
-      {/* Confirmation Dialog */}
-      {showConfirmation && (
-        <div
-          className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 ease-in-out ${isConfirmationVisible ? "bg-black bg-opacity-50" : "bg-black bg-opacity-0"}`}
-        >
-          <div
-            className={`rounded-lg bg-white p-6 shadow-xl transition-all duration-300 ease-in-out ${isConfirmationVisible ? "scale-100 opacity-100" : "scale-95 opacity-0"}`}
-          >
-            <h3 className="mb-4 text-lg font-semibold">
-              Are you sure you want to free this table?
-            </h3>
-
-            {freeTableError && (
-              <div className="mb-4 rounded-md bg-red-50 p-4 text-red-600">
-                <p className="font-medium">Error</p>
-                <p className="text-sm">{freeTableError}</p>
-              </div>
-            )}
-
-            <div className="flex justify-end gap-4">
-              <button
-                onClick={handleCloseConfirmation}
-                className="rounded-lg bg-gray-100 px-4 py-2 text-gray-600 hover:bg-gray-200"
-                disabled={isFreeingTable}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmFreeTable}
-                disabled={isFreeingTable}
-                className={`rounded-lg px-4 py-2 text-white transition-colors ${
-                  isFreeingTable
-                    ? "cursor-not-allowed bg-red-400"
-                    : "bg-red-600 hover:bg-red-700"
-                }`}
-              >
-                {isFreeingTable ? (
-                  <div className="flex items-center">
-                    <svg
-                      className="mr-2 h-4 w-4 animate-spin"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                        fill="none"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                    Processing...
-                  </div>
-                ) : (
-                  "Free Table"
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Diners Selection Modal */}
       {showDinersModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="rounded-lg bg-white p-6 shadow-xl">
+        <div
+          className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-300 ${
+            isDinersModalVisible ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <div
+            className={`relative w-full max-w-md transform rounded-lg bg-white p-6 shadow-xl transition-all duration-300 ${
+              isDinersModalVisible
+                ? "scale-100 opacity-100"
+                : "scale-95 opacity-0"
+            }`}
+          >
             <h3 className="mb-4 text-xl font-semibold">
               Select Number of Diners
             </h3>
@@ -374,16 +523,48 @@ const TableCard = ({
 
             <div className="flex justify-end gap-4">
               <button
-                onClick={() => setShowDinersModal(false)}
+                onClick={handleCloseDinersModal}
                 className="rounded-lg bg-gray-100 px-4 py-2 text-gray-600 hover:bg-gray-200"
+                disabled={isAssigning}
               >
                 Cancel
               </button>
               <button
                 onClick={handleDinersSubmit}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                disabled={isAssigning}
+                className={`rounded-lg px-4 py-2 text-white transition-colors ${
+                  isAssigning
+                    ? "cursor-not-allowed bg-blue-400"
+                    : "bg-blue-600 hover:bg-blue-700"
+                }`}
               >
-                Confirm
+                {isAssigning ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <svg
+                      className="h-5 w-5 animate-spin"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    <span>Assigning...</span>
+                  </div>
+                ) : (
+                  "Confirm"
+                )}
               </button>
             </div>
           </div>
@@ -392,8 +573,18 @@ const TableCard = ({
 
       {/* Payment Modal */}
       {showPaymentModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="rounded-lg bg-white p-6 shadow-xl">
+        <div
+          className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-300 ${
+            isPaymentModalVisible ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <div
+            className={`relative w-full max-w-md transform rounded-lg bg-white p-6 shadow-xl transition-all duration-300 ${
+              isPaymentModalVisible
+                ? "scale-100 opacity-100"
+                : "scale-95 opacity-0"
+            }`}
+          >
             <h3 className="mb-4 text-xl font-semibold">Payment Details</h3>
 
             {paymentError && (
@@ -441,10 +632,7 @@ const TableCard = ({
 
             <div className="flex justify-end gap-4">
               <button
-                onClick={() => {
-                  setShowPaymentModal(false)
-                  setPaymentError(null)
-                }}
+                onClick={handleClosePaymentModal}
                 className="rounded-lg bg-gray-100 px-4 py-2 text-gray-600 hover:bg-gray-200"
                 disabled={isPaymentLoading}
               >
@@ -460,9 +648,11 @@ const TableCard = ({
                 }`}
               >
                 {isPaymentLoading ? (
-                  <div className="flex items-center">
+                  <div className="flex items-center justify-center gap-2">
                     <svg
-                      className="mr-2 h-4 w-4 animate-spin"
+                      className="h-5 w-5 animate-spin"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
                       viewBox="0 0 24 24"
                     >
                       <circle
@@ -472,18 +662,92 @@ const TableCard = ({
                         r="10"
                         stroke="currentColor"
                         strokeWidth="4"
-                        fill="none"
-                      />
+                      ></circle>
                       <path
                         className="opacity-75"
                         fill="currentColor"
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
+                      ></path>
                     </svg>
-                    Processing...
+                    <span>Processing...</span>
                   </div>
                 ) : (
                   "Confirm Payment"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Dialog */}
+      {showConfirmation && (
+        <div
+          className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-300 ${
+            isConfirmationVisible ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <div
+            className={`relative w-full max-w-md transform rounded-lg bg-white p-6 shadow-xl transition-all duration-300 ${
+              isConfirmationVisible
+                ? "scale-100 opacity-100"
+                : "scale-95 opacity-0"
+            }`}
+          >
+            <h3 className="mb-4 text-lg font-semibold">
+              Are you sure you want to free this table?
+            </h3>
+
+            {freeTableError && (
+              <div className="mb-4 rounded-md bg-red-50 p-4 text-red-600">
+                <p className="font-medium">Error</p>
+                <p className="text-sm">{freeTableError}</p>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={handleCloseConfirmation}
+                className="rounded-lg bg-gray-100 px-4 py-2 text-gray-600 hover:bg-gray-200"
+                disabled={isFreeingTable}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmFreeTable}
+                disabled={isFreeingTable}
+                className={`rounded-lg px-4 py-2 text-white transition-colors ${
+                  isFreeingTable
+                    ? "cursor-not-allowed bg-red-400"
+                    : "bg-red-600 hover:bg-red-700"
+                }`}
+              >
+                {isFreeingTable ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <svg
+                      className="h-5 w-5 animate-spin"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    <span>Freeing Table...</span>
+                  </div>
+                ) : (
+                  "Free Table"
                 )}
               </button>
             </div>

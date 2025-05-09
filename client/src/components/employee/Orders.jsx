@@ -89,10 +89,9 @@ const Orders = ({ params }) => {
     previousOrders.current = JSON.parse(JSON.stringify(orders))
   }, [orders])
 
-  // Sort orders: ready but not delivered first, then not ready, then delivered
-  // Only include unpaid orders in the sorting
+  // Update the sorting logic to filter out canceled orders
   const sortedOrders = [...orders]
-    .filter((order) => !order.paid) // Filter out paid orders
+    .filter((order) => !order.paid && !order.canceled) // Add !order.canceled to the filter
     .sort((a, b) => {
       // Ready but not delivered orders come first
       if (a.ready && !a.delivered && (!b.ready || b.delivered)) return -1

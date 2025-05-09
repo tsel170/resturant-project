@@ -36,9 +36,15 @@ const Tables = () => {
 
   return (
     <div className="rounded-xl bg-white p-6 shadow-lg">
-      <h2 className="mb-6 border-b pb-3 text-2xl font-bold text-gray-800">
-        Restaurant Tables
-      </h2>
+      <div className="mb-6 flex items-center justify-between border-b pb-3">
+        <h2 className="text-2xl font-bold text-gray-800">Restaurant Tables</h2>
+        <button
+          className="transform rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-lg active:translate-y-0"
+          onClick={() => navigate("/tables")}
+        >
+          Manage Tables
+        </button>
+      </div>
       <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
         {tables.map((table) => (
           <div
@@ -156,14 +162,6 @@ const Tables = () => {
             </p>
           </div>
         ))}
-      </div>
-      <div className="mt-6 flex justify-center">
-        <button
-          className="transform rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-lg active:translate-y-0"
-          onClick={() => navigate("/tables")}
-        >
-          Manage Tables
-        </button>
       </div>
     </div>
   )

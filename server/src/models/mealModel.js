@@ -5,6 +5,11 @@ const mealSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  available:{
+    type:Boolean,
+    required: false,
+    default: true
+  },
   description: {
     type: String,
     required: true,

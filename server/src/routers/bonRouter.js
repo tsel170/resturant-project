@@ -7,6 +7,7 @@ import {
   updateDeliveredBon,
   updateReadyBon,
   updatePaidBon,
+  toggleCancelBon,
 } from "../controller/bonController.js";
 
 const Router = express.Router();
@@ -18,5 +19,6 @@ Router.delete("/deleteBon/:id", deleteBon);
 Router.put("/updateDeliveredBon/:id", updateDeliveredBon);
 Router.put("/updateReadyBon/:id", updateReadyBon);
 Router.put("/updatePaidBon/:id", updatePaidBon);
+Router.put("/toggleCancelBon/:bonNumber", toggleCancelBon);
 
 export default Router;
