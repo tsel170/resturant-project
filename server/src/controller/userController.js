@@ -76,7 +76,8 @@ export const login = async (req, res) => {
       expiresIn: "30d",
     });
 
-    const userData = {...user._doc
+    const userData = {
+      ...user._doc
     };
     console.log(userData);
 
@@ -93,7 +94,8 @@ export const login = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find();
+    // const users = await User.find();
+    const users = await User.find({}, "_id name email phone role jobTitle tipsTotal");
     res.status(200).json({
       success: true,
       users,
@@ -196,7 +198,7 @@ export const deleteUser = async (req, res) => {
 export const toggleShift = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -206,12 +208,12 @@ export const toggleShift = async (req, res) => {
     }
     console.log("user", user)
     const currentDate = new Date();
-    
+
     // If currently in shift and turning it off, calculate duration
     if (user.enteredShift) {
       const shiftStart = new Date(user.enteredShiftDate);
       const diffMs = currentDate - shiftStart;
-      
+
       // Convert milliseconds to hours and minutes
       const totalMinutes = Math.floor(diffMs / (1000 * 60));
       const hours = Math.floor(totalMinutes / 60);
@@ -219,11 +221,11 @@ export const toggleShift = async (req, res) => {
 
       // Update last shift duration
       user.lastShiftDuration = { hours, minutes };
-      
+
       // Update total worked time this month
       user.workedThisMonth.hours += hours;
       user.workedThisMonth.minutes += minutes;
-      
+
       // Adjust if minutes exceed 60
       if (user.workedThisMonth.minutes >= 60) {
         user.workedThisMonth.hours += Math.floor(user.workedThisMonth.minutes / 60);
@@ -237,7 +239,7 @@ export const toggleShift = async (req, res) => {
 
     // Toggle the shift status
     user.enteredShift = !user.enteredShift;
-    
+
     if (user.enteredShift) {
       // Starting a new shift
       const newShift = {
@@ -246,8 +248,8 @@ export const toggleShift = async (req, res) => {
         timeShift: currentDate.getHours() < 12 ? "am" : "pm",
         table: req.body.tables || []
       };
-      
-      user.shifts = user.shifts.filter(shift => 
+
+      user.shifts = user.shifts.filter(shift =>
         shift.shift && shift.date && shift.timeShift
       );
       user.shifts.push(newShift);
@@ -258,7 +260,7 @@ export const toggleShift = async (req, res) => {
     res.status(200).json({
       success: true,
       message: `Shift ${user.enteredShift ? 'started' : 'ended'} successfully`,
-      user:user
+      user: user
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -269,7 +271,7 @@ export const updateLastShiftDuration = async (req, res) => {
   try {
     const { hours, minutes } = req.body;
     const user = await User.findById(req.params.id);
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -279,11 +281,11 @@ export const updateLastShiftDuration = async (req, res) => {
 
     // Update last shift duration
     user.lastShiftDuration = { hours, minutes };
-    
+
     // Update total worked time this month
     user.workedThisMonth.hours += hours;
     user.workedThisMonth.minutes += minutes;
-    
+
     // Adjust if minutes exceed 60
     if (user.workedThisMonth.minutes >= 60) {
       user.workedThisMonth.hours += Math.floor(user.workedThisMonth.minutes / 60);
@@ -305,7 +307,7 @@ export const updateTips = async (req, res) => {
   try {
     const { tipsAmount } = req.body;
     const user = await User.findById(req.params.id);
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
