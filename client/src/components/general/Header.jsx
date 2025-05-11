@@ -1,7 +1,9 @@
 import React, { useContext } from "react"
 import { AuthContext } from "../../context/AuthContext"
+import { useLocation } from "react-router-dom"
 
 const Header = ({ role }) => {
+  const location = useLocation()
   const { toggleSidebar, isSidebarVisible, logout, user } =
     useContext(AuthContext)
 
@@ -33,7 +35,8 @@ const Header = ({ role }) => {
         </h1>
 
         {/* Logout Button */}
-        {user && && location.pathname !== "/" (
+
+        {user && location.pathname !== "/" && (
           <button
             onClick={logout}
             className="rounded px-4 py-2 hover:bg-green-700 focus:outline-none active:bg-green-800"
