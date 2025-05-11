@@ -35,6 +35,7 @@ const Header = ({ role }) => {
         </h1>
 
         {/* Logout Button */}
+
         {user && location.pathname !== "/" && (
           <button
             onClick={logout}
