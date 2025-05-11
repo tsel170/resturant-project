@@ -9,11 +9,16 @@ import backgroundImage from "../../assets/A_cozy_restaurant_interior_design_with
 const Login = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
   const { login, setUser } = useContext(AuthContext)
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setIsLoading(true)
+    setError("")
+
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_SERVER}/api/users/login`,
@@ -24,12 +29,15 @@ const Login = () => {
       )
       login(response.data)
       setUser(response.data.userData)
-      console.log("response.data.userData", response.data.userData)
       navigate(
         `/${response.data.userData.role === "manager" ? "management" : "enter-shift"}`
       )
     } catch (error) {
-      console.error("Login failed:", error.response.data.message)
+      setError(
+        error.response?.data?.message || "Login failed. Please try again."
+      )
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -59,6 +67,12 @@ const Login = () => {
                   </p>
                 </div>
 
+                {error && (
+                  <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
+                    {error}
+                  </div>
+                )}
+
                 <div className="space-y-4">
                   <div className="flex flex-col gap-1">
                     <label
@@ -74,7 +88,8 @@ const Login = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="rounded-lg border border-gray-300 px-4 py-2 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                      disabled={isLoading}
+                      className="rounded-lg border border-gray-300 px-4 py-2 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:cursor-not-allowed disabled:bg-gray-100"
                     />
                   </div>
 
@@ -92,16 +107,44 @@ const Login = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="rounded-lg border border-gray-300 px-4 py-2 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                      disabled={isLoading}
+                      className="rounded-lg border border-gray-300 px-4 py-2 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:cursor-not-allowed disabled:bg-gray-100"
                     />
                   </div>
                 </div>
 
                 <button
                   type="submit"
-                  className="active:scale-97 mt-2 rounded-lg bg-cyan-500 py-2.5 font-medium text-white transition-all hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                  disabled={isLoading}
+                  className="active:scale-97 mt-2 flex items-center justify-center rounded-lg bg-cyan-500 py-2.5 font-medium text-white transition-all hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:cursor-not-allowed disabled:bg-cyan-400"
                 >
-                  Sign In
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <svg
+                        className="h-5 w-5 animate-spin"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      <span>Signing in...</span>
+                    </div>
+                  ) : (
+                    "Sign In"
+                  )}
                 </button>
               </div>
             </form>
