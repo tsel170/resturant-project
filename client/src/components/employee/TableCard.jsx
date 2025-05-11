@@ -18,6 +18,7 @@ const TableCard = ({
     fetchTables,
     meals,
     orders: allOrders,
+    setOrders: setAllOrders,
     user,
   } = useContext(AuthContext)
   const [showConfirmation, setShowConfirmation] = useState(false)
@@ -35,9 +36,10 @@ const TableCard = ({
   const [selectedDiners, setSelectedDiners] = useState(1)
   const [isAssigning, setIsAssigning] = useState(false)
   const [isFreeing, setIsFreeing] = useState(false)
-  const [isCanceling, setIsCanceling] = useState(false)
   const [isDinersModalVisible, setIsDinersModalVisible] = useState(false)
   const [isPaymentModalVisible, setIsPaymentModalVisible] = useState(false)
+  const [isOrderModalVisible, setIsOrderModalVisible] = useState(false)
+  const [processingOrderId, setProcessingOrderId] = useState(null)
 
   useEffect(() => {
     setOrders(tableOrders)
@@ -120,10 +122,10 @@ const TableCard = ({
 
   const handleAddOrder = () => {
     setShowOrderModal(true)
+    setTimeout(() => setIsOrderModalVisible(true), 50)
   }
 
   const handleSubmitOrder = async (newOrder) => {
-    console.log("newOrder", newOrder)
     try {
       await axios.post(
         import.meta.env.VITE_SERVER + "/api/Bons/addBon",
@@ -134,7 +136,8 @@ const TableCard = ({
       updateTable(tableNumber, {
         tableOrders: updatedOrders,
       })
-      setShowOrderModal(false)
+      setIsOrderModalVisible(false)
+      setTimeout(() => setShowOrderModal(false), 300)
     } catch (error) {
       console.error("Error submitting order:", error)
       alert("Error submitting order")
@@ -153,8 +156,6 @@ const TableCard = ({
         )
       })
       .filter((order) => order) // Remove any undefined orders
-
-    console.log("Unpaid delivered orders:", fullOrderDetails)
 
     const summary = fullOrderDetails.reduce((acc, order) => {
       if (order && Array.isArray(order.meals)) {
@@ -251,21 +252,29 @@ const TableCard = ({
   }
 
   const handleCancelOrder = async (order) => {
-    setIsCanceling(true)
+    setProcessingOrderId(order.bonNumber)
     try {
       const response = await axios.put(
         `${import.meta.env.VITE_SERVER}/api/bons/toggleCancelBon/${order.bonNumber}`
       )
 
-      // Refresh the orders list
-      const updatedOrders = orders.map((o) =>
-        o.number === order.bonNumber ? { ...o, canceled: !o.canceled } : o
-      )
-      setOrders(updatedOrders)
+      // Update the local state immediately
+      const updatedOrders = allOrders.map((o) => {
+        if (o.bonNumber === order.bonNumber) {
+          return { ...o, canceled: !o.canceled }
+        }
+        return o
+      })
+      setAllOrders(updatedOrders)
+
+      // Also update the table state
+      updateTable(tableNumber, {
+        tableOrders: updatedOrders,
+      })
     } catch (error) {
       console.error("Error updating order status:", error)
     } finally {
-      setIsCanceling(false)
+      setProcessingOrderId(null)
     }
   }
 
@@ -337,12 +346,10 @@ const TableCard = ({
               {orders.length > 0
                 ? orders.map((order, index) => {
                     // Add debug logging
-                    console.log("Processing order:", order)
 
                     const fullOrder = allOrders.find(
                       (o) => o.bonNumber === order.number
                     )
-                    console.log("Found full order in render:", fullOrder)
 
                     return (
                       <li
@@ -373,20 +380,44 @@ const TableCard = ({
                         {fullOrder && !fullOrder.delivered && (
                           <button
                             onClick={() => handleCancelOrder(fullOrder)}
-                            disabled={isCanceling}
+                            disabled={processingOrderId === fullOrder.bonNumber}
                             className={`ml-2 rounded-md px-2 py-1 text-xs font-medium transition-colors ${
-                              isCanceling
+                              processingOrderId === fullOrder.bonNumber
                                 ? "cursor-not-allowed bg-gray-100 text-gray-400"
                                 : fullOrder.canceled
                                   ? "bg-green-100 text-green-600 hover:bg-green-200"
                                   : "bg-red-100 text-red-600 hover:bg-red-200"
                             }`}
                           >
-                            {isCanceling
-                              ? "Processing..."
-                              : fullOrder.canceled
-                                ? "Add Back"
-                                : "Cancel"}
+                            {processingOrderId === fullOrder.bonNumber ? (
+                              <div className="flex items-center gap-1">
+                                <svg
+                                  className="h-3 w-3 animate-spin"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                  ></circle>
+                                  <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                  ></path>
+                                </svg>
+                                <span>Processing...</span>
+                              </div>
+                            ) : fullOrder.canceled ? (
+                              "Add Back"
+                            ) : (
+                              "Cancel"
+                            )}
                           </button>
                         )}
                       </li>
@@ -482,10 +513,14 @@ const TableCard = ({
 
       <OrderModal
         isOpen={showOrderModal}
-        onClose={() => setShowOrderModal(false)}
+        onClose={() => {
+          setIsOrderModalVisible(false)
+          setTimeout(() => setShowOrderModal(false), 300)
+        }}
         onSubmit={handleSubmitOrder}
         tableNumber={tableNumber}
         meals={meals}
+        isVisible={isOrderModalVisible}
       />
 
       {/* Diners Selection Modal */}
